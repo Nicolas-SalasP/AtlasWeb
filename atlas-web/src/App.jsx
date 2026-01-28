@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import Proyectos from './pages/Proyectos';
 
-const Proyectos = () => <div className="pt-24 text-center text-2xl">Página de Proyectos (En construcción)</div>;
 const Catalogo = () => <div className="pt-24 text-center text-2xl">Tienda / Catálogo (En construcción)</div>;
 const Servicios = () => <div className="pt-24 text-center text-2xl">Nuestros Servicios (En construcción)</div>;
 

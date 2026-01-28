@@ -6,9 +6,9 @@ const Home = () => {
     return (
         <div className="bg-white min-h-screen">
 
-            {/* 1. HERO SECTION (Mejorado) */}
+            {/* 1. HERO SECTION */}
             <section className="relative bg-atlas-900 text-white pt-32 pb-24 px-4 overflow-hidden">
-                {/* Efectos de fondo animados */}
+                {/* Efectos de fondo */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-atlas-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-10"></div>
 
@@ -36,11 +36,10 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* Dashboard Técnico Realista (Terminal Style) */}
+                    {/* Dashboard Técnico Realista */}
                     <div className="relative hidden lg:block">
                         <div className="absolute -inset-1 bg-gradient-to-r from-atlas-300 to-blue-600 rounded-2xl blur opacity-20"></div>
                         <div className="relative bg-atlas-900 rounded-2xl p-6 border border-atlas-500/30 shadow-2xl font-mono text-sm">
-                            {/* Header de la ventana */}
                             <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
                                 <div className="flex gap-2">
                                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -50,7 +49,6 @@ const Home = () => {
                                 <span className="text-gray-400 text-xs">root@atlas-server:~</span>
                             </div>
 
-                            {/* Contenido de la consola */}
                             <div className="space-y-3">
                                 <div className="flex gap-2">
                                     <span className="text-green-400">➜</span>
@@ -77,7 +75,6 @@ const Home = () => {
                                     <span className="text-white animate-pulse">_</span>
                                 </div>
 
-                                {/* Gráfica de carga simulada */}
                                 <div className="mt-4 pt-4 border-t border-gray-800">
                                     <p className="text-xs text-gray-500 mb-1">CPU Load</p>
                                     <div className="flex items-end gap-1 h-8">
@@ -94,7 +91,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* 2. STATS BAR (Realista) */}
+            {/* 2. STATS BAR */}
             <div className="bg-atlas-800 border-y border-atlas-700">
                 <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
                     <StatItem number="100%" label="Dedicación" />
@@ -116,19 +113,19 @@ const Home = () => {
 
                     <div className="grid md:grid-cols-3 gap-8">
                         <ServiceCard
-                            icon={<Code size={48} className="text-atlas-500" />}
+                            icon={<Code size={48} />}
                             title="Desarrollo Web & Apps"
                             desc="Sitios corporativos, tiendas e-commerce y aplicaciones web a medida con las últimas tecnologías."
                             link="/servicios"
                         />
                         <ServiceCard
-                            icon={<Server size={48} className="text-atlas-500" />}
+                            icon={<Server size={48} />}
                             title="Redes e Infraestructura"
                             desc="Cableado estructurado, configuración de servidores, routers MikroTik y optimización WiFi."
                             link="/servicios"
                         />
                         <ServiceCard
-                            icon={<ShieldCheck size={48} className="text-atlas-500" />}
+                            icon={<ShieldCheck size={48} />}
                             title="Seguridad Electrónica"
                             desc="Instalación y mantenimiento de cámaras CCTV, controles de acceso y monitoreo remoto."
                             link="/servicios"
@@ -141,7 +138,6 @@ const Home = () => {
             <section className="py-20 bg-white overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="bg-atlas-900 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
-                        {/* Decoración de fondo */}
                         <div className="absolute -right-20 -top-20 w-96 h-96 bg-atlas-500 rounded-full opacity-10 blur-3xl"></div>
 
                         <div className="flex-1 relative z-10">
@@ -161,7 +157,6 @@ const Home = () => {
                         </div>
 
                         <div className="flex-1 relative z-10">
-                            {/* Simulación visual del ERP */}
                             <div className="bg-white rounded-xl shadow-2xl p-4 transform rotate-2 hover:rotate-0 transition-transform duration-500">
                                 <div className="flex items-center gap-4 mb-4 border-b pb-2">
                                     <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
@@ -218,7 +213,7 @@ const StatItem = ({ number, label }) => (
 
 const ServiceCard = ({ icon, title, desc, link }) => (
     <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-        <div className="bg-blue-50 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:bg-atlas-500 group-hover:text-white transition-colors">
+        <div className="bg-blue-50 w-16 h-16 rounded-xl flex items-center justify-center mb-6 text-atlas-500 group-hover:bg-atlas-500 group-hover:text-white transition-colors">
             {icon}
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
