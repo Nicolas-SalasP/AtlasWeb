@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, ShoppingCart, Filter, Box, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
-// 📦 BASE DE DATOS SIMULADA (Pronto vendrá de tu Admin Panel)
 const PRODUCTOS_INICIALES = [
     {
         id: 1,
@@ -64,28 +64,26 @@ const CATEGORIAS = ["Todos", "Seguridad", "Redes", "Infraestructura", "Software"
 const Catalogo = () => {
     const [filtroCategoria, setFiltroCategoria] = useState("Todos");
     const [busqueda, setBusqueda] = useState("");
-    const [orden, setOrden] = useState("relevantes"); // Estado para el ordenamiento
+    const [orden, setOrden] = useState("relevantes");
 
     // Lógica combinada: Filtrar y luego Ordenar
     const productosProcesados = PRODUCTOS_INICIALES
-        // 1. FILTRADO
         .filter(producto => {
             const coincideCategoria = filtroCategoria === "Todos" || producto.categoria === filtroCategoria;
             const coincideBusqueda = producto.nombre.toLowerCase().includes(busqueda.toLowerCase());
             return coincideCategoria && coincideBusqueda;
         })
-        // 2. ORDENAMIENTO
         .sort((a, b) => {
             if (orden === "menor_mayor") return a.precio - b.precio;
             if (orden === "mayor_menor") return b.precio - a.precio;
-            if (orden === "relevantes") return (b.destacado === true) - (a.destacado === true); // Destacados primero
+            if (orden === "relevantes") return (b.destacado === true) - (a.destacado === true);
             return 0;
         });
 
     return (
         <div className="bg-white min-h-screen pt-20">
 
-            {/* HEADER ESTANDARIZADO (Igual a Proyectos) */}
+            {/* HEADER ESTANDARIZADO */}
             <section className="bg-atlas-900 text-white py-20 px-4">
                 <div className="max-w-7xl mx-auto text-center">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
@@ -102,7 +100,7 @@ const Catalogo = () => {
                 {/* BARRA DE CONTROLES RESPONSIVE */}
                 <div className="flex flex-col lg:flex-row justify-between gap-6 mb-10 sticky top-24 z-30 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-100 transition-all">
 
-                    {/* Categorías (Scroll horizontal en móvil) */}
+                    {/* Categorías */}
                     <div className="flex overflow-x-auto gap-2 pb-2 lg:pb-0 hide-scrollbar items-center">
                         <Filter size={20} className="text-atlas-500 mr-2 flex-shrink-0" />
                         {CATEGORIAS.map(cat => (
@@ -110,8 +108,8 @@ const Catalogo = () => {
                                 key={cat}
                                 onClick={() => setFiltroCategoria(cat)}
                                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${filtroCategoria === cat
-                                        ? 'bg-atlas-900 text-white shadow-md'
-                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-atlas-900'
+                                    ? 'bg-atlas-900 text-white shadow-md'
+                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-atlas-900'
                                     }`}
                             >
                                 {cat}
@@ -175,11 +173,12 @@ const Catalogo = () => {
 // COMPONENTE TARJETA DE PRODUCTO
 const ProductCard = ({ producto }) => {
     const sinStock = producto.stock === 0;
+    const { addToCart } = useCart();
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full relative">
 
-            {/* Badge de Destacado (Solo si es relevante y tiene stock) */}
+            {/* Badge de Destacado */}
             {producto.destacado && !sinStock && (
                 <div className="absolute top-3 left-3 z-10 bg-atlas-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider">
                     Recomendado
@@ -206,7 +205,10 @@ const ProductCard = ({ producto }) => {
                 {/* Botón Acción Rápida (Hover en Desktop) */}
                 {!sinStock && (
                     <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden lg:block">
-                        <button className="w-full bg-atlas-900 text-white font-bold py-2 rounded-lg shadow-lg hover:bg-atlas-700 flex items-center justify-center gap-2">
+                        <button
+                            onClick={() => addToCart(producto)}
+                            className="w-full bg-atlas-900 text-white font-bold py-2 rounded-lg shadow-lg hover:bg-atlas-700 flex items-center justify-center gap-2"
+                        >
                             <ShoppingCart size={18} /> Agregar al Carrito
                         </button>
                     </div>
@@ -237,9 +239,10 @@ const ProductCard = ({ producto }) => {
                     {/* Botón Móvil (Siempre visible) */}
                     <button
                         disabled={sinStock}
+                        onClick={() => addToCart(producto)}
                         className={`lg:hidden p-3 rounded-full shadow-sm transition-colors ${sinStock
-                                ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                                : 'bg-atlas-900 text-white active:scale-95'
+                            ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'bg-atlas-900 text-white active:scale-95'
                             }`}
                     >
                         <ShoppingCart size={20} />
