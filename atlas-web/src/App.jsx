@@ -5,7 +5,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Proyectos from './pages/Proyectos';
 import Catalogo from './pages/Catalogo';
-const Servicios = () => <div className="pt-24 text-center text-2xl">Nuestros Servicios (En construcción)</div>;
+import Servicios from './pages/Servicios';
 
 function App() {
   return (
