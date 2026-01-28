@@ -4,8 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Proyectos from './pages/Proyectos';
-
-const Catalogo = () => <div className="pt-24 text-center text-2xl">Tienda / Catálogo (En construcción)</div>;
+import Catalogo from './pages/Catalogo';
 const Servicios = () => <div className="pt-24 text-center text-2xl">Nuestros Servicios (En construcción)</div>;
 
 function App() {
