@@ -7,6 +7,9 @@ import Proyectos from './pages/Proyectos';
 import Catalogo from './pages/Catalogo';
 import Servicios from './pages/Servicios';
 import Checkout from './pages/Checkout';
+import Login from './pages/Login';
+import Registro from './pages/Registro';
+import Recuperar from './pages/Recuperar';
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/servicios" element={<Servicios />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Registro />} />
+          <Route path="/recuperar" element={<Recuperar />} />
         </Routes>
         <Footer />
       </div>
