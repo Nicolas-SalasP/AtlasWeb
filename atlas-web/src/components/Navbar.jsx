@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ShoppingCart, User, LogIn } from 'lucide-react';
+// AGREGAMOS "MessageSquare" AQUÍ ABAJO
+import { Menu, X, ShoppingCart, User, LogIn, MessageSquare } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import CartDrawer from './CartDrawer';
 
@@ -26,13 +27,12 @@ const Navbar = () => {
                                 <Link to="/proyectos" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">Proyectos</Link>
                                 <Link to="/catalogo" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tienda</Link>
                                 <Link to="/servicios" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">Servicios</Link>
+                                <Link to="/mis-tickets" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-medium"> Mis Tickets</Link>
                             </div>
                         </div>
 
                         {/* ICONOS DERECHA */}
                         <div className="hidden md:flex items-center gap-4">
-
-                            {/* Carrito */}
                             <button
                                 onClick={() => setIsCartOpen(true)}
                                 className="relative p-2 hover:bg-atlas-800 rounded-full transition-colors group"
@@ -45,7 +45,6 @@ const Navbar = () => {
                                 )}
                             </button>
 
-                            {/* Botón Login (Reemplaza al ERP directo) */}
                             <Link
                                 to="/login"
                                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-white/10"
@@ -56,7 +55,6 @@ const Navbar = () => {
 
                         {/* MOBILE MENU BUTTON */}
                         <div className="-mr-2 flex md:hidden gap-4 items-center">
-                            {/* Carrito Móvil */}
                             <button
                                 onClick={() => setIsCartOpen(true)}
                                 className="relative p-2"
@@ -84,6 +82,7 @@ const Navbar = () => {
                             <Link to="/proyectos" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-atlas-800">Proyectos</Link>
                             <Link to="/catalogo" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-atlas-800">Tienda</Link>
                             <Link to="/servicios" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-atlas-800">Servicios</Link>
+                            <Link to="/mis-tickets" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-atlas-800">Mis Tickets</Link>
                             <Link to="/login" className="block w-full text-left px-3 py-2 text-atlas-300 font-bold bg-atlas-800/50 mt-2 rounded">
                                 <LogIn size={16} className="inline mr-2" /> Iniciar Sesión
                             </Link>
@@ -92,7 +91,6 @@ const Navbar = () => {
                 )}
             </nav>
 
-            {/* RENDERIZAMOS EL DRAWER AQUÍ PARA QUE ESTÉ DISPONIBLE SIEMPRE */}
             <CartDrawer />
         </>
     );
