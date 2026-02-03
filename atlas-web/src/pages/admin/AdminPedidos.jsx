@@ -1,263 +1,141 @@
-import React, { useState } from 'react';
-import { Search, Eye, Filter, CheckCircle, Clock, Truck, XCircle, FileText, X } from 'lucide-react';
-
-// DATOS SIMULADOS (MOCK)
-const INITIAL_ORDERS = [
-    {
-        id: "#ORD-001",
-        fecha: "28/01/2026",
-        cliente: "Juan Pérez",
-        email: "juan@gmail.com",
-        total: 154980,
-        estado: "pagado",
-        items: [
-            { nombre: "Kit 4 Cámaras Hilook", cantidad: 1, precio: 149990 },
-            { nombre: "Conector DC", cantidad: 5, precio: 998 }
-        ],
-        direccion: "General Gana 1379, Santiago"
-    },
-    {
-        id: "#ORD-002",
-        fecha: "27/01/2026",
-        cliente: "Empresa SpA",
-        email: "contacto@empresa.cl",
-        total: 299000,
-        estado: "pendiente",
-        items: [
-            { nombre: "Licencia ERP Pyme", cantidad: 1, precio: 299000 }
-        ],
-        direccion: "Av. Providencia 1234, Of 601"
-    },
-    {
-        id: "#ORD-003",
-        fecha: "26/01/2026",
-        cliente: "Carlos Díaz",
-        email: "carlos@outlook.com",
-        total: 45000,
-        estado: "enviado",
-        items: [
-            { nombre: "Switch PoE 8 Puertos", cantidad: 1, precio: 45000 }
-        ],
-        direccion: "Calle Falsa 123, Valparaíso"
-    },
-];
+import React, { useState, useEffect } from 'react';
+import api from '../../api/axiosConfig';
+import {
+    Search, ShoppingBag, Calendar, User,
+    ChevronRight, DollarSign, Package, X, Loader2
+} from 'lucide-react';
 
 const AdminPedidos = () => {
-    const [pedidos, setPedidos] = useState(INITIAL_ORDERS);
-    const [filtroEstado, setFiltroEstado] = useState('todos');
-    const [modalOpen, setModalOpen] = useState(false);
+    const [pedidos, setPedidos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [busqueda, setBusqueda] = useState("");
+
+    // Drawer Detalle
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
 
-    // Filtrado
-    const pedidosFiltrados = pedidos.filter(p =>
-        filtroEstado === 'todos' ? true : p.estado === filtroEstado
+    useEffect(() => {
+        cargarPedidos();
+    }, []);
+
+    const cargarPedidos = async () => {
+        try {
+            const response = await api.get('/admin/orders');
+            setPedidos(response.data);
+        } catch (error) {
+            console.error("Error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filtrados = pedidos.filter(p =>
+        p.order_number.toLowerCase().includes(busqueda.toLowerCase()) ||
+        p.user.name.toLowerCase().includes(busqueda.toLowerCase())
     );
 
-    // Cambiar Estado
-    const cambiarEstado = (nuevoEstado) => {
-        setPedidos(pedidos.map(p =>
-            p.id === pedidoSeleccionado.id ? { ...p, estado: nuevoEstado } : p
-        ));
-        setModalOpen(false);
-    };
-
-    // Renderizar Badge de Estado
-    const StatusBadge = ({ estado }) => {
-        const estilos = {
-            pendiente: "bg-yellow-100 text-yellow-700 border-yellow-200",
-            pagado: "bg-blue-100 text-blue-700 border-blue-200",
-            enviado: "bg-purple-100 text-purple-700 border-purple-200",
-            entregado: "bg-green-100 text-green-700 border-green-200",
-            cancelado: "bg-red-100 text-red-700 border-red-200",
-        };
-
-        const iconos = {
-            pendiente: <Clock size={14} />,
-            pagado: <CheckCircle size={14} />,
-            enviado: <Truck size={14} />,
-            entregado: <CheckCircle size={14} />,
-            cancelado: <XCircle size={14} />,
-        };
-
-        return (
-            <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 w-fit capitalize ${estilos[estado] || estilos.pendiente}`}>
-                {iconos[estado]} {estado}
-            </span>
-        );
-    };
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2"><Loader2 className="animate-spin" /> Cargando Ventas...</div>;
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="h-[calc(100vh-80px)] p-6 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Gestión de Pedidos</h1>
-                    <p className="text-gray-500">Monitorea y actualiza el estado de las ventas</p>
-                </div>
-                <div className="flex gap-2">
-                    <button className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 font-medium hover:bg-gray-50">
-                        <FileText size={18} /> Exportar Reporte
-                    </button>
-                </div>
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-900">Gestión de Pedidos</h1>
+                <p className="text-gray-500">Historial global de ventas</p>
             </div>
 
-            {/* Filtros Rápidos */}
-            <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex overflow-x-auto">
-                {['todos', 'pendiente', 'pagado', 'enviado', 'entregado'].map(estado => (
-                    <button
-                        key={estado}
-                        onClick={() => setFiltroEstado(estado)}
-                        className={`px-4 py-2 rounded-lg text-sm font-bold capitalize whitespace-nowrap transition-all ${filtroEstado === estado ? 'bg-atlas-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'
-                            }`}
-                    >
-                        {estado}
-                    </button>
-                ))}
-            </div>
+            {/* Tabla Contenedor */}
+            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 flex flex-col flex-1 overflow-hidden">
+                <div className="p-6 border-b border-gray-100">
+                    <div className="relative max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <input type="text" placeholder="Buscar por Orden o Cliente..." className="w-full pl-11 pr-4 py-3 bg-gray-50 rounded-xl outline-none" value={busqueda} onChange={e => setBusqueda(e.target.value)} />
+                    </div>
+                </div>
 
-            {/* Tabla de Pedidos */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                                <th className="p-4">ID Pedido</th>
-                                <th className="p-4">Fecha</th>
-                                <th className="p-4">Cliente</th>
-                                <th className="p-4">Estado</th>
-                                <th className="p-4">Total</th>
-                                <th className="p-4 text-right">Acciones</th>
+                <div className="overflow-auto flex-1 custom-scrollbar">
+                    <table className="w-full">
+                        <thead className="bg-gray-50 text-left sticky top-0">
+                            <tr>
+                                <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Orden</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Cliente</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Fecha</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Estado</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-right">Total</th>
+                                <th className="px-6 py-4"></th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {pedidosFiltrados.map((pedido) => (
-                                <tr key={pedido.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="p-4 font-mono font-bold text-atlas-600">{pedido.id}</td>
-                                    <td className="p-4 text-sm text-gray-600">{pedido.fecha}</td>
-                                    <td className="p-4">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-gray-800">{pedido.cliente}</span>
-                                            <span className="text-xs text-gray-400">{pedido.email}</span>
+                        <tbody className="divide-y divide-gray-50">
+                            {filtrados.map((p) => (
+                                <tr key={p.id} onClick={() => setPedidoSeleccionado(p)} className="hover:bg-blue-50/50 cursor-pointer transition-colors group">
+                                    <td className="px-8 py-4 font-mono font-bold text-atlas-900">{p.order_number}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold">{p.user.name.charAt(0)}</div>
+                                            <span className="text-sm font-medium">{p.user.name}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <StatusBadge estado={pedido.estado} />
+                                    <td className="px-6 py-4 text-sm text-gray-500">{new Date(p.created_at).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${p.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                            {p.status}
+                                        </span>
                                     </td>
-                                    <td className="p-4 font-bold text-gray-900">${pedido.total.toLocaleString('es-CL')}</td>
-                                    <td className="p-4 text-right">
-                                        <button
-                                            onClick={() => { setPedidoSeleccionado(pedido); setModalOpen(true); }}
-                                            className="text-gray-400 hover:text-atlas-500 p-2 hover:bg-atlas-50 rounded-full transition-all"
-                                        >
-                                            <Eye size={20} />
-                                        </button>
-                                    </td>
+                                    <td className="px-6 py-4 text-right font-black text-gray-900">${parseInt(p.total).toLocaleString('es-CL')}</td>
+                                    <td className="px-6 py-4 text-gray-400 group-hover:text-atlas-900"><ChevronRight size={20} /></td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    {pedidosFiltrados.length === 0 && (
-                        <div className="p-12 text-center text-gray-400 flex flex-col items-center">
-                            <Filter size={48} className="opacity-20 mb-4" />
-                            <p>No hay pedidos con este estado.</p>
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* MODAL DE DETALLE DEL PEDIDO */}
-            {modalOpen && pedidoSeleccionado && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
-
-                        {/* Header Modal */}
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            {/* DRAWER DETALLE PEDIDO */}
+            <div className={`fixed inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${pedidoSeleccionado ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}>
+                {pedidoSeleccionado && (
+                    <>
+                        <div className="h-24 bg-atlas-900 flex items-center justify-between px-8 text-white flex-shrink-0">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Detalle Pedido {pedidoSeleccionado.id}</h2>
-                                <p className="text-sm text-gray-500">Realizado el {pedidoSeleccionado.fecha}</p>
+                                <h2 className="text-xl font-bold">{pedidoSeleccionado.order_number}</h2>
+                                <p className="text-atlas-300 text-sm">{new Date(pedidoSeleccionado.created_at).toLocaleDateString()}</p>
                             </div>
-                            <button onClick={() => setModalOpen(false)} className="bg-white p-2 rounded-full shadow-sm hover:bg-gray-200 text-gray-500">
-                                <X size={20} />
-                            </button>
+                            <button onClick={() => setPedidoSeleccionado(null)} className="p-2 bg-white/10 rounded-full hover:bg-white/20"><X size={20} /></button>
                         </div>
 
-                        {/* Body Modal (Scrollable) */}
-                        <div className="p-6 overflow-y-auto">
-
-                            {/* Info Cliente */}
-                            <div className="grid md:grid-cols-2 gap-6 mb-8">
-                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                    <h3 className="font-bold text-atlas-900 mb-2 flex items-center gap-2"><Truck size={16} /> Datos de Envío</h3>
-                                    <p className="text-sm text-gray-600"><span className="font-semibold">Dirección:</span> {pedidoSeleccionado.direccion}</p>
-                                    <p className="text-sm text-gray-600"><span className="font-semibold">Cliente:</span> {pedidoSeleccionado.cliente}</p>
-                                </div>
-                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                    <h3 className="font-bold text-gray-900 mb-2">Estado Actual</h3>
-                                    <StatusBadge estado={pedidoSeleccionado.estado} />
-                                    <div className="mt-4">
-                                        <label className="text-xs font-bold text-gray-500 uppercase">Cambiar Estado:</label>
-                                        <select
-                                            className="w-full mt-1 p-2 border rounded-lg text-sm"
-                                            value={pedidoSeleccionado.estado}
-                                            onChange={(e) => cambiarEstado(e.target.value)}
-                                        >
-                                            <option value="pendiente">Pendiente de Pago</option>
-                                            <option value="pagado">Pagado</option>
-                                            <option value="enviado">Enviado</option>
-                                            <option value="entregado">Entregado</option>
-                                            <option value="cancelado">Cancelado</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Lista de Items */}
-                            <h3 className="font-bold text-gray-900 mb-3 border-b pb-2">Productos Comprados</h3>
-                            <div className="space-y-3">
-                                {pedidoSeleccionado.items.map((item, idx) => (
-                                    <div key={idx} className="flex justify-between items-center text-sm">
-                                        <div className="flex gap-3 items-center">
-                                            <div className="bg-gray-100 w-8 h-8 rounded flex items-center justify-center font-bold text-gray-500 text-xs">
-                                                x{item.cantidad}
-                                            </div>
-                                            <span className="text-gray-700 font-medium">{item.nombre}</span>
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2"><Package size={18} /> Productos</h3>
+                            <div className="space-y-4">
+                                {pedidoSeleccionado.items.map((item) => (
+                                    <div key={item.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div>
+                                            <p className="font-bold text-gray-800 text-sm">{item.product_name}</p>
+                                            <p className="text-xs text-gray-500">Cant: {item.quantity} x ${parseInt(item.unit_price).toLocaleString('es-CL')}</p>
                                         </div>
-                                        <span className="font-bold text-gray-900">${(item.precio * item.cantidad).toLocaleString('es-CL')}</span>
+                                        <p className="font-bold text-atlas-900">${parseInt(item.total_line).toLocaleString('es-CL')}</p>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Totales */}
-                            <div className="mt-6 border-t pt-4 flex justify-end">
-                                <div className="text-right">
-                                    <p className="text-sm text-gray-500">Envío: <span className="font-medium text-gray-900">$3.990</span></p>
-                                    <p className="text-2xl font-bold text-atlas-900 mt-1">Total: ${pedidoSeleccionado.total.toLocaleString('es-CL')}</p>
+                            <div className="mt-8 border-t border-gray-100 pt-6 space-y-2">
+                                <div className="flex justify-between text-sm text-gray-500">
+                                    <span>Subtotal</span>
+                                    <span>${parseInt(pedidoSeleccionado.subtotal).toLocaleString('es-CL')}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-gray-500">
+                                    <span>Envío</span>
+                                    <span>${parseInt(pedidoSeleccionado.shipping_cost).toLocaleString('es-CL')}</span>
+                                </div>
+                                <div className="flex justify-between text-xl font-black text-gray-900 pt-2 border-t border-gray-100 mt-2">
+                                    <span>Total Pagado</span>
+                                    <span>${parseInt(pedidoSeleccionado.total).toLocaleString('es-CL')}</span>
                                 </div>
                             </div>
-
                         </div>
-
-                        {/* Footer Modal Actions */}
-                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-                            <button
-                                onClick={() => setModalOpen(false)}
-                                className="px-4 py-2 text-gray-600 font-bold hover:bg-gray-200 rounded-lg transition-colors"
-                            >
-                                Cerrar
-                            </button>
-                            <button
-                                className="px-4 py-2 bg-atlas-900 text-white font-bold rounded-lg hover:bg-atlas-800 shadow-lg flex items-center gap-2"
-                                onClick={() => window.print()} // Simulación de imprimir factura
-                            >
-                                <FileText size={18} /> Imprimir Orden
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-            )}
-
+                    </>
+                )}
+            </div>
+            {/* Backdrop */}
+            {pedidoSeleccionado && <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setPedidoSeleccionado(null)} />}
         </div>
     );
 };
