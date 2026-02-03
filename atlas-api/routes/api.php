@@ -7,6 +7,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,4 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return \App\Models\Category::all();
     });
 
+
+    // Dashboard
+    Route::get('/admin/dashboard', [DashboardController::class, 'index']);
 });
