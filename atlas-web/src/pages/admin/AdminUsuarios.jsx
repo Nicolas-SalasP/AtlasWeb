@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom'; // <--- 1. IMPORTAR ESTO
 import api from '../../api/axiosConfig';
 import {
     Search, User, Mail, Building, Calendar,
@@ -7,6 +8,9 @@ import {
 } from 'lucide-react';
 
 const AdminUsuarios = () => {
+    // --- HOOKS ---
+    const location = useLocation(); // <--- 2. NECESARIO PARA LEER LA NAVEGACIÓN
+
     // --- ESTADOS ---
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,6 +31,14 @@ const AdminUsuarios = () => {
         cargarUsuarios();
     }, []);
 
+    // 2. EFECTO MAGICO: DETECTAR NAVEGACIÓN DESDE TICKETS
+    useEffect(() => {
+        if (location.state?.abrirUsuarioId) {
+            abrirDetalle(location.state.abrirUsuarioId);
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
+
     const cargarUsuarios = async () => {
         try {
             const response = await api.get('/admin/users');
@@ -38,7 +50,7 @@ const AdminUsuarios = () => {
         }
     };
 
-    // 2. ABRIR DRAWER (VER DETALLES)
+    // 3. ABRIR DRAWER (VER DETALLES)
     const abrirDetalle = async (id) => {
         setDrawerOpen(true);
         setLoadingDetalle(true);
@@ -53,7 +65,7 @@ const AdminUsuarios = () => {
         }
     };
 
-    // 3. ABRIR MODAL (EDITAR)
+    // 4. ABRIR MODAL (EDITAR)
     const abrirEditar = (usuario) => {
         setUsuarioEditar({
             ...usuario,
@@ -63,7 +75,7 @@ const AdminUsuarios = () => {
         setDrawerOpen(false);
     };
 
-    // 4. GUARDAR EDICIÓN (PUT)
+    // 5. GUARDAR EDICIÓN (PUT)
     const guardarEdicion = async (e) => {
         e.preventDefault();
         try {
@@ -80,7 +92,7 @@ const AdminUsuarios = () => {
             setModalEditarOpen(false);
         } catch (error) {
             console.error("Error actualizando:", error);
-            alert("Error al actualizar usuario. Revisa la consola.");
+            alert("Error al actualizar usuario.");
         }
     };
 
@@ -98,7 +110,7 @@ const AdminUsuarios = () => {
     if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Directorio...</div>;
 
     return (
-        <div className="h-[calc(100vh-80px)] p-6 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
+        <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
 
             {/* HEADER Y STATS */}
             <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 flex-shrink-0">
@@ -119,7 +131,7 @@ const AdminUsuarios = () => {
             </div>
 
             {/* TABLA PRINCIPAL */}
-            <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden flex flex-col flex-1">
+            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden flex flex-col flex-1">
                 {/* Buscador */}
                 <div className="p-6 border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
                     <div className="relative max-w-md">
@@ -128,9 +140,9 @@ const AdminUsuarios = () => {
                     </div>
                 </div>
 
-                {/* Tabla Scrolleable - CORREGIDO: Sin comentarios dentro de tr */}
+                {/* Tabla Scrolleable */}
                 <div className="overflow-auto flex-1 custom-scrollbar">
-                    <table className="w-full">
+                    <table className="w-full min-w-[800px]">
                         <thead className="bg-gray-50 border-b border-gray-100 text-left sticky top-0 z-10">
                             <tr>
                                 <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Usuario</th>
