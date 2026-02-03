@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,5 +29,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tickets/{id}/reply', [TicketController::class, 'reply']);
     Route::get('/admin/tickets', [TicketController::class, 'indexAll']);
     Route::put('/admin/tickets/{id}/status', [TicketController::class, 'updateStatus']);
-    
+
+    // Clientes
+    Route::get('/admin/users', [UserController::class, 'index']);
+    Route::get('/admin/users/{id}', [UserController::class, 'show']);
+    Route::put('/admin/users/{id}', [UserController::class, 'update']);
+
+    //Ordenes
+    Route::get('/admin/orders', [OrderController::class, 'index']);
+
 });
