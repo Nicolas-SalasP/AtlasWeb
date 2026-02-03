@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
-    Plus, Search, Send, Paperclip, X, FileText,
-    Clock, CheckCircle, AlertCircle, Sparkles, MessageSquare,
-    ChevronRight, Shield, Layout, Tag, AlignLeft, Info
+    Plus, Search, Send, Paperclip, X,
+    Clock, MessageSquare, ChevronRight,
+    MoreVertical, ArrowLeft, Layout, Tag, AlignLeft
 } from 'lucide-react';
 
 const MIS_TICKETS_DATA = [
@@ -16,6 +16,17 @@ const MIS_TICKETS_DATA = [
         mensajes: [
             { id: 1, emisor: "yo", texto: "Al intentar exportar el PDF del balance contable, el sistema lanza un error 500.", fecha: "10:15 AM", adjuntos: [] }
         ]
+    },
+    {
+        id: "TK-1024",
+        asunto: "Consulta Facturación Enero",
+        categoria: "Facturación",
+        estado: "cerrado",
+        prioridad: "baja",
+        fecha: "15/01/2026",
+        mensajes: [
+            { id: 1, emisor: "yo", texto: "Hola, necesito la factura del mes pasado.", fecha: "09:00 AM", adjuntos: [] }
+        ]
     }
 ];
 
@@ -24,13 +35,16 @@ const MisTickets = () => {
     const [ticketActivo, setTicketActivo] = useState(MIS_TICKETS_DATA[0]);
     const [busqueda, setBusqueda] = useState("");
     const [mensaje, setMensaje] = useState("");
-    const [adjuntos, setAdjuntos] = useState([]);
+    const [vistaMovil, setVistaMovil] = useState('lista');
 
-    // Estados para el Modal
+    // Modal
     const [crearModalOpen, setCrearModalOpen] = useState(false);
     const [nuevoForm, setNuevoForm] = useState({ asunto: '', categoria: 'ERP', prioridad: 'media', mensaje: '' });
 
-    const fileRef = useRef(null);
+    const seleccionarTicket = (ticket) => {
+        setTicketActivo(ticket);
+        setVistaMovil('chat');
+    };
 
     const handleCrearTicket = (e) => {
         e.preventDefault();
@@ -40,16 +54,16 @@ const MisTickets = () => {
             categoria: nuevoForm.categoria,
             estado: "nuevo",
             prioridad: nuevoForm.prioridad,
-            fecha: "28/01/2026",
+            fecha: "Hoy",
             mensajes: [
                 { id: Date.now(), emisor: "yo", texto: nuevoForm.mensaje, fecha: "Recién", adjuntos: [] }
             ]
         };
-
         setTickets([nuevoTicket, ...tickets]);
         setTicketActivo(nuevoTicket);
         setCrearModalOpen(false);
         setNuevoForm({ asunto: '', categoria: 'ERP', prioridad: 'media', mensaje: '' });
+        setVistaMovil('chat');
     };
 
     const enviarRespuesta = (e) => {
@@ -67,54 +81,58 @@ const MisTickets = () => {
     );
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-6 md:pt-32 md:pb-12 min-h-screen flex flex-col">
 
-            {/* HEADER PRINCIPAL */}
-            <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-10 gap-4">
+            {/* HEADER */}
+            <div className={`flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-10 gap-4 ${vistaMovil === 'chat' ? 'hidden md:flex' : 'flex'}`}>
                 <div>
-                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Mis Solicitudes</h1>
-                    <p className="text-gray-500 mt-2 text-lg">Centro de soporte especializado para tus proyectos</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Mis Solicitudes</h1>
+                    <p className="text-gray-500 text-xs md:text-sm mt-1">Gestiona tus incidencias y requerimientos</p>
                 </div>
                 <button
                     onClick={() => setCrearModalOpen(true)}
-                    className="bg-atlas-900 text-white px-8 py-4 rounded-[1.8rem] font-bold shadow-2xl shadow-atlas-900/20 hover:bg-atlas-800 flex items-center gap-3 transition-all active:scale-95 group"
+                    className="w-full md:w-auto bg-atlas-900 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-atlas-900/20 hover:bg-atlas-800 transition-all flex items-center justify-center gap-2 text-sm active:scale-95"
                 >
-                    <Plus size={22} className="group-hover:rotate-90 transition-transform duration-300" />
-                    Abrir Nueva Solicitud
+                    <Plus size={20} /> Nuevo Ticket
                 </button>
             </div>
 
-            <div className="h-[75vh] flex gap-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            {/* CONTENEDOR PRINCIPAL CON PADDING PARA EVITAR CORTES DE SOMBRA */}
+            <div className="flex-1 flex gap-8 overflow-visible relative h-[calc(100vh-200px)] md:h-[70vh] p-1">
 
-                {/* LISTA DE TICKETS (Ajustada) */}
-                <div className="w-full md:w-1/3 flex flex-col gap-4">
-                    <div className="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 flex flex-col h-full overflow-hidden">
-                        <div className="relative mb-6">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                {/* --- LISTA LATERAL --- */}
+                <div className={`w-full md:w-[350px] flex-col gap-4 ${vistaMovil === 'lista' ? 'flex' : 'hidden md:flex'}`}>
+                    {/* SOMBRA SUAVE PERSONALIZADA AQUÍ */}
+                    <div className="bg-white p-4 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100/50 flex flex-col h-full overflow-hidden">
+                        <div className="relative mb-4 px-1">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                             <input
-                                type="text" placeholder="Buscar ticket..."
+                                type="text" placeholder="Buscar..."
                                 value={busqueda} onChange={e => setBusqueda(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50/50 hover:bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-atlas-100 outline-none text-sm text-gray-700 placeholder:text-gray-400 transition-all"
                             />
                         </div>
 
-                        <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                             {filtrados.map(t => (
                                 <div
-                                    key={t.id} onClick={() => setTicketActivo(t)}
-                                    className={`p-6 rounded-[2rem] cursor-pointer transition-all border-2 ${ticketActivo.id === t.id ? 'bg-atlas-50 border-atlas-200' : 'bg-white border-transparent hover:bg-gray-50'
+                                    key={t.id} onClick={() => seleccionarTicket(t)}
+                                    className={`p-4 rounded-2xl cursor-pointer transition-all active:scale-[0.98] ${ticketActivo.id === t.id
+                                            ? 'bg-atlas-50 border border-atlas-100 shadow-sm'
+                                            : 'bg-transparent border border-transparent hover:bg-gray-50'
                                         }`}
                                 >
-                                    <div className="flex justify-between items-center mb-3">
-                                        <span className="text-xs font-bold text-atlas-500 font-mono tracking-tighter">{t.id}</span>
-                                        <span className={`px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-widest ${t.estado === 'nuevo' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                                            }`}>
-                                            {t.estado}
-                                        </span>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <span className="text-[10px] font-bold text-gray-400 font-mono tracking-wide">{t.id}</span>
+                                        <span className={`w-2 h-2 rounded-full ${t.estado === 'nuevo' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' : 'bg-gray-300'}`}></span>
                                     </div>
-                                    <h3 className="font-bold text-gray-800 text-sm mb-2 line-clamp-1">{t.asunto}</h3>
-                                    <div className="flex items-center gap-2">
-                                        <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-[9px] font-bold uppercase">{t.categoria}</span>
+                                    <h3 className={`text-sm font-bold mb-1 line-clamp-1 ${ticketActivo.id === t.id ? 'text-atlas-900' : 'text-gray-700'}`}>
+                                        {t.asunto}
+                                    </h3>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] text-gray-500 font-bold bg-white px-2 py-1 rounded-lg border border-gray-100 uppercase">
+                                            {t.categoria}
+                                        </span>
                                         <span className="text-[10px] text-gray-400 font-medium">{t.fecha}</span>
                                     </div>
                                 </div>
@@ -123,168 +141,169 @@ const MisTickets = () => {
                     </div>
                 </div>
 
-                {/* ÁREA DE CHAT (Consistente) */}
-                <div className="hidden md:flex flex-1 flex-col bg-white rounded-[3rem] shadow-2xl shadow-gray-100/50 border border-gray-100 overflow-hidden relative isolate">
+                {/* --- ÁREA DE CHAT --- */}
+                <div className={`flex-1 flex-col bg-white md:rounded-[2.5rem] rounded-none md:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden relative isolate fixed inset-0 z-20 md:static ${vistaMovil === 'chat' ? 'flex' : 'hidden md:flex'}`}>
                     {ticketActivo ? (
                         <>
-                            <div className="p-10 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-14 h-14 rounded-2xl bg-atlas-900 text-white flex items-center justify-center font-bold text-2xl shadow-xl">
-                                        <MessageSquare size={28} />
+                            {/* Header Chat */}
+                            <div className="px-4 md:px-8 py-4 md:py-6 border-b border-gray-50 flex justify-between items-center bg-white/80 backdrop-blur-md z-10 sticky top-0 md:relative">
+                                <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                                    <button
+                                        onClick={() => setVistaMovil('lista')}
+                                        className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </button>
+
+                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex shrink-0 items-center justify-center text-white font-bold text-sm shadow-lg ${ticketActivo.estado === 'nuevo' ? 'bg-gradient-to-br from-atlas-800 to-atlas-900' : 'bg-gray-400'
+                                        }`}>
+                                        {ticketActivo.categoria.charAt(0)}
                                     </div>
-                                    <div>
-                                        <h2 className="text-2xl font-black text-gray-900 leading-none">{ticketActivo.asunto}</h2>
-                                        <p className="text-sm text-gray-500 mt-2 font-medium">Gestión de {ticketActivo.categoria} • Ticket #{ticketActivo.id}</p>
+                                    <div className="min-w-0">
+                                        <h2 className="text-base md:text-xl font-bold text-gray-900 leading-tight truncate">{ticketActivo.asunto}</h2>
+                                        <p className="text-xs text-gray-400 flex items-center gap-2 mt-0.5 font-medium">
+                                            {ticketActivo.estado} <span className="hidden md:inline">• ID {ticketActivo.id}</span>
+                                        </p>
                                     </div>
                                 </div>
+                                <button className="text-gray-300 hover:text-atlas-900 transition-colors p-2 hover:bg-gray-50 rounded-full"><MoreVertical size={20} /></button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
+                            {/* Mensajes */}
+                            <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 md:space-y-6 custom-scrollbar bg-[#FAFAFA]">
                                 {ticketActivo.mensajes.map((msg) => (
                                     <div key={msg.id} className={`flex ${msg.emisor === 'yo' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className="max-w-[75%]">
-                                            <div className={`p-6 rounded-[2rem] shadow-sm text-sm leading-relaxed ${msg.emisor === 'yo'
-                                                    ? 'bg-atlas-900 text-white rounded-tr-none'
-                                                    : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none'
+                                        <div className={`max-w-[85%] md:max-w-[70%] group ${msg.emisor === 'yo' ? 'items-end flex flex-col' : 'items-start flex flex-col'}`}>
+                                            <div className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed shadow-sm transition-all ${msg.emisor === 'yo'
+                                                    ? 'bg-atlas-900 text-white rounded-br-none'
+                                                    : 'bg-white border border-gray-100 text-gray-700 rounded-bl-none'
                                                 }`}>
                                                 {msg.texto}
                                             </div>
-                                            <p className={`text-[10px] mt-3 font-bold uppercase tracking-widest text-gray-400 ${msg.emisor === 'yo' ? 'text-right' : 'text-left'}`}>
-                                                {msg.emisor === 'yo' ? 'Enviado por ti' : 'Soporte Atlas Digital'} • {msg.fecha}
-                                            </p>
+                                            <span className="text-[10px] text-gray-300 font-bold mt-1 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {msg.fecha}
+                                            </span>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="p-10 bg-white border-t border-gray-100">
-                                <form onSubmit={enviarRespuesta} className="bg-gray-50 p-2 rounded-[2.5rem] border border-gray-100 flex items-end gap-3 focus-within:ring-4 focus-within:ring-atlas-50 transition-all">
-                                    <button type="button" className="p-4 text-gray-400 hover:text-atlas-900 transition-colors"><Paperclip size={24} /></button>
-                                    <textarea
-                                        rows="1" placeholder="Escribe tu respuesta..."
-                                        className="flex-1 bg-transparent border-0 outline-none py-4 text-base resize-none"
+                            {/* Input */}
+                            <div className="p-3 md:p-6 bg-white border-t border-gray-50 md:border-t-0">
+                                <form onSubmit={enviarRespuesta} className="flex items-center gap-2 bg-gray-50 border border-gray-100 p-2 pl-4 rounded-[1.5rem] focus-within:ring-2 focus-within:ring-atlas-100 focus-within:bg-white transition-all shadow-sm">
+                                    <button type="button" className="text-gray-400 hover:text-atlas-600 transition-colors p-1 md:p-2 hover:bg-white rounded-full">
+                                        <Paperclip size={20} />
+                                    </button>
+                                    <input
+                                        type="text"
+                                        placeholder="Escribe un mensaje..."
+                                        className="flex-1 bg-transparent border-0 outline-none text-sm py-2 text-gray-700 placeholder:text-gray-400"
                                         value={mensaje} onChange={e => setMensaje(e.target.value)}
                                     />
-                                    <button type="submit" className="bg-atlas-900 text-white p-5 rounded-[2rem] shadow-xl hover:bg-atlas-800 transition-all active:scale-95"><Send size={24} /></button>
+                                    <button
+                                        type="submit"
+                                        disabled={!mensaje.trim()}
+                                        className="bg-atlas-900 text-white p-2.5 md:p-3 rounded-full hover:bg-atlas-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md active:scale-90"
+                                    >
+                                        <Send size={16} className={mensaje.trim() ? "ml-0.5" : ""} />
+                                    </button>
                                 </form>
                             </div>
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
-                            <Sparkles size={80} className="mb-6 opacity-20" />
-                            <p className="text-lg font-bold">Selecciona una conversación</p>
+                        <div className="flex-1 flex flex-col items-center justify-center text-gray-300 bg-[#FAFAFA]">
+                            <MessageSquare size={50} className="mb-4 opacity-10" />
+                            <p className="text-sm font-medium">Selecciona una conversación</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* --- MODAL DE CREACIÓN "PREMIUM" --- */}
+            {/* --- MODAL CREAR TICKET (Responsivo) --- */}
             {crearModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6 animate-in fade-in duration-500">
-                    <div className="bg-white rounded-[3rem] shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] w-full max-w-3xl overflow-hidden animate-in zoom-in duration-300 flex flex-col md:flex-row h-auto max-h-[90vh]">
-
-                        {/* Panel Lateral del Modal (Branding) */}
-                        <div className="hidden md:flex md:w-1/3 bg-atlas-900 p-10 flex-col justify-between relative isolate">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-atlas-300 rounded-full blur-[80px] opacity-20 -z-10"></div>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-3xl md:rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+                        {/* (El contenido del modal es igual, asegúrate de mantener la corrección del símbolo < ) */}
+                        <div className="px-6 py-5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <div>
-                                <div className="bg-white/10 w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-6">
-                                    <Sparkles size={24} />
-                                </div>
-                                <h2 className="text-2xl font-bold text-white mb-4 leading-tight">Nueva Solicitud</h2>
-                                <p className="text-atlas-200 text-sm leading-relaxed">
-                                    Completa los detalles para que nuestro equipo técnico pueda asistirte a la brevedad.
-                                </p>
+                                <h2 className="text-lg md:text-xl font-black text-gray-900">Nueva Solicitud</h2>
                             </div>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3 text-xs text-atlas-300">
-                                    <Shield size={16} /> Datos Protegidos
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-atlas-300">
-                                    <Clock size={16} /> Respuesta en &lt; 24h
-                                </div>
-                            </div>
+                            <button onClick={() => setCrearModalOpen(false)} className="text-gray-400 bg-white p-2 rounded-full border border-gray-100 shadow-sm hover:text-red-500 transition-colors">
+                                <X size={20} />
+                            </button>
                         </div>
 
-                        {/* Formulario Principal */}
-                        <div className="flex-1 p-10 overflow-y-auto custom-scrollbar">
-                            <div className="flex justify-between items-center mb-8">
-                                <span className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                                    <Info size={14} /> Formulario Oficial
-                                </span>
-                                <button onClick={() => setCrearModalOpen(false)} className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full">
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleCrearTicket} className="space-y-6">
-                                {/* Asunto */}
+                        <form onSubmit={handleCrearTicket} className="p-6 overflow-y-auto custom-scrollbar space-y-5">
+                            {/* ... Inputs del formulario igual que antes ... */}
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Asunto</label>
                                 <div className="relative group">
-                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block ml-1">Asunto de la solicitud</label>
-                                    <div className="relative">
-                                        <AlignLeft className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-600 transition-colors" size={20} />
-                                        <input
-                                            type="text" required placeholder="¿En qué podemos ayudarte?"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-atlas-300 focus:bg-white rounded-[1.5rem] outline-none transition-all font-medium text-gray-800"
-                                            value={nuevoForm.asunto} onChange={e => setNuevoForm({ ...nuevoForm, asunto: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Categoría y Prioridad en Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div className="relative group">
-                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block ml-1">Servicio Afectado</label>
-                                        <div className="relative">
-                                            <Layout className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-600 transition-colors" size={20} />
-                                            <select
-                                                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-atlas-300 focus:bg-white rounded-[1.5rem] outline-none appearance-none transition-all font-medium text-gray-800"
-                                                value={nuevoForm.categoria} onChange={e => setNuevoForm({ ...nuevoForm, categoria: e.target.value })}
-                                            >
-                                                <option value="ERP">Sistema ERP</option>
-                                                <option value="Web">Desarrollo Web</option>
-                                                <option value="Facturación">Facturación</option>
-                                                <option value="Soporte">Soporte Técnico</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="relative group">
-                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block ml-1">Nivel de Urgencia</label>
-                                        <div className="relative">
-                                            <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-600 transition-colors" size={20} />
-                                            <select
-                                                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-atlas-300 focus:bg-white rounded-[1.5rem] outline-none appearance-none transition-all font-medium text-gray-800"
-                                                value={nuevoForm.prioridad} onChange={e => setNuevoForm({ ...nuevoForm, prioridad: e.target.value })}
-                                            >
-                                                <option value="baja">Informativo (Baja)</option>
-                                                <option value="media">Necesario (Media)</option>
-                                                <option value="alta">Urgente (Alta)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Descripción */}
-                                <div className="relative group">
-                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block ml-1">Descripción detallada</label>
-                                    <textarea
-                                        rows="5" required placeholder="Describe el problema paso a paso..."
-                                        className="w-full p-6 bg-gray-50 border-2 border-transparent focus:border-atlas-300 focus:bg-white rounded-[2rem] outline-none transition-all font-medium text-gray-800 resize-none"
-                                        value={nuevoForm.mensaje} onChange={e => setNuevoForm({ ...nuevoForm, mensaje: e.target.value })}
+                                    <AlignLeft className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                    <input
+                                        type="text" required placeholder="Ej: Falla en el sistema"
+                                        className="w-full pl-11 pr-4 py-3 bg-gray-50 rounded-xl outline-none text-sm font-semibold text-gray-800 focus:bg-white focus:ring-2 focus:ring-atlas-100 transition-all border border-transparent"
+                                        value={nuevoForm.asunto} onChange={e => setNuevoForm({ ...nuevoForm, asunto: e.target.value })}
                                     />
                                 </div>
+                            </div>
+                            {/* ... Resto de inputs ... */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Categoría</label>
+                                    <div className="relative">
+                                        <Layout className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                        <select
+                                            className="w-full pl-11 pr-4 py-3 bg-gray-50 rounded-xl outline-none text-sm font-semibold text-gray-700 appearance-none focus:bg-white focus:ring-2 focus:ring-atlas-100 transition-all border border-transparent"
+                                            value={nuevoForm.categoria} onChange={e => setNuevoForm({ ...nuevoForm, categoria: e.target.value })}
+                                        >
+                                            <option value="ERP">Sistema ERP</option>
+                                            <option value="Web">Sitio Web</option>
+                                            <option value="Facturación">Facturación</option>
+                                            <option value="Soporte">Soporte Técnico</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Urgencia</label>
+                                    <div className="relative">
+                                        <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                        <select
+                                            className="w-full pl-11 pr-4 py-3 bg-gray-50 rounded-xl outline-none text-sm font-semibold text-gray-700 appearance-none focus:bg-white focus:ring-2 focus:ring-atlas-100 transition-all border border-transparent"
+                                            value={nuevoForm.prioridad} onChange={e => setNuevoForm({ ...nuevoForm, prioridad: e.target.value })}
+                                        >
+                                            <option value="baja">Baja</option>
+                                            <option value="media">Media</option>
+                                            <option value="alta">Alta</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Detalles</label>
+                                <textarea
+                                    rows="4" required placeholder="Describe tu problema..."
+                                    className="w-full p-4 bg-gray-50 rounded-xl outline-none text-sm font-medium text-gray-800 resize-none focus:bg-white focus:ring-2 focus:ring-atlas-100 transition-all border border-transparent"
+                                    value={nuevoForm.mensaje} onChange={e => setNuevoForm({ ...nuevoForm, mensaje: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="pt-2 flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-2 text-[10px] text-gray-400 font-medium">
+                                    <Clock size={12} /> Respuesta en {'<'} 24h
+                                </div>
                                 <button
                                     type="submit"
-                                    className="w-full bg-atlas-900 text-white py-5 rounded-[2rem] font-black shadow-2xl shadow-atlas-900/40 hover:bg-atlas-800 transition-all flex justify-center items-center gap-3 active:scale-[0.98] group"
+                                    className="w-full md:w-auto bg-atlas-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-atlas-800 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
                                 >
-                                    Enviar Solicitud Técnica <ChevronRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                                    Enviar Solicitud <ChevronRight size={16} />
                                 </button>
-                            </form>
-                        </div>
+                            </div>
+
+                        </form>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };
