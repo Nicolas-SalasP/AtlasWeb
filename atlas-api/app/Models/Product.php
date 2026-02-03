@@ -10,8 +10,10 @@ class Product extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'sku', 'name', 'slug', 'description', 'price', 
-        'stock_current', 'category_id', 'is_visible'
+        'sku', 'name', 'slug', 'description', 
+        'price', 'cost_price', 
+        'stock_current', 'stock_alert', 
+        'category_id', 'is_visible'
     ];
 
     // Relación con Categoría
@@ -22,5 +24,11 @@ class Product extends Model
     // Relación con Imágenes
     public function images() {
         return $this->hasMany(ProductImage::class);
+    }
+
+    // Helper para obtener la imagen de portada
+    public function getCoverAttribute()
+    {
+        return $this->images->where('is_cover', true)->first()->url ?? null;
     }
 }

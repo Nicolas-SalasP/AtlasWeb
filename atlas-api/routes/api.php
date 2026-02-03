@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +19,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Rutas Protegidas (Requieren Token)
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -35,7 +36,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/users/{id}', [UserController::class, 'show']);
     Route::put('/admin/users/{id}', [UserController::class, 'update']);
 
-    //Ordenes
+    // Ordenes / Pedidos
     Route::get('/admin/orders', [OrderController::class, 'index']);
+
+    // Productos
+    Route::get('/admin/products', [ProductController::class, 'index']);
+    Route::post('/admin/products', [ProductController::class, 'store']);
+    Route::post('/admin/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/admin/products/{id}', [ProductController::class, 'destroy']);
+    Route::delete('/admin/product-images/{id}', [ProductController::class, 'destroyImage']);
+    Route::post('/admin/product-images/{id}/cover', [ProductController::class, 'setCover']);
+
+    Route::get('/categories', function () {
+        return \App\Models\Category::all();
+    });
 
 });
