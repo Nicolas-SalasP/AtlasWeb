@@ -19,7 +19,9 @@ class CheckMaintenanceMode
                 'api/login',
                 'api/logout',
                 'api/settings',
-                'api/sanctum/csrf-cookie' 
+                'api/sanctum/csrf-cookie',
+                'api/system-status',
+                'api/products'
             ];
 
             foreach ($rutasPermitidas as $ruta) {

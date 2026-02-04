@@ -11,8 +11,10 @@ import CartDrawer from './CartDrawer';
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
-    const { cartCount, setIsCartOpen } = useCart();
+    
+    const { getCartCount, setIsCartOpen } = useCart();
     const { user, logout, isAuthenticated } = useAuth();
+    
     const navigate = useNavigate();
     const menuRef = useRef(null);
 
@@ -43,18 +45,16 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="bg-atlas-900 text-white fixed w-full z-50 shadow-lg border-b border-atlas-800 transition-all">
+            <nav className="bg-atlas-900 text-white fixed w-full z-30 shadow-lg border-b border-atlas-800 transition-all">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-20">
 
-                        {/* 1. LOGO */}
                         <Link to="/" className="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
                             <span className="font-black text-2xl tracking-wider group-hover:opacity-90 transition-opacity">
                                 ATLAS <span className="text-atlas-300 font-light">DIGITAL</span>
                             </span>
                         </Link>
 
-                        {/* 2. MENÚ CENTRAL (Escritorio) */}
                         <div className="hidden md:block">
                             <div className="ml-10 flex items-baseline space-x-8">
                                 <Link to="/" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Inicio</Link>
@@ -64,26 +64,21 @@ const Navbar = () => {
                             </div>
                         </div>
 
-                        {/* 3. ZONA DE USUARIO (DERECHA) */}
                         <div className="hidden md:flex items-center gap-6">
-
-                            {/* Carrito de Compras */}
                             <button
                                 onClick={() => setIsCartOpen(true)}
                                 className="relative p-2 hover:bg-atlas-800 rounded-full transition-colors group"
                             >
                                 <ShoppingCart size={22} className="text-gray-300 group-hover:text-white" />
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-atlas-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-atlas-900 shadow-sm">
-                                        {cartCount}
+                                {getCartCount() > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-atlas-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-atlas-900 shadow-sm animate-in zoom-in">
+                                        {getCartCount()}
                                     </span>
                                 )}
                             </button>
 
-                            {/* LÓGICA DE USUARIO: ¿Está Logeado? */}
                             {isAuthenticated ? (
                                 <div className="relative" ref={menuRef}>
-                                    {/* Botón Trigger del Menú */}
                                     <button
                                         onClick={() => setShowUserMenu(!showUserMenu)}
                                         className={`flex items-center gap-3 py-1.5 px-2 pr-4 rounded-full transition-all border ${showUserMenu ? 'bg-atlas-800 border-atlas-700' : 'hover:bg-atlas-800 border-transparent'}`}
@@ -98,17 +93,13 @@ const Navbar = () => {
                                         <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
                                     </button>
 
-                                    {/* DROPDOWN MENU FLOTANTE */}
                                     {showUserMenu && (
                                         <div className="absolute right-0 mt-4 w-60 bg-white rounded-2xl shadow-2xl py-2 text-gray-800 border border-gray-100 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden">
-
-                                            {/* Header del Dropdown */}
                                             <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
                                                 <p className="text-sm font-black text-gray-900 truncate">{user?.name}</p>
                                                 <p className="text-xs text-gray-500 truncate font-medium">{user?.email}</p>
                                             </div>
 
-                                            {/* Opciones del Menú */}
                                             <div className="py-2">
                                                 <Link to="/perfil" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
                                                     <User size={18} className="text-gray-400 group-hover:text-atlas-600" /> Mi Perfil
@@ -121,7 +112,6 @@ const Navbar = () => {
                                                 </Link>
                                             </div>
 
-                                            {/* Logout */}
                                             <div className="border-t border-gray-100 mt-1 pt-1 bg-gray-50/30">
                                                 <button
                                                     onClick={handleLogout}
@@ -134,7 +124,6 @@ const Navbar = () => {
                                     )}
                                 </div>
                             ) : (
-                                // Botón si NO está logeado
                                 <Link
                                     to="/login"
                                     className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all border border-white/10 shadow-lg hover:shadow-atlas-500/20"
@@ -144,16 +133,15 @@ const Navbar = () => {
                             )}
                         </div>
 
-                        {/* BOTÓN MENÚ MÓVIL */}
                         <div className="-mr-2 flex md:hidden gap-4 items-center">
                             <button
                                 onClick={() => setIsCartOpen(true)}
                                 className="relative p-2"
                             >
                                 <ShoppingCart size={24} />
-                                {cartCount > 0 && (
+                                {getCartCount() > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-atlas-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                                        {cartCount}
+                                        {getCartCount()}
                                     </span>
                                 )}
                             </button>
@@ -165,7 +153,6 @@ const Navbar = () => {
                     </div>
                 </div>
 
-                {/* MENÚ MÓVIL (Full Adaptado) */}
                 {isOpen && (
                     <div className="md:hidden bg-atlas-900 border-t border-atlas-800 shadow-inner">
                         <div className="px-4 pt-4 pb-6 space-y-2 sm:px-3">
@@ -173,7 +160,6 @@ const Navbar = () => {
                             <Link to="/proyectos" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-atlas-800 transition-colors">Proyectos</Link>
                             <Link to="/catalogo" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-atlas-800 transition-colors">Tienda</Link>
 
-                            {/* SECCIÓN USUARIO MÓVIL */}
                             {isAuthenticated ? (
                                 <div className="border-t border-atlas-800 mt-6 pt-6 pb-2 bg-atlas-800/30 rounded-2xl mx-2 px-2">
                                     <div className="flex items-center px-3 mb-4">

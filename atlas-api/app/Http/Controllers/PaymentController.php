@@ -4,188 +4,112 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\SystemSetting;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderPlaced;
+use App\Models\SystemSetting; // <--- Asegúrate de tener este import
 use Transbank\Webpay\WebpayPlus\Transaction;
-use Transbank\Webpay\Options; // <--- Clase necesaria para configurar
+use Transbank\Webpay\Options;
 
 class PaymentController extends Controller
 {
-    /**
-     * Helper robusto para obtener la instancia de Transbank.
-     * Soluciona el error de "Missing argument $options" y métodos desconocidos.
-     */
-    private function getTransactionInstance()
+    // Configuración de Webpay (Integración)
+    private function getTransbankOptions()
     {
-        // 1. Intentar leer credenciales de Producción desde la BD
-        $cc = SystemSetting::where('key', 'webpay_code')->value('value');
-        $apiKey = SystemSetting::where('key', 'webpay_api_key')->value('value');
-        
-        // Asumimos 'integration' si no está definido explícitamente como 'production'
-        $env = SystemSetting::where('key', 'webpay_env')->value('value') ?? 'integration';
-
-        if ($env === 'production' && !empty($cc) && !empty($apiKey)) {
-            // --- MODO PRODUCCIÓN ---
-            // Creamos las opciones manualmente pasando 'PRODUCTION' como string
-            $options = new Options($cc, $apiKey, 'PRODUCTION');
-        } else {
-            // --- MODO INTEGRACIÓN (TEST) ---
-            // Credenciales públicas oficiales de Transbank. Las ponemos aquí directo
-            // para evitar errores de constantes faltantes en versiones nuevas del SDK.
-            $integrationCC = '597055555532';
-            $integrationKey = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C';
-            
-            $options = new Options($integrationCC, $integrationKey, 'TEST');
-        }
-
-        // Retornamos la transacción lista con las opciones inyectadas
-        return new Transaction($options);
+        return new Options(
+            '597012345678',
+            '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C',
+            'integration'
+        );
     }
 
-    // --- 1. PROCESAR TRANSFERENCIA BANCARIA ---
+    // 1. PAGO CON TRANSFERENCIA (Ahora conecta con tu BD)
     public function payWithTransfer(Request $request)
     {
         $request->validate(['order_id' => 'required|exists:orders,id']);
+
         $order = Order::find($request->order_id);
-        
-        // Evitar duplicar lógicas si el usuario hace clic varias veces
-        if ($order->status !== 'pending' && $order->status !== 'pending_payment') {
-            return response()->json(['message' => 'Esta orden ya está en proceso o pagada'], 400);
-        }
+        $order->status = 'pending';
+        $order->payment_method = 'transfer';
+        $order->save();
 
-        $order->update([
-            'payment_method' => 'transfer',
-            'status' => 'pending_payment'
-        ]);
-
-        // Datos del banco para mostrar en el frontend
-        $bankDetails = SystemSetting::whereIn('key', [
-            'bank_name', 'bank_account_type', 'bank_account_number', 'bank_rut', 'bank_email'
-        ])->pluck('value', 'key');
-
-        // Enviar correo de instrucciones
-        try {
-            Mail::to($order->user->email)->send(new OrderPlaced($order, $bankDetails));
-        } catch (\Exception $e) {
-            Log::error("Error enviando email transferencia: " . $e->getMessage());
-        }
-
+        // AQUÍ RECUPERAMOS TUS DATOS DE LA BASE DE DATOS
         return response()->json([
-            'status' => 'success',
-            'message' => 'Orden registrada. Instrucciones enviadas al correo.',
-            'bank_details' => $bankDetails
+            'message' => 'Intención de transferencia registrada',
+            'bank_details' => [
+                'bank_name' => SystemSetting::where('key', 'bank_name')->value('value') ?? 'Banco Estado',
+                'bank_account_type' => SystemSetting::where('key', 'bank_account_type')->value('value') ?? 'Cuenta Vista',
+                'bank_account_number' => SystemSetting::where('key', 'bank_account_number')->value('value') ?? '123456789',
+                'bank_rut' => SystemSetting::where('key', 'bank_rut')->value('value') ?? '11.111.111-1',
+                'bank_email' => SystemSetting::where('key', 'bank_email')->value('value') ?? 'pagos@tuempresa.cl',
+            ]
         ]);
     }
 
-    // --- 2. INICIAR WEBPAY PLUS ---
+    // 2. INICIAR WEBPAY
     public function initWebpay(Request $request)
     {
-        $request->validate(['order_id' => 'required']);
-        $order = Order::findOrFail($request->order_id);
+        $request->validate(['order_id' => 'required|exists:orders,id']);
 
-        // 1. Validar Stock antes de ir al banco (Crucial para evitar sobreventas)
-        foreach ($order->items as $item) {
-            if ($item->product->stock_current < $item->quantity) {
-                return response()->json(['error' => "Sin stock suficiente para: {$item->product->name}"], 409);
-            }
-        }
+        $order = Order::find($request->order_id);
+
+        $buyOrder = $order->order_number;
+        $sessionId = session()->getId();
+        $amount = (int) $order->total;
+        $returnUrl = url('/api/webpay/return');
 
         try {
-            // 2. Obtener instancia configurada (Producción o Integración)
-            $transaction = $this->getTransactionInstance();
-            
-            // 3. Preparar datos de la transacción
-            $buyOrder = "ORD-" . $order->id . "-" . rand(1000, 9999); // ID único aleatorio
-            $sessionId = session()->getId();
-            $amount = round($order->total); // Webpay solo acepta enteros
-            $returnUrl = url('/api/webpay/return'); 
+            $options = $this->getTransbankOptions();
+            $transaction = new Transaction($options);
 
-            // 4. Crear transacción en Transbank
             $response = $transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
 
-            // 5. Guardar token en nuestra BD
-            $order->update([
-                'payment_method' => 'webpay',
-                'transaction_token' => $response->getToken(),
-                'status' => 'pending_payment'
-            ]);
+            $order->transaction_token = $response->getToken();
+            $order->status = 'pending';
+            $order->payment_method = 'webpay';
+            $order->save();
 
-            // 6. Responder al frontend con URL y Token
             return response()->json([
                 'url' => $response->getUrl(),
                 'token' => $response->getToken()
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Webpay Init Error: " . $e->getMessage());
-            return response()->json(['error' => 'Error al conectar con Webpay. Intente más tarde.'], 500);
+            \Log::error("Error Webpay Init: " . $e->getMessage());
+            return response()->json(['error' => 'Error Webpay: ' . $e->getMessage()], 500);
         }
     }
 
-    // --- 3. RETORNO WEBPAY (CONFIRMACIÓN) ---
+    // 3. RETORNO WEBPAY
     public function commitWebpay(Request $request)
     {
-        // Transbank envía el token por POST o GET
         $token = $request->input('token_ws');
 
-        // Si no hay token, es porque el usuario anuló la compra en el formulario del banco
         if (!$token) {
-            return redirect()->away(env('FRONTEND_URL') . '/checkout/failure?reason=aborted');
+            $token = $request->input('TBK_TOKEN');
+            return redirect('http://localhost:5173/checkout?status=cancelled');
         }
 
         try {
-            // Instancia configurada
-            $transaction = $this->getTransactionInstance();
-            
-            // Confirmar transacción con Transbank (Commit)
-            $response = $transaction->commit($token); 
+            $options = $this->getTransbankOptions();
+            $transaction = new Transaction($options);
 
-            // Buscar nuestra orden
-            $order = Order::where('transaction_token', $token)->firstOrFail();
+            $response = $transaction->commit($token);
 
-            // Verificar si el banco aprobó el pago (Código 0)
+            $order = Order::where('transaction_token', $token)->first();
+
             if ($response->isApproved()) {
-                
-                // Transacción DB Atómica: O se guarda todo o nada
-                DB::transaction(function () use ($order, $response) {
-                    // A. Marcar pagado
-                    $order->update([
-                        'status' => 'paid',
-                        'payment_data' => json_encode($response)
-                    ]);
+                $order->status = 'paid';
+                $order->payment_data = json_encode($response);
+                $order->save();
 
-                    // B. Descontar Stock
-                    foreach ($order->items as $item) {
-                        $product = Product::find($item->product_id);
-                        if ($product) {
-                            $product->decrement('stock_current', $item->quantity);
-                        }
-                    }
-                });
-
-                // C. Enviar correo de éxito
-                try {
-                    Mail::to($order->user->email)->send(new OrderPlaced($order));
-                } catch (\Exception $e) {
-                    Log::error("Error email webpay: " . $e->getMessage());
-                }
-                
-                // Redirigir al frontend (Éxito)
-                return redirect()->away(env('FRONTEND_URL') . '/checkout/success?order_id=' . $order->id);
+                return redirect('http://localhost:5173/checkout/success?order=' . $order->order_number);
             } else {
-                // Pago rechazado por el banco (Sin fondos, clave errónea, etc.)
-                $order->update(['status' => 'cancelled', 'notes' => 'Rechazado por Webpay']);
-                return redirect()->away(env('FRONTEND_URL') . '/checkout/failure?reason=rejected');
+                $order->status = 'cancelled';
+                $order->save();
+                return redirect('http://localhost:5173/checkout/failure?order=' . $order->order_number);
             }
 
         } catch (\Exception $e) {
-            Log::error("Webpay Commit Error: " . $e->getMessage());
-            // Error técnico (Timeout, doble confirmación, etc)
-            return redirect()->away(env('FRONTEND_URL') . '/checkout/failure?reason=error');
+            \Log::error("Error Webpay Commit: " . $e->getMessage());
+            return redirect('http://localhost:5173/checkout/error');
         }
     }
 }

@@ -9,7 +9,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
-
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,8 +19,12 @@ use App\Http\Controllers\SettingController;
 
 // Rutas Públicas
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/products', [ProductController::class, 'indexPublic']); 
+Route::get('/system-status', [SettingController::class, 'publicStatus']);
+Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
+Route::post('/orders', [OrderController::class, 'store']);
 
-// Rutas Protegidas (Requieren Token)
+// Rutas Protegidas
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
@@ -39,13 +43,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/users/{id}', [UserController::class, 'show']);
     Route::put('/admin/users/{id}', [UserController::class, 'update']);
 
-    // Ordenes / Pedidos
+    // Ordenes / Pedidos (Admin)
     Route::get('/admin/orders', [OrderController::class, 'index']);
+    
+    // CREACIÓN DE ORDEN (CLIENTE) ---
+    Route::post('/orders', [OrderController::class, 'store']); 
 
-    // Productos
+    // PAGOS (CLIENTE) ---
+    Route::post('/payment/transfer', [PaymentController::class, 'payWithTransfer']);
+    Route::post('/payment/webpay', [PaymentController::class, 'initWebpay']);
+
+    // Productos (Admin)
     Route::get('/admin/products', [ProductController::class, 'index']);
     Route::post('/admin/products', [ProductController::class, 'store']);
-    Route::post('/admin/products/{id}', [ProductController::class, 'update']);
+    Route::put('/admin/products/{id}', [ProductController::class, 'update']);
     Route::delete('/admin/products/{id}', [ProductController::class, 'destroy']);
     Route::delete('/admin/product-images/{id}', [ProductController::class, 'destroyImage']);
     Route::post('/admin/product-images/{id}/cover', [ProductController::class, 'setCover']);
@@ -60,6 +71,4 @@ Route::middleware('auth:sanctum')->group(function () {
     // Config
     Route::get('/admin/settings', [SettingController::class, 'index']);
     Route::post('/admin/settings', [SettingController::class, 'update']);
-
-
 });

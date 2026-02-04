@@ -54,18 +54,23 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = Product::find($id);
-        if (!$product) return response()->json(['message' => 'Producto no encontrado'], 404);
-        $data = $request->except(['images']);
+
+        if (!$product) {
+            return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
+        $data = $request->except(['images', '_method']);
         if ($request->has('is_visible')) {
             $data['is_visible'] = filter_var($request->is_visible, FILTER_VALIDATE_BOOLEAN);
         }
-        $product->update($data); 
+        $product->update($data);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
                 $path = $file->store('products', 'public');
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'url' => '/storage/' . $path
+                    'url' => '/storage/' . $path,
+                    'is_cover' => !$product->images()->where('is_cover', true)->exists(),
+                    'position' => 0
                 ]);
             }
         }
@@ -86,7 +91,8 @@ class ProductController extends Controller
     public function destroyImage($id)
     {
         $image = ProductImage::find($id);
-        if (!$image) return response()->json(['message' => 'Imagen no encontrada'], 404);
+        if (!$image)
+            return response()->json(['message' => 'Imagen no encontrada'], 404);
         $relativePath = str_replace('/storage/', '', $image->url);
         Storage::disk('public')->delete($relativePath);
         $image->delete();
@@ -97,10 +103,21 @@ class ProductController extends Controller
     public function setCover($imageId)
     {
         $image = ProductImage::find($imageId);
-        if (!$image) return response()->json(['message' => 'Imagen no encontrada'], 404);
+        if (!$image)
+            return response()->json(['message' => 'Imagen no encontrada'], 404);
         ProductImage::where('product_id', $image->product_id)->update(['is_cover' => false]);
         $image->update(['is_cover' => true]);
 
         return response()->json(['message' => 'Portada actualizada']);
+    }
+
+    public function indexPublic()
+    {
+        $products = Product::with(['images', 'category'])
+            ->where('is_visible', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return response()->json($products);
     }
 }

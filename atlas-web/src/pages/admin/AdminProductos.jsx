@@ -20,8 +20,8 @@ const AdminProductos = () => {
     const [guardando, setGuardando] = useState(false);
 
     // --- SISTEMA DE NOTIFICACIONES Y MODALES ---
-    const [toast, setToast] = useState({ show: false, type: 'success', message: '' }); // 'success' | 'error'
-    const [confirmModal, setConfirmModal] = useState({ show: false, message: '', action: null }); // Para confirmaciones
+    const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
+    const [confirmModal, setConfirmModal] = useState({ show: false, message: '', action: null });
 
     // --- FORMULARIO ---
     const [form, setForm] = useState({
@@ -41,9 +41,10 @@ const AdminProductos = () => {
 
     const cargarDatos = async () => {
         try {
+            // Nota: Asegúrate de que tus rutas en Laravel coincidan (/admin/products)
             const [prodRes, catRes] = await Promise.all([
                 api.get('/admin/products'),
-                api.get('/categories')
+                api.get('/categories') // O /admin/categories según tu backend
             ]);
             setProductos(prodRes.data);
             setCategorias(catRes.data);
@@ -107,7 +108,7 @@ const AdminProductos = () => {
             try {
                 await api.delete(`/admin/product-images/${idImagen}`);
                 setImagenesExistentes(prev => prev.filter(img => img.id !== idImagen));
-                cargarDatos(); // Refrescar lista fondo
+                cargarDatos(); // Refrescar la lista de fondo también
                 showToast('success', 'Imagen eliminada');
             } catch (error) {
                 showToast('error', 'Error al eliminar imagen');
@@ -137,19 +138,27 @@ const AdminProductos = () => {
         try {
             const formData = new FormData();
 
+            // Datos de texto
             Object.keys(form).forEach(key => {
                 if (key === 'is_visible') formData.append(key, form[key] ? '1' : '0');
                 else formData.append(key, form[key]);
             });
 
+            // Imágenes nuevas (Array)
             nuevasImagenes.forEach((file, index) => {
                 formData.append(`images[${index}]`, file);
             });
 
             if (editando) {
-                await api.post(`/admin/products/${editando.id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                // TRUCO LARAVEL: Para subir archivos en PUT, hay que usar POST y agregar _method: PUT
+                formData.append('_method', 'PUT');
+                await api.post(`/admin/products/${editando.id}`, formData, { 
+                    headers: { 'Content-Type': 'multipart/form-data' } 
+                });
             } else {
-                await api.post('/admin/products', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await api.post('/admin/products', formData, { 
+                    headers: { 'Content-Type': 'multipart/form-data' } 
+                });
             }
 
             await cargarDatos();
@@ -158,7 +167,7 @@ const AdminProductos = () => {
 
         } catch (error) {
             console.error(error);
-            showToast('error', 'Error al guardar. Revisa el SKU.');
+            showToast('error', 'Error al guardar. Revisa el SKU o conexión.');
         } finally {
             setGuardando(false);
         }
@@ -176,15 +185,17 @@ const AdminProductos = () => {
         });
     };
 
-    const filtrados = productos.filter(p => p.name.toLowerCase().includes(busqueda.toLowerCase()) || p.sku.toLowerCase().includes(busqueda.toLowerCase()));
+    const filtrados = productos.filter(p => 
+        p.name.toLowerCase().includes(busqueda.toLowerCase()) || 
+        p.sku.toLowerCase().includes(busqueda.toLowerCase())
+    );
 
     if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Inventario...</div>;
 
     return (
-        // LAYOUT RESPONSIVO Y FIJO
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
 
-            {/* NOTIFICACIÓN TOAST (Flotante) */}
+            {/* NOTIFICACIÓN TOAST */}
             {toast.show && (
                 <div className={`fixed top-24 right-4 md:right-10 z-[100] px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
                     {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
@@ -213,7 +224,8 @@ const AdminProductos = () => {
                 </div>
 
                 <div className="overflow-auto flex-1 custom-scrollbar">
-                    <table className="w-full min-w-[800px]"> {/* min-w fuerza scroll horizontal en móvil */}
+                    {/* AQUÍ ESTABA EL ERROR DE WHITESPACE - AHORA ESTÁ CORREGIDO */}
+                    <table className="w-full min-w-[800px]">
                         <thead className="bg-gray-50 border-b border-gray-100 text-left sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Producto</th>
@@ -267,7 +279,7 @@ const AdminProductos = () => {
                 </div>
             </div>
 
-            {/* --- MODAL CONFIRMACIÓN (REEMPLAZA CONFIRM) --- */}
+            {/* --- MODAL CONFIRMACIÓN --- */}
             {confirmModal.show && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95 text-center">
@@ -284,7 +296,7 @@ const AdminProductos = () => {
                 </div>
             )}
 
-            {/* --- DRAWER FORMULARIO RESPONSIVO --- */}
+            {/* --- DRAWER FORMULARIO --- */}
             <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setDrawerOpen(false)} />
             <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 

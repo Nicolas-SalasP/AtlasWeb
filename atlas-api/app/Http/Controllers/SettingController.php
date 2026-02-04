@@ -10,7 +10,6 @@ class SettingController extends Controller
 {
     public function index()
     {
-        // Retorna un objeto clave:valor simple { "store_name": "Atlas...", ... }
         $settings = SystemSetting::all()->pluck('value', 'key');
         return response()->json($settings);
     }
@@ -37,5 +36,13 @@ class SettingController extends Controller
         }
 
         return response()->json(['message' => 'Configuración guardada']);
+    }
+
+    public function publicStatus()
+    {
+        $maintenance = SystemSetting::where('key', 'maintenance_mode')->value('value');
+        return response()->json([
+            'maintenance_mode' => $maintenance
+        ]);
     }
 }
