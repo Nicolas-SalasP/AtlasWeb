@@ -1,25 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axiosConfig';
-import { Save, Store, CreditCard, Truck, Shield, Lock, Globe, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+    Save, Store, CreditCard, Truck, Shield, Lock, Globe,
+    Loader2, CheckCircle, AlertCircle, Landmark, Wallet
+} from 'lucide-react';
 
 const AdminConfig = () => {
     const [loading, setLoading] = useState(true);
     const [guardando, setGuardando] = useState(false);
 
-    // Configuración inicial (se sobreescribe con la API)
+    // Configuración completa (incluyendo bancos)
     const [config, setConfig] = useState({
+        // General
         store_name: '',
         contact_email: '',
         contact_phone: '',
+        maintenance_mode: false,
+        // WebPay
         webpay_enabled: false,
         webpay_code: '',
+        webpay_api_key: '', // Agregado por si quieres editarlo también
+        webpay_env: 'integration', // integration | production
+        // Logística
         free_shipping_threshold: '',
-        maintenance_mode: false,
-        password_current: '', // Campos especiales (no van a system_settings)
+        // Banco (NUEVO)
+        bank_name: '',
+        bank_account_type: '',
+        bank_account_number: '',
+        bank_rut: '',
+        bank_email: '',
+        // Seguridad (solo local, no se carga de BD)
+        password_current: '',
         password_new: ''
     });
 
-    // Toasts (Notificaciones)
     const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
 
     // 1. Cargar Configuración
@@ -27,11 +41,13 @@ const AdminConfig = () => {
         const fetchSettings = async () => {
             try {
                 const response = await api.get('/admin/settings');
-                // Convertir strings "1"/"0" a booleanos para los checkbox
                 const data = response.data;
+
+                // Mapeamos la respuesta al estado
                 setConfig(prev => ({
                     ...prev,
                     ...data,
+                    // Aseguramos tipos correctos para los booleanos/números
                     webpay_enabled: data.webpay_enabled == '1',
                     maintenance_mode: data.maintenance_mode == '1',
                     free_shipping_threshold: parseInt(data.free_shipping_threshold || 0)
@@ -46,7 +62,6 @@ const AdminConfig = () => {
         fetchSettings();
     }, []);
 
-    // Helper Toast
     const showToast = (type, message) => {
         setToast({ show: true, type, message });
         setTimeout(() => setToast({ ...toast, show: false }), 3000);
@@ -64,7 +79,6 @@ const AdminConfig = () => {
         e.preventDefault();
         setGuardando(true);
 
-        // Preparamos datos (convertir booleanos a 1/0 para la BD)
         const payload = {
             ...config,
             webpay_enabled: config.webpay_enabled ? '1' : '0',
@@ -74,7 +88,6 @@ const AdminConfig = () => {
         try {
             await api.post('/admin/settings', payload);
             showToast('success', 'Configuración guardada correctamente');
-            // Limpiar campos de password por seguridad
             setConfig(prev => ({ ...prev, password_current: '', password_new: '' }));
         } catch (error) {
             console.error(error);
@@ -88,7 +101,7 @@ const AdminConfig = () => {
     if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Configuración...</div>;
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 pb-10 p-6 md:p-10 relative">
+        <div className="h-[calc(100vh-80px)] overflow-y-auto p-6 md:p-10 custom-scrollbar relative pb-20">
 
             {/* TOAST FLOTANTE */}
             {toast.show && (
@@ -99,10 +112,10 @@ const AdminConfig = () => {
             )}
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Configuración</h1>
-                    <p className="text-gray-500 mt-1">Variables globales de la tienda y seguridad</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Configuración del Sistema</h1>
+                    <p className="text-gray-500 mt-1">Variables globales, métodos de pago y seguridad</p>
                 </div>
                 <button
                     onClick={handleGuardar}
@@ -114,7 +127,7 @@ const AdminConfig = () => {
                 </button>
             </div>
 
-            <form className="grid lg:grid-cols-2 gap-8">
+            <form className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
 
                 {/* 1. GENERAL */}
                 <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100">
@@ -123,17 +136,17 @@ const AdminConfig = () => {
                     </h2>
                     <div className="space-y-5">
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre de la Tienda</label>
-                            <input type="text" name="store_name" value={config.store_name} onChange={handleChange} className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none transition-all" />
+                            <label className="label-config">Nombre de la Tienda</label>
+                            <input type="text" name="store_name" value={config.store_name} onChange={handleChange} className="input-config" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email Contacto</label>
-                                <input type="email" name="contact_email" value={config.contact_email} onChange={handleChange} className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none transition-all" />
+                                <label className="label-config">Email Contacto</label>
+                                <input type="email" name="contact_email" value={config.contact_email} onChange={handleChange} className="input-config" />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Teléfono</label>
-                                <input type="text" name="contact_phone" value={config.contact_phone} onChange={handleChange} className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none transition-all" />
+                                <label className="label-config">Teléfono</label>
+                                <input type="text" name="contact_phone" value={config.contact_phone} onChange={handleChange} className="input-config" />
                             </div>
                         </div>
 
@@ -154,71 +167,122 @@ const AdminConfig = () => {
                     </div>
                 </div>
 
-                {/* 2. PAGOS & API */}
+                {/* 2. DATOS BANCARIOS (NUEVA SECCIÓN) */}
                 <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100">
                     <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
-                        <div className="p-2 bg-green-50 text-green-600 rounded-lg"><CreditCard size={20} /></div> Pagos (WebPay)
+                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Landmark size={20} /></div> Datos de Transferencia
+                    </h2>
+                    <div className="space-y-5">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="label-config">Nombre Banco</label>
+                                <input type="text" name="bank_name" placeholder="Ej: Banco de Chile" value={config.bank_name} onChange={handleChange} className="input-config" />
+                            </div>
+                            <div>
+                                <label className="label-config">Tipo de Cuenta</label>
+                                <input type="text" name="bank_account_type" placeholder="Ej: Cuenta Corriente" value={config.bank_account_type} onChange={handleChange} className="input-config" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="label-config">Número de Cuenta</label>
+                                <input type="text" name="bank_account_number" value={config.bank_account_number} onChange={handleChange} className="input-config font-mono" />
+                            </div>
+                            <div>
+                                <label className="label-config">RUT Empresa</label>
+                                <input type="text" name="bank_rut" value={config.bank_rut} onChange={handleChange} className="input-config" />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="label-config">Email para Comprobantes</label>
+                            <input type="email" name="bank_email" value={config.bank_email} onChange={handleChange} className="input-config" />
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-indigo-600 bg-indigo-50 p-3 rounded-lg">
+                            <Wallet size={14} />
+                            Estos datos se mostrarán al cliente al elegir "Transferencia".
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. WEBPAY */}
+                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100">
+                    <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
+                        <div className="p-2 bg-green-50 text-green-600 rounded-lg"><CreditCard size={20} /></div> Configuración WebPay
                     </h2>
                     <div className="space-y-5">
                         <div className="flex items-center justify-between mb-4">
-                            <span className="text-sm font-bold text-gray-700">Habilitar WebPay Plus</span>
+                            <span className="text-sm font-bold text-gray-700">Habilitar Pagos Online</span>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="webpay_enabled" checked={config.webpay_enabled} onChange={handleChange} className="sr-only peer" />
                                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                             </label>
                         </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="label-config">Entorno</label>
+                                <select name="webpay_env" value={config.webpay_env} onChange={handleChange} className="input-config">
+                                    <option value="integration">Integración (Pruebas)</option>
+                                    <option value="production">Producción (Real)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="label-config">Código Comercio</label>
+                                <input type="text" name="webpay_code" value={config.webpay_code} onChange={handleChange} className="input-config font-mono" placeholder="5970..." />
+                            </div>
+                        </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Código de Comercio</label>
-                            <input type="text" name="webpay_code" value={config.webpay_code} onChange={handleChange} className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all font-mono" />
-                            <p className="text-[10px] text-gray-400 mt-1 ml-1">Código entregado por Transbank (Integración)</p>
+                            <label className="label-config">API Key (Secreta)</label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input type="password" name="webpay_api_key" value={config.webpay_api_key} onChange={handleChange} className="w-full pl-10 p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all font-mono" placeholder="••••••••••••" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 3. ENVÍOS */}
-                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Truck size={20} /></div> Logística
-                    </h2>
-                    <div className="space-y-5">
+                {/* 4. SEGURIDAD & LOGÍSTICA */}
+                <div className="space-y-8">
+                    {/* Logística */}
+                    <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100">
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Truck size={20} /></div> Logística
+                        </h2>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Envío Gratis Desde ($)</label>
+                            <label className="label-config">Envío Gratis Desde ($)</label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
                                 <input type="number" name="free_shipping_threshold" value={config.free_shipping_threshold} onChange={handleChange} className="w-full pl-8 p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none transition-all" />
                             </div>
                         </div>
-                        <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-800 leading-relaxed">
-                            <strong>Nota:</strong> Las tarifas específicas por comuna se gestionan en el mantenedor de base de datos geográfica.
-                        </div>
                     </div>
-                </div>
 
-                {/* 4. SEGURIDAD */}
-                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
-                        <div className="p-2 bg-red-50 text-red-600 rounded-lg"><Shield size={20} /></div> Seguridad Admin
-                    </h2>
-                    <div className="space-y-5">
-                        <p className="text-xs text-gray-400">Deja estos campos vacíos si no quieres cambiar tu contraseña.</p>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Contraseña Actual</label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input type="password" name="password_current" value={config.password_current} onChange={handleChange} className="w-full pl-10 p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-red-500 outline-none transition-all" />
+                    {/* Seguridad */}
+                    <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100">
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
+                            <div className="p-2 bg-red-50 text-red-600 rounded-lg"><Shield size={20} /></div> Seguridad Admin
+                        </h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="label-config">Contraseña Actual</label>
+                                <input type="password" name="password_current" value={config.password_current} onChange={handleChange} className="input-config" placeholder="••••••" />
                             </div>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nueva Contraseña</label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input type="password" name="password_new" value={config.password_new} onChange={handleChange} className="w-full pl-10 p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-red-500 outline-none transition-all" />
+                            <div>
+                                <label className="label-config">Nueva Contraseña</label>
+                                <input type="password" name="password_new" value={config.password_new} onChange={handleChange} className="input-config" placeholder="••••••" />
                             </div>
                         </div>
                     </div>
                 </div>
 
             </form>
+
+            {/* Styles inject */}
+            <style>{`
+                .label-config { display: block; font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem; }
+                .input-config { width: 100%; padding: 0.75rem; background-color: #f9fafb; border-radius: 0.75rem; border: 1px solid transparent; outline: none; transition: all 0.2s; }
+                .input-config:focus { background-color: white; box-shadow: 0 0 0 2px #0f172a; }
+            `}</style>
         </div>
     );
 };

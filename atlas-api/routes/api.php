@@ -9,7 +9,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\WebpayController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -61,7 +61,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/settings', [SettingController::class, 'index']);
     Route::post('/admin/settings', [SettingController::class, 'update']);
 
-    // WebPay
-    Route::middleware('auth:sanctum')->post('/webpay/pagar', [WebpayController::class, 'iniciarPago']);
-    Route::any('/webpay/confirmar', [WebpayController::class, 'confirmarPago']);
+
 });

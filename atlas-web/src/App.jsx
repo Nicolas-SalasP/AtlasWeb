@@ -1,37 +1,42 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute'; // <--- EL GUARDIA
-
-// Componentes
+import ProtectedRoute from './components/ProtectedRoute';
+import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import SystemAlert from './components/SystemAlert';
 
-// Páginas Públicas
-import Home from './pages/Home';
-import Proyectos from './pages/Proyectos';
-import Catalogo from './pages/Catalogo';
-import Servicios from './pages/Servicios';
-import Checkout from './pages/Checkout';
-import Login from './pages/Login';
-import Registro from './pages/Registro';
-import Recuperar from './pages/Recuperar';
-import MisTickets from './pages/MisTickets';
+const Home = lazy(() => import('./pages/Home'));
+const Proyectos = lazy(() => import('./pages/Proyectos'));
+const Catalogo = lazy(() => import('./pages/Catalogo'));
+const Servicios = lazy(() => import('./pages/Servicios'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Login = lazy(() => import('./pages/Login'));
+const Registro = lazy(() => import('./pages/Registro'));
+const Recuperar = lazy(() => import('./pages/Recuperar'));
+const Maintenance = lazy(() => import('./pages/Maintenance'));
+const MisTickets = lazy(() => import('./pages/MisTickets'));
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminProductos = lazy(() => import('./pages/admin/AdminProductos'));
+const AdminPedidos = lazy(() => import('./pages/admin/AdminPedidos'));
+const AdminConfig = lazy(() => import('./pages/admin/AdminConfig'));
+const AdminUsuarios = lazy(() => import('./pages/admin/AdminUsuarios'));
+const AdminTickets = lazy(() => import('./pages/admin/AdminTickets'));
 
-// Páginas Admin
-import AdminLayout from './layouts/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminProductos from './pages/admin/AdminProductos';
-import AdminPedidos from './pages/admin/AdminPedidos';
-import AdminConfig from './pages/admin/AdminConfig';
-import AdminUsuarios from './pages/admin/AdminUsuarios';
-import AdminTickets from './pages/admin/AdminTickets';
+// Loader
+const PageLoader = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-gray-50 text-atlas-900">
+    <Loader2 className="animate-spin" size={40} />
+  </div>
+);
 
-// Layout Público (Navbar + Footer)
 const PublicLayout = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900 flex flex-col">
       <Navbar />
+      <SystemAlert />
       <div className="flex-grow">
         <Outlet />
       </div>
@@ -44,33 +49,41 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/proyectos" element={<Proyectos />} />
-            <Route path="/catalogo" element={<Catalogo />} />
-            <Route path="/servicios" element={<Servicios />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/registro" element={<Registro />} />
-            <Route path="/recuperar" element={<Recuperar />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/mis-tickets" element={<MisTickets />} />
-            </Route>
-          </Route>
-          
-          <Route element={<ProtectedRoute requiredRole={1} />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="productos" element={<AdminProductos />} />
-              <Route path="pedidos" element={<AdminPedidos />} />
-              <Route path="configuracion" element={<AdminConfig />} />
-              <Route path="usuarios" element={<AdminUsuarios />} />
-              <Route path="tickets" element={<AdminTickets />} />
-            </Route>
-          </Route>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            
+            <Route path="/mantenimiento" element={<Maintenance />} />
 
-        </Routes>
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/proyectos" element={<Proyectos />} />
+              <Route path="/catalogo" element={<Catalogo />} />
+              <Route path="/servicios" element={<Servicios />} />
+              <Route path="/checkout/*" element={<Checkout />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/registro" element={<Registro />} />
+              <Route path="/recuperar" element={<Recuperar />} />
+
+              <Route element={<ProtectedRoute />}>
+                <Route path="/mis-tickets" element={<MisTickets />} />
+              </Route>
+            </Route>
+
+            <Route element={<ProtectedRoute requiredRole={1} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="productos" element={<AdminProductos />} />
+                <Route path="pedidos" element={<AdminPedidos />} />
+                <Route path="configuracion" element={<AdminConfig />} />
+                <Route path="usuarios" element={<AdminUsuarios />} />
+                <Route path="tickets" element={<AdminTickets />} />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </Router>
   );
