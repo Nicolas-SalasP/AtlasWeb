@@ -101,13 +101,13 @@ const Navbar = () => {
                                             </div>
 
                                             <div className="py-2">
-                                                <Link to="/perfil" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
+                                                <Link to="/perfil?tab=general" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
                                                     <User size={18} className="text-gray-400 group-hover:text-atlas-600" /> Mi Perfil
                                                 </Link>
-                                                <Link to="/mis-compras" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
+                                                <Link to="/perfil?tab=orders" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
                                                     <Package size={18} className="text-gray-400 group-hover:text-blue-600" /> Mis Compras
                                                 </Link>
-                                                <Link to="/mis-tickets" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
+                                                <Link to="/perfil?tab=tickets" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
                                                     <MessageSquare size={18} className="text-gray-400 group-hover:text-green-600" /> Mis Tickets
                                                 </Link>
                                             </div>
@@ -174,13 +174,13 @@ const Navbar = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <Link to="/perfil" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
+                                        <Link to="/perfil?tab=general" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
                                             <User size={20} /> Mi Perfil
                                         </Link>
-                                        <Link to="/mis-compras" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
+                                        <Link to="/perfil?tab=orders" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
                                             <Package size={20} /> Mis Compras
                                         </Link>
-                                        <Link to="/mis-tickets" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
+                                        <Link to="/perfil?tab=tickets" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
                                             <MessageSquare size={20} /> Mis Tickets
                                         </Link>
                                         <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-3 mt-4 rounded-xl text-base font-bold text-red-400 hover:text-red-300 hover:bg-atlas-800 transition-colors">

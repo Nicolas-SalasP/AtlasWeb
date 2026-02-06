@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ use App\Http\Controllers\PaymentController;
 
 // Rutas Públicas
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/products', [ProductController::class, 'indexPublic']); 
+Route::get('/products', [ProductController::class, 'indexPublic']);
 Route::get('/system-status', [SettingController::class, 'publicStatus']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 Route::post('/orders', [OrderController::class, 'store']);
@@ -38,20 +39,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/tickets', [TicketController::class, 'indexAll']);
     Route::put('/admin/tickets/{id}/status', [TicketController::class, 'updateStatus']);
 
-    // Clientes
+    // Administrador de Usuarios
     Route::get('/admin/users', [UserController::class, 'index']);
     Route::get('/admin/users/{id}', [UserController::class, 'show']);
     Route::put('/admin/users/{id}', [UserController::class, 'update']);
 
     // Ordenes / Pedidos (Admin)
     Route::get('/admin/orders', [OrderController::class, 'index']);
-    
-    // CREACIÓN DE ORDEN (CLIENTE) ---
-    Route::post('/orders', [OrderController::class, 'store']); 
-
-    // PAGOS (CLIENTE) ---
-    Route::post('/payment/transfer', [PaymentController::class, 'payWithTransfer']);
-    Route::post('/payment/webpay', [PaymentController::class, 'initWebpay']);
 
     // Productos (Admin)
     Route::get('/admin/products', [ProductController::class, 'index']);
@@ -71,4 +65,25 @@ Route::middleware('auth:sanctum')->group(function () {
     // Config
     Route::get('/admin/settings', [SettingController::class, 'index']);
     Route::post('/admin/settings', [SettingController::class, 'update']);
+
+    // Clientes
+
+    // Ordenes
+    Route::post('/orders', [OrderController::class, 'store']);
+
+    // Pagos
+    Route::post('/payment/transfer', [PaymentController::class, 'payWithTransfer']);
+    Route::post('/payment/webpay', [PaymentController::class, 'initWebpay']);
+
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'show']);
+        Route::put('/update', [ProfileController::class, 'update']);
+        Route::put('/password', [ProfileController::class, 'changePassword']);
+        Route::post('/email/request', [ProfileController::class, 'requestEmailChange']);
+        Route::post('/email/verify', [ProfileController::class, 'verifyEmailChange']);
+        Route::get('/orders', [ProfileController::class, 'getOrders']);
+        Route::get('/subscription', [ProfileController::class, 'getSubscription']);
+        Route::get('/tickets-summary', [ProfileController::class, 'getTicketsSummary']);
+        Route::get('/security-logs', [ProfileController::class, 'getSecurityLogs']);
+    });
 });

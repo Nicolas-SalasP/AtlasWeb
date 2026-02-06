@@ -17,6 +17,7 @@ const Registro = lazy(() => import('./pages/Registro'));
 const Recuperar = lazy(() => import('./pages/Recuperar'));
 const Maintenance = lazy(() => import('./pages/Maintenance'));
 const MisTickets = lazy(() => import('./pages/MisTickets'));
+const UserProfile = lazy(() => import('./pages/UserProfile')); 
 const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminProductos = lazy(() => import('./pages/admin/AdminProductos'));
@@ -64,11 +65,14 @@ function App() {
               <Route path="/registro" element={<Registro />} />
               <Route path="/recuperar" element={<Recuperar />} />
 
+              {/* RUTAS PROTEGIDAS (Usuarios Logueados) */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/mis-tickets" element={<MisTickets />} />
+                <Route path="/perfil" element={<UserProfile />} />
               </Route>
             </Route>
 
+            {/* RUTAS ADMIN*/}
             <Route element={<ProtectedRoute requiredRole={1} />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />

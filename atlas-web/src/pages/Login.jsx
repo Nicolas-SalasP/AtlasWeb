@@ -22,7 +22,6 @@ const Login = () => {
         setIsSubmitting(true);
 
         try {
-            // 1. Enviamos credenciales y esperamos al usuario de vuelta
             const usuarioLogueado = await login(formData.email, formData.password, rememberMe);
 
             setModal({
@@ -35,12 +34,10 @@ const Login = () => {
             setTimeout(() => {
                 setModal({ ...modal, open: false });
 
-                // 2. LÓGICA DE REDIRECCIÓN INTELIGENTE
-                // Si el role_id es 1 (Admin), va al Dashboard. Si no, a sus Tickets.
                 if (usuarioLogueado.role_id === 1) {
                     navigate('/admin');
                 } else {
-                    navigate('/mis-tickets');
+                    navigate('/perfil');
                 }
 
             }, 1500);
