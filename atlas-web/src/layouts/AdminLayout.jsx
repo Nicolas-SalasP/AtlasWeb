@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
     LayoutDashboard, Package, ShoppingCart, LogOut, 
-    Settings, Home, Users, LifeBuoy, Menu, X 
+    Settings, Home, Users, LifeBuoy, Menu, X, Briefcase, Layers, Zap
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -59,6 +59,9 @@ const AdminLayout = () => {
                     </Link>
                     <Link to="/admin/productos" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/productos')}`}>
                         <Package size={20} /> Productos
+                    </Link>
+                    <Link to="/admin/services" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/services')}`}>
+                        <Zap size={20} /> Servicios
                     </Link>
                     <Link to="/admin/pedidos" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/pedidos')}`}>
                         <ShoppingCart size={20} /> Pedidos

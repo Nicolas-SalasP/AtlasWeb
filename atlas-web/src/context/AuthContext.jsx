@@ -19,9 +19,8 @@ export const AuthProvider = ({ children }) => {
                     const response = await api.get('/me');
                     setUser(response.data);
                 } catch (error) {
-                    console.error("Sesión expirada");
-                    localStorage.removeItem('token');
-                    sessionStorage.removeItem('token');
+                    console.error("Sesión inválida o expirada:", error);
+                    logout();
                 }
             }
             setLoading(false);
@@ -30,7 +29,13 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password, remember) => {
-        const response = await api.post('/login', { email, password });
+        console.log("Intentando login con:", { email, password, remember });
+        const response = await api.post('/login', { 
+            email, 
+            password,
+            remember_me: remember
+        });
+
         const { token, user } = response.data.data; 
 
         if (remember) {
@@ -38,9 +43,9 @@ export const AuthProvider = ({ children }) => {
         } else {
             sessionStorage.setItem('token', token);
         }
-
-        setUser(user);
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
+        setUser(user);
         return user;
     };
 
@@ -48,12 +53,13 @@ export const AuthProvider = ({ children }) => {
         try {
             await api.post('/logout');
         } catch (error) {
-            console.error(error);
+            console.error("Error al cerrar sesión en servidor (ignorando):", error);
         } finally {
             localStorage.removeItem('token');
             sessionStorage.removeItem('token');
+            delete api.defaults.headers.common['Authorization'];
             setUser(null);
-            window.location.href = '/login'; 
+            window.location.href = '/login';
         }
     };
 
@@ -62,4 +68,4 @@ export const AuthProvider = ({ children }) => {
             {!loading && children}
         </AuthContext.Provider>
     );
-};
+}; 

@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,7 @@ Route::get('/products', [ProductController::class, 'indexPublic']);
 Route::get('/system-status', [SettingController::class, 'publicStatus']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 Route::post('/orders', [OrderController::class, 'store']);
+Route::get('/services/catalog', [ServiceController::class, 'indexPublic']);
 
 // Rutas Protegidas
 Route::middleware('auth:sanctum')->group(function () {
@@ -54,6 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/admin/products/{id}', [ProductController::class, 'destroy']);
     Route::delete('/admin/product-images/{id}', [ProductController::class, 'destroyImage']);
     Route::post('/admin/product-images/{id}/cover', [ProductController::class, 'setCover']);
+
+    // Servicios (Admin)
+    Route::apiResource('/admin/services', ServiceController::class);
 
     Route::get('/categories', function () {
         return \App\Models\Category::all();

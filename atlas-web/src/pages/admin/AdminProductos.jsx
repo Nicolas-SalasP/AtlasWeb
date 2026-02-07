@@ -3,7 +3,7 @@ import api from '../../api/axiosConfig';
 import {
     Search, Plus, Package, DollarSign, Image as ImageIcon,
     MoreVertical, Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
-    AlertTriangle, CheckCircle, AlertCircle
+    AlertTriangle, CheckCircle, AlertCircle, List, MinusCircle, PlusCircle
 } from 'lucide-react';
 
 const AdminProductos = () => {
@@ -12,7 +12,7 @@ const AdminProductos = () => {
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
-    const BASE_URL = 'http://127.0.0.1:8000';
+    const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000';
 
     // --- ESTADOS UI ---
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -26,7 +26,8 @@ const AdminProductos = () => {
     // --- FORMULARIO ---
     const [form, setForm] = useState({
         name: '', sku: '', price: '', cost_price: '',
-        stock_current: '', category_id: '', description: '', is_visible: true
+        stock_current: '', category_id: '', description: '', is_visible: true,
+        specs: [''] // <--- NUEVO: Array para especificaciones
     });
 
     // Gestor de Imágenes
@@ -41,10 +42,9 @@ const AdminProductos = () => {
 
     const cargarDatos = async () => {
         try {
-            // Nota: Asegúrate de que tus rutas en Laravel coincidan (/admin/products)
             const [prodRes, catRes] = await Promise.all([
                 api.get('/admin/products'),
-                api.get('/categories') // O /admin/categories según tu backend
+                api.get('/categories')
             ]);
             setProductos(prodRes.data);
             setCategorias(catRes.data);
@@ -77,6 +77,22 @@ const AdminProductos = () => {
         cerrarConfirmacion();
     };
 
+    // --- LÓGICA DE ESPECIFICACIONES (NUEVA) ---
+    const handleSpecChange = (index, value) => {
+        const newSpecs = [...form.specs];
+        newSpecs[index] = value;
+        setForm({ ...form, specs: newSpecs });
+    };
+
+    const addSpecField = () => {
+        setForm({ ...form, specs: [...form.specs, ''] });
+    };
+
+    const removeSpecField = (index) => {
+        const newSpecs = form.specs.filter((_, i) => i !== index);
+        setForm({ ...form, specs: newSpecs });
+    };
+
     // 2. ABRIR DRAWER
     const abrirDrawer = (producto = null) => {
         setNuevasImagenes([]);
@@ -91,12 +107,18 @@ const AdminProductos = () => {
                 stock_current: producto.stock_current,
                 category_id: producto.category_id,
                 description: producto.description || '',
-                is_visible: Boolean(producto.is_visible)
+                is_visible: Boolean(producto.is_visible),
+                // Cargar specs o iniciar vacío
+                specs: producto.specs && producto.specs.length > 0 ? producto.specs : ['']
             });
             setImagenesExistentes(producto.images || []);
         } else {
             setEditando(null);
-            setForm({ name: '', sku: '', price: '', cost_price: '', stock_current: '', category_id: '', description: '', is_visible: true });
+            setForm({ 
+                name: '', sku: '', price: '', cost_price: '', 
+                stock_current: '', category_id: '', description: '', 
+                is_visible: true, specs: [''] 
+            });
             setImagenesExistentes([]);
         }
         setDrawerOpen(true);
@@ -108,7 +130,7 @@ const AdminProductos = () => {
             try {
                 await api.delete(`/admin/product-images/${idImagen}`);
                 setImagenesExistentes(prev => prev.filter(img => img.id !== idImagen));
-                cargarDatos(); // Refrescar la lista de fondo también
+                cargarDatos();
                 showToast('success', 'Imagen eliminada');
             } catch (error) {
                 showToast('error', 'Error al eliminar imagen');
@@ -138,27 +160,31 @@ const AdminProductos = () => {
         try {
             const formData = new FormData();
 
-            // Datos de texto
+            // Datos de texto y Specs
             Object.keys(form).forEach(key => {
-                if (key === 'is_visible') formData.append(key, form[key] ? '1' : '0');
-                else formData.append(key, form[key]);
+                if (key === 'is_visible') {
+                    formData.append(key, form[key] ? '1' : '0');
+                } else if (key === 'specs') {
+                    // Filtrar vacíos y convertir a JSON String
+                    const cleanSpecs = form.specs.filter(s => s.trim() !== '');
+                    formData.append('specs', JSON.stringify(cleanSpecs));
+                } else {
+                    formData.append(key, form[key]);
+                }
             });
 
-            // Imágenes nuevas (Array)
+            // Imágenes nuevas
             nuevasImagenes.forEach((file, index) => {
                 formData.append(`images[${index}]`, file);
             });
 
+            const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+
             if (editando) {
-                // TRUCO LARAVEL: Para subir archivos en PUT, hay que usar POST y agregar _method: PUT
                 formData.append('_method', 'PUT');
-                await api.post(`/admin/products/${editando.id}`, formData, { 
-                    headers: { 'Content-Type': 'multipart/form-data' } 
-                });
+                await api.post(`/admin/products/${editando.id}`, formData, config);
             } else {
-                await api.post('/admin/products', formData, { 
-                    headers: { 'Content-Type': 'multipart/form-data' } 
-                });
+                await api.post('/admin/products', formData, config);
             }
 
             await cargarDatos();
@@ -167,7 +193,7 @@ const AdminProductos = () => {
 
         } catch (error) {
             console.error(error);
-            showToast('error', 'Error al guardar. Revisa el SKU o conexión.');
+            showToast('error', 'Error al guardar. Revisa el SKU.');
         } finally {
             setGuardando(false);
         }
@@ -224,7 +250,6 @@ const AdminProductos = () => {
                 </div>
 
                 <div className="overflow-auto flex-1 custom-scrollbar">
-                    {/* AQUÍ ESTABA EL ERROR DE WHITESPACE - AHORA ESTÁ CORREGIDO */}
                     <table className="w-full min-w-[800px]">
                         <thead className="bg-gray-50 border-b border-gray-100 text-left sticky top-0 z-10">
                             <tr>
@@ -392,6 +417,35 @@ const AdminProductos = () => {
                                     {categorias.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
+                        </div>
+
+                        {/* --- SECCIÓN ESPECIFICACIONES (NUEVA) --- */}
+                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                            <label className="text-sm font-bold text-gray-900 mb-4 block flex items-center gap-2">
+                                <List size={16} /> Especificaciones Técnicas
+                            </label>
+                            <div className="space-y-3">
+                                {form.specs.map((spec, index) => (
+                                    <div key={index} className="flex gap-2 items-center">
+                                        <div className="relative flex-1">
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-atlas-400 rounded-full"></div>
+                                            <input
+                                                type="text"
+                                                value={spec}
+                                                onChange={(e) => handleSpecChange(index, e.target.value)}
+                                                className="w-full pl-7 pr-3 py-2 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none text-sm"
+                                                placeholder="Ej: Procesador Intel Core i7"
+                                            />
+                                        </div>
+                                        {form.specs.length > 1 && (
+                                            <button type="button" onClick={() => removeSpecField(index)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><MinusCircle size={18} /></button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            <button type="button" onClick={addSpecField} className="mt-4 text-xs font-bold text-atlas-600 hover:text-atlas-800 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-atlas-50 transition-colors">
+                                <PlusCircle size={16} /> Agregar característica
+                            </button>
                         </div>
 
                         <div>

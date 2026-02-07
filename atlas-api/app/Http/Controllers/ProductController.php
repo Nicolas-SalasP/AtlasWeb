@@ -22,19 +22,16 @@ class ProductController extends Controller
             'sku' => 'required|unique:products,sku',
             'price' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
-            'stock_current' => 'required|integer'
+            'stock_current' => 'required|integer',
+            'specs' => 'nullable'
         ]);
-        $product = Product::create([
-            'sku' => $request->sku,
-            'name' => $request->name,
-            'slug' => Str::slug($request->name) . '-' . Str::random(4),
-            'description' => $request->description,
-            'price' => $request->price,
-            'cost_price' => $request->cost_price,
-            'stock_current' => $request->stock_current,
-            'category_id' => $request->category_id,
-            'is_visible' => $request->boolean('is_visible', true),
-        ]);
+        $data = $request->except(['images']);
+        $data['slug'] = Str::slug($request->name) . '-' . Str::random(4);
+        $data['is_visible'] = $request->boolean('is_visible', true);
+        if ($request->has('specs')) {
+            $data['specs'] = is_string($request->specs) ? json_decode($request->specs, true) : $request->specs;
+        }
+        $product = Product::create($data);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $file) {
                 $path = $file->store('products', 'public');
@@ -62,6 +59,9 @@ class ProductController extends Controller
         if ($request->has('is_visible')) {
             $data['is_visible'] = filter_var($request->is_visible, FILTER_VALIDATE_BOOLEAN);
         }
+        if ($request->has('specs')) {
+            $data['specs'] = is_string($request->specs) ? json_decode($request->specs, true) : $request->specs;
+        }
         $product->update($data);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
@@ -82,6 +82,7 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         if ($product) {
+            foreach($product->images as $img)
             $product->delete();
             return response()->json(['message' => 'Producto eliminado']);
         }
@@ -117,7 +118,19 @@ class ProductController extends Controller
             ->where('is_visible', true)
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         return response()->json($products);
+    }
+
+    public function showPublic($id)
+    {
+        $product = Product::with(['images', 'category'])
+            ->where('id', $id)
+            ->where('is_visible', true)
+            ->first();
+
+        if (!$product) return response()->json(['message' => 'No encontrado'], 404);
+
+        return response()->json($product);
     }
 }
