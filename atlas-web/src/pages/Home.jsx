@@ -1,14 +1,40 @@
-import React from 'react';
-import { ArrowRight, Server, ShieldCheck, Code, Cpu, Activity, Database, Monitor } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, Server, ShieldCheck, Code, Cpu, Activity, Database, Monitor, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../api/axiosConfig';
 
 const Home = () => {
+    const [productosDestacados, setProductosDestacados] = useState([]);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const { data } = await api.get('/products');
+                const hardwareOnly = data.filter(p => !p.is_service).slice(0, 4);
+                setProductosDestacados(hardwareOnly);
+            } catch (error) {
+                console.error("Error cargando productos home:", error);
+            } finally {
+                setLoadingProducts(false);
+            }
+        };
+        fetchProducts();
+    }, []);
+
+    const getProductImage = (product) => {
+        const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://api.atlasdigitaltech.cl';
+        if (product.images && product.images.length > 0) {
+            const cover = product.images.find(img => img.is_cover) || product.images[0];
+            return `${BASE_URL}${cover.url}`;
+        }
+        return "https://placehold.co/400x300?text=No+Image";
+    };
+
     return (
         <div className="bg-white min-h-screen">
 
-            {/* 1. HERO SECTION */}
             <section className="relative bg-atlas-900 text-white pt-32 pb-24 px-4 overflow-hidden">
-                {/* Efectos de fondo */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-atlas-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-10"></div>
 
@@ -36,7 +62,6 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* Dashboard Técnico Realista */}
                     <div className="relative hidden lg:block">
                         <div className="absolute -inset-1 bg-gradient-to-r from-atlas-300 to-blue-600 rounded-2xl blur opacity-20"></div>
                         <div className="relative bg-atlas-900 rounded-2xl p-6 border border-atlas-500/30 shadow-2xl font-mono text-sm">
@@ -54,27 +79,11 @@ const Home = () => {
                                     <span className="text-green-400">➜</span>
                                     <span className="text-white">check status --all</span>
                                 </div>
-
                                 <div className="pl-4 space-y-2 text-gray-300">
-                                    <div className="flex justify-between">
-                                        <span>[ Database ]</span>
-                                        <span className="text-green-400">Connected (12ms)</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>[ API Gateway ]</span>
-                                        <span className="text-green-400">Online</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>[ Security ]</span>
-                                        <span className="text-blue-400">Firewall Active</span>
-                                    </div>
+                                    <div className="flex justify-between"><span>[ Database ]</span><span className="text-green-400">Connected (12ms)</span></div>
+                                    <div className="flex justify-between"><span>[ API Gateway ]</span><span className="text-green-400">Online</span></div>
+                                    <div className="flex justify-between"><span>[ Security ]</span><span className="text-blue-400">Firewall Active</span></div>
                                 </div>
-
-                                <div className="flex gap-2 mt-4">
-                                    <span className="text-green-400">➜</span>
-                                    <span className="text-white animate-pulse">_</span>
-                                </div>
-
                                 <div className="mt-4 pt-4 border-t border-gray-800">
                                     <p className="text-xs text-gray-500 mb-1">CPU Load</p>
                                     <div className="flex items-end gap-1 h-8">
@@ -91,7 +100,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* 2. STATS BAR */}
             <div className="bg-atlas-800 border-y border-atlas-700">
                 <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
                     <StatItem number="100%" label="Dedicación" />
@@ -101,7 +109,6 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* 3. SERVICIOS PRINCIPALES */}
             <section className="py-20 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="text-center mb-16">
@@ -115,36 +122,34 @@ const Home = () => {
                         <ServiceCard
                             icon={<Code size={48} />}
                             title="Desarrollo Web & Apps"
-                            desc="Sitios corporativos, tiendas e-commerce y aplicaciones web a medida con las últimas tecnologías."
-                            link="/servicios"
+                            desc="Sitios corporativos, tiendas e-commerce y aplicaciones web a medida."
+                            link="/servicios#desarrollo"
                         />
                         <ServiceCard
                             icon={<Server size={48} />}
                             title="Redes e Infraestructura"
-                            desc="Cableado estructurado, configuración de servidores, routers MikroTik y optimización WiFi."
-                            link="/servicios"
+                            desc="Cableado estructurado, servidores y routers MikroTik."
+                            link="/servicios#redes"
                         />
                         <ServiceCard
                             icon={<ShieldCheck size={48} />}
                             title="Seguridad Electrónica"
-                            desc="Instalación y mantenimiento de cámaras CCTV, controles de acceso y monitoreo remoto."
-                            link="/servicios"
+                            desc="Cámaras CCTV, controles de acceso y monitoreo remoto."
+                            link="/servicios#seguridad"
                         />
                     </div>
                 </div>
             </section>
 
-            {/* 4. SECCIÓN ERP DESTACADA */}
             <section className="py-20 bg-white overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="bg-atlas-900 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
                         <div className="absolute -right-20 -top-20 w-96 h-96 bg-atlas-500 rounded-full opacity-10 blur-3xl"></div>
-
                         <div className="flex-1 relative z-10">
                             <span className="text-atlas-300 font-bold tracking-widest text-sm uppercase mb-2 block">Producto Estrella</span>
                             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Atlas ERP Cloud</h2>
                             <p className="text-gray-300 text-lg mb-8">
-                                Toma el control total de tu contabilidad, inventario y facturación. Nuestro sistema ERP está diseñado para PYMES chilenas.
+                                Toma el control total de tu contabilidad, inventario y facturación. Sistema diseñado para PYMES chilenas.
                             </p>
                             <ul className="space-y-3 mb-8 text-gray-300">
                                 <li className="flex items-center gap-3"><Activity size={20} className="text-green-400" /> Facturación Electrónica SII</li>
@@ -155,18 +160,14 @@ const Home = () => {
                                 Probar Demo
                             </a>
                         </div>
-
-                        <div className="flex-1 relative z-10">
-                            <div className="bg-white rounded-xl shadow-2xl p-4 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                                <div className="flex items-center gap-4 mb-4 border-b pb-2">
-                                    <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                                    <div className="h-4 bg-gray-200 w-32 rounded"></div>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="h-8 bg-blue-50 w-full rounded"></div>
-                                    <div className="h-8 bg-gray-50 w-full rounded"></div>
-                                    <div className="h-8 bg-gray-50 w-full rounded"></div>
-                                    <div className="h-24 bg-gray-50 w-full rounded mt-4"></div>
+                        <div className="flex-1 relative z-10 hidden md:block">
+                            <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-xl">
+                                <div className="space-y-4">
+                                    <div className="flex gap-4">
+                                        <div className="w-1/3 h-20 bg-white/10 rounded-lg animate-pulse"></div>
+                                        <div className="w-2/3 h-20 bg-white/10 rounded-lg animate-pulse delay-75"></div>
+                                    </div>
+                                    <div className="h-40 bg-white/10 rounded-lg animate-pulse delay-150"></div>
                                 </div>
                             </div>
                         </div>
@@ -174,31 +175,48 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* 5. TIENDA TEASER */}
-            <section className="py-20 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <h2 className="text-3xl font-bold text-atlas-900 mb-8">Hardware Profesional</h2>
-                    <p className="text-gray-600 mb-12 max-w-2xl mx-auto">No solo instalamos, también vendemos los mejores equipos para tu proyecto.</p>
+            {!loadingProducts && productosDestacados.length > 0 && (
+                <section className="py-20 bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-4 text-center">
+                        <h2 className="text-3xl font-bold text-atlas-900 mb-8">Hardware Profesional</h2>
+                        <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
+                            Equipamiento seleccionado por expertos para tu infraestructura.
+                        </p>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {[1, 2, 3, 4].map((item) => (
-                            <div key={item} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                                <div className="h-32 bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
-                                    <Cpu size={40} className="text-gray-400" />
-                                </div>
-                                <h3 className="font-semibold text-gray-800">Cámara IP Hilook</h3>
-                                <p className="text-atlas-500 font-bold mt-2">$45.990</p>
-                            </div>
-                        ))}
-                    </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            {productosDestacados.map((prod) => (
+                                <Link to={`/item/product/${prod.id}`} key={prod.id} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-xl transition-all group text-left">
+                                    <div className="h-40 bg-gray-50 rounded-lg mb-4 overflow-hidden flex items-center justify-center p-2">
+                                        <img
+                                            src={getProductImage(prod)}
+                                            alt={prod.name}
+                                            loading="lazy"
+                                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 mix-blend-multiply"
+                                        />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-800 line-clamp-2 min-h-[3rem] text-sm md:text-base">
+                                        {prod.name}
+                                    </h3>
+                                    <div className="flex items-center justify-between mt-3">
+                                        <p className="text-atlas-900 font-bold">
+                                            ${parseInt(prod.price).toLocaleString('es-CL')}
+                                        </p>
+                                        <div className="bg-atlas-100 text-atlas-900 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <ShoppingCart size={16} />
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
 
-                    <div className="mt-12">
-                        <Link to="/catalogo" className="text-atlas-500 font-bold hover:text-atlas-800 inline-flex items-center gap-2">
-                            Ver todo el catálogo <ArrowRight size={16} />
-                        </Link>
+                        <div className="mt-12">
+                            <Link to="/catalogo" className="text-atlas-500 font-bold hover:text-atlas-800 inline-flex items-center gap-2 border-b-2 border-transparent hover:border-atlas-500 transition-all">
+                                Ver catálogo completo <ArrowRight size={16} />
+                            </Link>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
         </div>
     );
 };

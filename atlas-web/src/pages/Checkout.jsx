@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext'; // <--- NUEVO IMPORT
+import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Search, User, Mail, Phone,
@@ -11,6 +11,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import api from '../api/axiosConfig';
 import PaymentSelector from '../components/checkout/PaymentSelector';
+import { BASE_URL } from '../api/constants';
 
 // --- CONFIGURACIÓN LEAFLET ---
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -87,7 +88,7 @@ const validarRutChileno = (rut) => {
 
 const Checkout = () => {
     const { cart, getCartTotal, clearCart } = useCart();
-    const { isAuthenticated } = useAuth(); // Importante para detectar sesión
+    const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     const [procesando, setProcesando] = useState(false);
@@ -98,7 +99,7 @@ const Checkout = () => {
     // ESTADO DEL FORMULARIO
     const [datos, setDatos] = useState({
         nombre: '', apellido: '', email: '',
-        telefono: '', // Input para +56
+        telefono: '',
         rutPersonal: '',
         direccion: '', numero: '', depto: '',
         region: 'Metropolitana',
@@ -109,8 +110,6 @@ const Checkout = () => {
     const [errorRut, setErrorRut] = useState(false);
     const [costoEnvio, setCostoEnvio] = useState(TARIFAS_ENVIO["Metropolitana"]);
     const [mapCoords, setMapCoords] = useState({ lat: -33.4489, lng: -70.6693 });
-    const BASE_URL = 'http://127.0.0.1:8000';
-
     const getCartImage = (item) => {
         if (!item.images || item.images.length === 0) return "https://placehold.co/100?text=No+Img";
         const cover = item.images.find(img => img.is_cover == 1) || item.images[0];
@@ -198,9 +197,6 @@ const Checkout = () => {
             };
 
             const { data } = await api.post('/orders', orderPayload);
-
-            // --- LÓGICA DE DETECCIÓN DE SESIÓN EXPIRADA ---
-            // Si el frontend cree que está autenticado, pero el backend dice que fue checkout de invitado:
             if (isAuthenticated && data.is_guest_checkout) {
                 showModal('info', 'Sesión Expirada', 'Tu sesión expiró por seguridad, pero tu compra se procesó correctamente como invitado. Recibirás el comprobante a tu correo.');
             }
@@ -258,8 +254,6 @@ const Checkout = () => {
                                 <Input label="Nombre" name="nombre" value={datos.nombre} onChange={handleChange} icon={<User size={14} />} />
                                 <Input label="Apellido" name="apellido" value={datos.apellido} onChange={handleChange} />
                                 <Input label="Email" name="email" type="email" value={datos.email} onChange={handleChange} icon={<Mail size={14} />} />
-
-                                {/* INPUT DE TELÉFONO (+56 FIJO) */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono <span className="text-red-500">*</span></label>
                                     <div className="relative flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-atlas-300">

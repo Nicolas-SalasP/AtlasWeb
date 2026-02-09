@@ -6,6 +6,7 @@ return [
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:5173'),
         'https://atlasdigitaltech.cl',
+        'https://www.atlasdigitaltech.cl',
         'http://localhost:5173',
     ],
 

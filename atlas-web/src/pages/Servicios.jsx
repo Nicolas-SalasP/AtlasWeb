@@ -1,7 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Code, Server, ShieldCheck, CheckCircle, ArrowRight, Send } from 'lucide-react';
 
 const Servicios = () => {
+    const { hash } = useLocation();
+    useEffect(() => {
+        if (hash) {
+            const id = hash.replace('#', '');
+            const element = document.getElementById(id);
+            
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        } else {
+            window.scrollTo(0, 0);
+        }
+    }, [hash]);
+
     return (
         <div className="bg-white min-h-screen pt-20">
 
@@ -19,8 +36,6 @@ const Servicios = () => {
 
             {/* 2. DETALLE DE SERVICIOS */}
             <div className="max-w-7xl mx-auto px-4 py-20 space-y-24">
-
-                {/* SERVICIO 1: DESARROLLO WEB (Nueva imagen abstracta) */}
                 <ServiceSection
                     id="desarrollo"
                     title="Desarrollo de Software & Web"
@@ -33,9 +48,9 @@ const Servicios = () => {
                         "Sistemas de Gestión (ERP/CRM) a medida",
                         "Integración de APIs y Automatización"
                     ]}
-                    img="/desarrollo.png" // <--- Ruta local exacta
+                    img="/desarrollo.webp"
                     reverse={false}
-                    zoom={false} // No necesita zoom, no tiene logo en esquina
+                    zoom={false}
                 />
 
                 {/* SERVICIO 2: INFRAESTRUCTURA (Imagen Rack) */}
@@ -51,9 +66,9 @@ const Servicios = () => {
                         "Enlaces Inalámbricos Punto a Punto",
                         "Servidores Locales (Windows Server/Linux)"
                     ]}
-                    img="/estructura.png" // <--- Ruta local exacta
+                    img="/estructura.webp"
                     reverse={true}
-                    zoom={true} // <--- Activamos zoom para ocultar logo
+                    zoom={true}
                 />
 
                 {/* SERVICIO 3: SEGURIDAD (Imagen Cámara) */}
@@ -69,9 +84,9 @@ const Servicios = () => {
                         "Controles de Acceso Biométricos",
                         "Mantenimiento preventivo de sistemas existentes"
                     ]}
-                    img="/seguridad.png" // <--- Ruta local exacta
+                    img="/seguridad.webp"
                     reverse={false}
-                    zoom={true} // <--- Activamos zoom para ocultar logo
+                    zoom={true}
                 />
 
             </div>
@@ -95,11 +110,8 @@ const Servicios = () => {
 };
 
 /* --- SUBCOMPONENTES --- */
-
-// Componente de Sección con soporte de Zoom
 const ServiceSection = ({ id, title, desc, icon, color, features, img, reverse, zoom }) => (
-    <div id={id} className={`flex flex-col lg:flex-row gap-12 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
-        {/* Contenido Texto */}
+    <div id={id} className={`flex flex-col lg:flex-row gap-12 items-center scroll-mt-32 ${reverse ? 'lg:flex-row-reverse' : ''}`}>
         <div className="flex-1">
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg ${color}`}>
                 {icon}
@@ -120,15 +132,13 @@ const ServiceSection = ({ id, title, desc, icon, color, features, img, reverse, 
                 Solicitar este servicio <ArrowRight size={20} />
             </a>
         </div>
-
-        {/* Imagen Ilustrativa con Zoom condicional */}
         <div className="flex-1 w-full">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] group">
                 <div className={`absolute inset-0 opacity-10 group-hover:opacity-0 transition-opacity duration-500 ${color}`}></div>
                 <img
                     src={img}
                     alt={title}
-                    // APLICAMOS EL ZOOM SI zoom={true}
+                    loading="lazy"
                     className={`w-full h-full object-cover transition-transform duration-700 ${zoom ? 'scale-110 group-hover:scale-115' : 'transform group-hover:scale-105'}`}
                 />
             </div>
@@ -136,7 +146,6 @@ const ServiceSection = ({ id, title, desc, icon, color, features, img, reverse, 
     </div>
 );
 
-// Formulario (Sin cambios por ahora)
 const QuoteForm = () => {
     const [formData, setFormData] = useState({
         nombre: '',

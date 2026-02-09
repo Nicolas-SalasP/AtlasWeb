@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../api/constants';
 
 const CartDrawer = () => {
     // Usamos las variables nuevas del Context
@@ -14,7 +15,6 @@ const CartDrawer = () => {
     } = useCart();
     
     const navigate = useNavigate();
-    const BASE_URL = 'http://127.0.0.1:8000';
 
     // Helper para imagen
     const getProductImage = (item) => {
