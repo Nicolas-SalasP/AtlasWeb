@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// 1. IMPORTAR useNavigate
 import { useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Filter, Box, ChevronDown, ArrowUpDown, Loader2, Briefcase, CheckCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -123,19 +122,17 @@ const Catalogo = () => {
 
 const ProductCard = ({ producto }) => {
     const { addToCart } = useCart();
-    const navigate = useNavigate(); // 2. HOOK DE NAVEGACIÓN
+    const navigate = useNavigate();
     
     const sinStock = !producto.is_service && producto.stock_current <= 0;
     const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000';
 
-    // 3. FUNCIÓN PARA IR AL DETALLE
     const goToDetail = () => {
         navigate(`/item/${producto.is_service ? 'service' : 'product'}/${producto.id}`);
     };
 
-    // 4. FUNCIÓN CARRITO (Con StopPropagation para no activar el click de la carta)
     const handleAddToCart = (e) => {
-        e.stopPropagation(); // <--- ESTO ES CRÍTICO
+        e.stopPropagation();
         
         if (producto.is_service) {
             addToCart({
@@ -166,17 +163,16 @@ const ProductCard = ({ producto }) => {
         }
         const cover = producto.images.find(img => img.is_cover == 1) || producto.images[0];
         return (
-            <img src={`${BASE_URL}${cover.url}`} alt={producto.name} className={`w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 ${sinStock ? 'opacity-60 grayscale' : ''}`} />
+            <img src={`${BASE_URL}${cover.url}`} alt={producto.name} loading="lazy" className={`w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 ${sinStock ? 'opacity-60 grayscale' : ''}`} />
         );
     };
 
     return (
         <div 
-            onClick={goToDetail} // <--- 5. EVENTO CLICK EN TODA LA TARJETA
+            onClick={goToDetail}
             className={`bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full relative cursor-pointer ${producto.is_service ? 'border-atlas-200' : 'border-gray-100'}`}
         >
             
-            {/* ÁREA DE IMAGEN */}
             <div className="relative h-56 overflow-hidden bg-white group flex items-center justify-center">
                 {renderImage()}
 
@@ -191,7 +187,7 @@ const ProductCard = ({ producto }) => {
                 {!sinStock && (
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white/90 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden lg:block text-center">
                         <button
-                            onClick={handleAddToCart} // <--- Llama a la función que tiene stopPropagation
+                            onClick={handleAddToCart}
                             className="w-full bg-atlas-900 text-white font-bold py-2 rounded-lg shadow-lg hover:bg-atlas-700 flex items-center justify-center gap-2"
                         >
                             <ShoppingCart size={18} /> {producto.is_service ? 'Suscribirse' : 'Agregar'}
@@ -200,7 +196,6 @@ const ProductCard = ({ producto }) => {
                 )}
             </div>
 
-            {/* ÁREA DE CONTENIDO */}
             <div className="p-5 flex flex-col flex-grow border-t border-gray-50">
                 <div className="flex justify-between items-start mb-2">
                     <span className={`text-xs font-bold uppercase tracking-wide px-2 py-1 rounded ${producto.is_service ? 'bg-blue-50 text-blue-700' : 'bg-atlas-50 text-atlas-300'}`}>
@@ -236,7 +231,7 @@ const ProductCard = ({ producto }) => {
                     
                     <button
                         disabled={sinStock}
-                        onClick={handleAddToCart} // <--- Aquí también el botón móvil
+                        onClick={handleAddToCart}
                         className={`lg:hidden p-3 rounded-full shadow-sm transition-colors ${sinStock ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-atlas-900 text-white active:scale-95'}`}
                     >
                         <ShoppingCart size={20} />

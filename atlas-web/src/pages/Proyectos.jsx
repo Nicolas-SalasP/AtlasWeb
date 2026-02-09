@@ -28,15 +28,13 @@ const Proyectos = () => {
 
                     {/* PROYECTO 1: JC ENVÍOS */}
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        {/* Imagen con efecto y ajuste COVER (porque es web pública y se ve bien recortada) */}
                         <div className="relative group">
                             <div className="absolute -inset-4 bg-blue-500/20 rounded-xl transform -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
                             <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-100 bg-white aspect-video flex items-center justify-center group-hover:scale-[1.01] transition-transform">
-                                <img src="/jcenvios.png" alt="Plataforma JC Envíos" className="w-full h-full object-cover object-top" />
+                                <img src="/jcenvios.webp" alt="Plataforma JC Envíos" className="w-full h-full object-cover object-top" />
                             </div>
                         </div>
 
-                        {/* Texto */}
                         <div>
                             <div className="flex items-center gap-2 mb-4">
                                 <Badge color="bg-blue-100 text-blue-700">Fintech / Remesas</Badge>
@@ -62,9 +60,8 @@ const Proyectos = () => {
                         </div>
                     </div>
 
-                    {/* PROYECTO 2: INSUORDERS (Corregido) */}
+                    {/* PROYECTO 2: INSUORDERS */}
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        {/* Texto (Izquierda) */}
                         <div className="order-2 lg:order-1">
                             <div className="flex items-center gap-2 mb-4">
                                 <Badge color="bg-purple-100 text-purple-700">Sistema ERP</Badge>
@@ -80,7 +77,6 @@ const Proyectos = () => {
                                 <TechTag icon={<Layout size={16} />} text="Gestión Proveedores" />
                             </div>
 
-                            {/* BOTÓN NEGRO RESTAURADO */}
                             <a
                                 href="https://github.com/Nicolas-SalasP/InsuOrders"
                                 target="_blank"
@@ -91,14 +87,11 @@ const Proyectos = () => {
                             </a>
                         </div>
 
-                        {/* IMAGEN: Fondo morado RESTAURADO + Imagen COMPLETA (object-contain) */}
                         <div className="relative group order-1 lg:order-2">
                             <div className="absolute -inset-4 bg-purple-500/20 rounded-xl transform rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
-
-                            {/* Aquí usamos 'object-contain' para que la imagen NO se recorte y 'bg-gray-50' para rellenar espacios si sobran */}
                             <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-100 bg-gray-50 aspect-video flex items-center justify-center group-hover:scale-[1.01] transition-transform">
                                 <img
-                                    src="/insuorders.png"
+                                    src="/insuorders.webp"
                                     alt="Dashboard InsuOrders"
                                     className="w-full h-full object-contain"
                                 />
@@ -107,7 +100,6 @@ const Proyectos = () => {
                     </div>
                 </div>
 
-                {/* SECCIÓN 2: LABORATORIO & I+D */}
                 <h2 className="text-2xl font-bold text-atlas-900 mb-12 border-l-4 border-blue-500 pl-4 uppercase tracking-widest">
                     Laboratorio de Desarrollo & Open Source
                 </h2>
@@ -143,7 +135,6 @@ const Proyectos = () => {
                     />
                 </div>
 
-                {/* CTA FINAL */}
                 <div className="mt-20 bg-gray-50 rounded-2xl p-12 text-center border border-gray-200">
                     <h2 className="text-3xl font-bold text-atlas-900 mb-4">¿Código Nuevo o Legado?</h2>
                     <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
