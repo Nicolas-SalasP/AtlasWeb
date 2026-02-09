@@ -215,11 +215,8 @@ const MisTickets = () => {
                                                     {msg.attachments && msg.attachments.length > 0 && (
                                                         <div className="mt-3 space-y-2">
                                                             {msg.attachments.map((file, index) => {
-                                                                // LÓGICA DE SEGURIDAD: Detectar si es string antiguo o objeto nuevo
                                                                 const filePath = typeof file === 'string' ? file : file.path;
                                                                 const fileName = typeof file === 'string' ? 'Archivo Adjunto' : file.name;
-
-                                                                // Si no hay path, saltamos este archivo para que no rompa la app
                                                                 if (!filePath) return null;
 
                                                                 return (
@@ -238,7 +235,6 @@ const MisTickets = () => {
                                                                                 <p className="text-xs font-bold text-gray-700 truncate group-hover:text-atlas-900">{fileName}</p>
                                                                                 <p className="text-[10px] text-gray-400">Clic para descargar</p>
                                                                             </div>
-                                                                            {/* Preview solo si es imagen */}
                                                                             {filePath.match(/\.(jpeg|jpg|gif|png)$/i) && (
                                                                                 <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100">
                                                                                     <img src={`${BASE_URL}${filePath}`} alt="preview" className="w-full h-full object-cover" />
