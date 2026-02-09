@@ -9,7 +9,7 @@ import {
     Sparkles, Mail, Building, Calendar, Loader2,
     Trash2, AlertTriangle
 } from 'lucide-react';
-import { BASE_URL } from '../api/constants';
+import { BASE_URL } from '../../api/constants';
 
 const AdminTickets = () => {
     const { user: adminUser } = useAuth();

@@ -5,7 +5,7 @@ import {
     Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
     AlertTriangle, CheckCircle, AlertCircle, Check, MinusCircle, PlusCircle
 } from 'lucide-react';
-import { BASE_URL } from '../api/constants';
+import { BASE_URL } from '../../api/constants';
 
 const AdminServices = () => {
     // --- ESTADOS DE DATOS ---

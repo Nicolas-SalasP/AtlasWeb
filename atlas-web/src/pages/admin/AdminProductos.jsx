@@ -5,7 +5,7 @@ import {
     MoreVertical, Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
     AlertTriangle, CheckCircle, AlertCircle, List, MinusCircle, PlusCircle
 } from 'lucide-react';
-import { BASE_URL } from '../api/constants';
+import { BASE_URL } from '../../api/constants';
 
 const AdminProductos = () => {
     // --- ESTADOS DE DATOS ---
