@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../../api/axiosConfig';
-import {
-    TrendingUp, Users, ShoppingBag, DollarSign,
-    MapPin, ArrowUpRight, ArrowDownRight, Package, AlertTriangle, Sparkles, Loader2, CheckCircle
+import { 
+    TrendingUp, Users, Package, AlertTriangle, 
+    Activity, DollarSign, Calendar, MapPin, CheckCircle, MessageSquare // Importamos MessageSquare para tickets
 } from 'lucide-react';
+import { 
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+    Tooltip, ResponsiveContainer 
+} from 'recharts';
 
 const AdminDashboard = () => {
-    const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
-    const [periodo, setPeriodo] = useState('mes');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await api.get('/admin/dashboard');
+                // Esta ruta apunta a DashboardController@index en tu backend
+                const response = await api.get('/admin/dashboard'); 
                 setData(response.data);
             } catch (error) {
                 console.error("Error cargando dashboard:", error);
@@ -24,203 +28,216 @@ const AdminDashboard = () => {
         fetchData();
     }, []);
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Analizando Datos...</div>;
+    if (loading) return (
+        <div className="flex h-screen items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-atlas-900"></div>
+        </div>
+    );
 
-    // Data Safalguard
-    const kpi = data?.kpis || { ventas: { value: 0 }, pedidos: { value: 0 }, ticket: { value: 0 }, conversion: { value: 0 } };
-    const chartData = data?.chart_data || [];
-    const topProducts = data?.top_products || [];
-    const topZones = data?.top_zones || [];
-    const insights = data?.insights || [];
+    if (!data) return <div className="p-10 text-center text-gray-500">No hay datos disponibles en este momento.</div>;
+
+    // Transformamos los datos del gráfico (array de enteros) a objetos para Recharts
+    const chartData = data.chart_data.map((value, index) => ({
+        day: `Día ${index + 1}`,
+        ventas: value
+    }));
 
     return (
-        <div className="space-y-8 pb-10 animate-in slide-in-from-bottom-4 fade-in duration-700 p-6 md:p-10">
-
-            {/* HEADER */}
-            <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Dashboard Ejecutivo</h1>
-                    <p className="text-gray-500 mt-1">Visión general en tiempo real</p>
-                </div>
-                {/* Filtro visual (no funcional en back por ahora) */}
-                <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100 flex text-sm font-medium">
-                    {['semana', 'mes', 'anio'].map((p) => (
-                        <button key={p} onClick={() => setPeriodo(p)} className={`px-5 py-2 rounded-xl capitalize transition-all ${periodo === p ? 'bg-atlas-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
-                            {p === 'anio' ? 'Año' : p}
-                        </button>
-                    ))}
-                </div>
+        <div className="p-6 md:p-10 min-h-screen bg-gray-50/50">
+            <div className="mb-8">
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dashboard Atlas</h1>
+                <p className="text-gray-500">Resumen de operaciones en tiempo real.</p>
             </div>
 
-            {/* 1. KPIs REALES */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <KpiCard title="Ventas" value={`$${kpi.ventas.value.toLocaleString('es-CL')}`} trend={kpi.ventas.trend} icon={<DollarSign size={28} />} gradientBg="bg-gradient-to-br from-white to-green-50/50" iconColor="text-green-600" trendColor="text-green-600 bg-green-100/50" />
-                <KpiCard title="Pedidos" value={kpi.pedidos.value} trend={kpi.pedidos.trend} icon={<ShoppingBag size={28} />} gradientBg="bg-gradient-to-br from-white to-blue-50/50" iconColor="text-blue-600" trendColor="text-blue-600 bg-blue-100/50" />
-                <KpiCard title="Ticket Prom." value={`$${kpi.ticket.value.toLocaleString('es-CL')}`} trend={kpi.ticket.trend} icon={<TrendingUp size={28} />} gradientBg="bg-gradient-to-br from-white to-purple-50/50" iconColor="text-purple-600" trendColor="text-red-600 bg-red-100/50" />
-                <KpiCard title="Conversión" value={kpi.conversion.value} trend={kpi.conversion.trend} icon={<Users size={28} />} gradientBg="bg-gradient-to-br from-white to-orange-50/50" iconColor="text-orange-600" trendColor="text-orange-600 bg-orange-100/50" />
+            {/* 1. KPIS PRINCIPALES (GRID DE 4) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                {/* VENTAS */}
+                <StatCard 
+                    title="Ventas Mes" 
+                    value={`$${data.kpis.ventas.value.toLocaleString('es-CL')}`} 
+                    trend={data.kpis.ventas.trend} 
+                    icon={<DollarSign size={24} />} 
+                    color="bg-emerald-500"
+                />
+                
+                {/* PEDIDOS (HISTÓRICO) */}
+                <StatCard 
+                    title="Pedidos Totales" 
+                    value={data.kpis.pedidos.value} 
+                    trend={data.kpis.pedidos.trend} 
+                    icon={<Package size={24} />} 
+                    color="bg-blue-500"
+                />
+                
+                {/* VALOR PROMEDIO (TICKET) */}
+                <StatCard 
+                    title="Valor Promedio" 
+                    value={`$${data.kpis.ticket.value.toLocaleString('es-CL')}`} 
+                    trend={data.kpis.ticket.trend} 
+                    icon={<Activity size={24} />} 
+                    color="bg-violet-500"
+                />
+                
+                {/* NUEVO KPI: RECLAMOS / TICKETS */}
+                <StatCard 
+                    title="Reclamos (Mes)" 
+                    value={data.kpis.reclamos ? data.kpis.reclamos.value : 0} 
+                    trend={data.kpis.reclamos ? data.kpis.reclamos.trend : 0} 
+                    icon={<MessageSquare size={24} />} 
+                    color="bg-rose-500"
+                />
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
-                {/* 2. GRÁFICO (TOOLTIP SOLO AL PASAR MOUSE) */}
-                <div className="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border-0 relative overflow-hidden group hover:shadow-2xl hover:shadow-blue-100/30 transition-all duration-500">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h3 className="font-bold text-gray-900 text-xl">Tendencia de Ingresos</h3>
-                            <p className="text-gray-400 text-sm">Últimos 10 días</p>
-                        </div>
-                        <span className="flex items-center gap-1 text-sm text-green-700 font-bold bg-green-100/80 px-3 py-1.5 rounded-full"><ArrowUpRight size={16} /> Dinámico</span>
-                    </div>
-                    <div className="relative h-80 w-full">
-                        <SmoothAreaChart data={chartData} />
+            <div className="grid lg:grid-cols-3 gap-8 mb-8">
+                
+                {/* 2. GRÁFICO DE VENTAS (Últimos 10 días) - Ocupa 2 columnas */}
+                <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <Activity className="text-atlas-900" size={20} /> Tendencia de Ventas (10 días)
+                    </h3>
+                    <div className="h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData}>
+                                <defs>
+                                    <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#0F172A" stopOpacity={0.1}/>
+                                        <stop offset="95%" stopColor="#0F172A" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+                                <Tooltip 
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                                    formatter={(value) => [`$${value.toLocaleString('es-CL')}`, 'Ventas']}
+                                />
+                                <Area type="monotone" dataKey="ventas" stroke="#0F172A" strokeWidth={3} fillOpacity={1} fill="url(#colorVentas)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* 3. ATLAS AI INSIGHTS (GENERADOS POR BACKEND) */}
-                <div className="bg-gradient-to-br from-atlas-900 via-blue-900 to-atlas-800 text-white p-8 rounded-[2rem] shadow-2xl shadow-blue-900/30 flex flex-col justify-between relative overflow-hidden isolate">
-                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-30 -z-10"></div>
-                    <div>
-                        <h3 className="font-bold text-2xl mb-2 flex items-center gap-3"><Sparkles className="text-yellow-300" size={24} /> Atlas AI</h3>
-                        <p className="text-blue-200 text-sm mb-8">Análisis automático de tu negocio.</p>
-                        <div className="space-y-4">
-                            {insights.map((insight, idx) => (
-                                <div key={idx} className="bg-white/10 p-4 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg transition-transform hover:scale-105">
-                                    <p className={`text-base font-bold mb-1 flex items-center gap-2 ${insight.type === 'warning' ? 'text-yellow-300' : insight.type === 'success' ? 'text-green-300' : 'text-blue-200'}`}>
-                                        {insight.icon === 'alert' ? <AlertTriangle size={18} className="animate-pulse" /> : insight.icon === 'check' ? <CheckCircle size={18}/> : <MapPin size={18} />} 
-                                        {insight.title}
-                                    </p>
-                                    <p className="text-sm text-gray-100/90 leading-snug">{insight.message}</p>
+                {/* 3. INSIGHTS Y AVISOS - Ocupa 1 columna */}
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-full flex flex-col">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <AlertTriangle className="text-atlas-900" size={20} /> Alertas del Sistema
+                        </h3>
+                        <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
+                            {data.insights.map((insight, idx) => (
+                                <div key={idx} className={`p-4 rounded-2xl flex gap-3 items-start transition-all hover:scale-[1.02] ${
+                                    insight.type === 'warning' ? 'bg-red-50 text-red-700' : 
+                                    insight.type === 'success' ? 'bg-green-50 text-green-700' : 
+                                    'bg-blue-50 text-blue-700'
+                                }`}>
+                                    <div className="mt-1 flex-shrink-0">
+                                        {insight.type === 'warning' && <AlertTriangle size={18} />}
+                                        {insight.type === 'success' && <CheckCircle size={18} />}
+                                        {insight.type === 'info' && <MapPin size={18} />}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm">{insight.title}</p>
+                                        <p className="text-xs opacity-90 mt-1 leading-relaxed">{insight.message}</p>
+                                    </div>
                                 </div>
                             ))}
-                            {insights.length === 0 && <p className="text-sm text-white/50 italic">Sin alertas por el momento.</p>}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-8">
-                {/* 4. TOP PRODUCTOS (REAL) */}
-                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border-0">
-                    <h3 className="font-bold text-gray-900 text-xl mb-8 flex items-center gap-3">
-                        <div className="bg-orange-100 p-2 rounded-xl text-orange-600"><Package size={24} /></div> Top Productos
-                    </h3>
-                    <div className="space-y-8">
-                        {topProducts.map((prod, i) => (
-                            <div key={i} className="relative group">
-                                <div className="flex justify-between items-center mb-2 z-10 relative">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-2xl shadow-sm bg-gray-50 w-10 h-10 flex items-center justify-center rounded-full">📦</span>
-                                        <div><span className="font-bold text-gray-800 block text-sm">{prod.nombre}</span><span className="text-xs text-gray-400">{prod.ventas} ventas • {prod.stock} stock</span></div>
-                                    </div>
-                                    <span className="font-bold text-gray-900 text-sm">${parseInt(prod.ingresos).toLocaleString('es-CL')}</span>
-                                </div>
-                                <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden"><div className="bg-gradient-to-r from-atlas-500 to-blue-400 h-3 rounded-full relative" style={{ width: `${Math.min((prod.ventas / 10) * 100, 100)}%` }}></div></div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* 5. ZONAS CALIENTES (REAL) */}
-                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-100/50 border-0 flex flex-col justify-between">
-                    <div>
-                        <h3 className="font-bold text-gray-900 text-xl mb-8 flex items-center gap-3">
-                            <div className="bg-red-100 p-2 rounded-xl text-red-600"><MapPin size={24} /></div> Zonas Calientes
-                        </h3>
-                        <div className="space-y-6">
-                            {topZones.length > 0 ? topZones.map((zona, i) => (
-                                <div key={i} className="group">
-                                    <div className="flex justify-between mb-2 items-end">
-                                        <span className="font-bold text-gray-700 text-base">{zona.comuna}</span>
-                                        <span className="text-sm font-medium text-gray-500">{zona.porcentaje}% ({zona.envios} envíos)</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-0.5">
-                                        <div className="h-full rounded-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-1000" style={{ width: `${zona.porcentaje}%` }}></div>
-                                    </div>
-                                </div>
-                            )) : (
-                                <div className="text-center py-10 text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                    <MapPin size={32} className="mx-auto mb-2 opacity-20"/>
-                                    <p className="text-sm">Sin datos geográficos suficientes.</p>
-                                    <p className="text-[10px] mt-1">Las órdenes deben tener dirección asociada.</p>
+                            {data.insights.length === 0 && (
+                                <div className="text-center py-10 text-gray-400">
+                                    <CheckCircle size={40} className="mx-auto mb-2 opacity-20" />
+                                    <p className="text-sm">Todo opera con normalidad.</p>
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+                
+                {/* 4. TOP PRODUCTOS */}
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <Package className="text-atlas-900" size={20} /> Top Productos
+                    </h3>
+                    <div className="space-y-3">
+                        {data.top_products.map((prod, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors group">
+                                <div className="flex items-center gap-4">
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold ${idx === 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
+                                        #{idx+1}
+                                    </span>
+                                    <div>
+                                        <p className="font-bold text-sm text-gray-900 group-hover:text-atlas-600 transition-colors">{prod.nombre}</p>
+                                        <p className="text-xs text-gray-500 font-medium">Stock: {prod.stock}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-atlas-900">${parseInt(prod.ingresos).toLocaleString('es-CL')}</p>
+                                    <p className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-md inline-block mt-1">
+                                        {prod.ventas} unid.
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                        {data.top_products.length === 0 && <p className="text-center text-gray-400 text-sm py-4">No hay ventas registradas aún.</p>}
+                    </div>
+                </div>
+
+                {/* 5. TOP ZONAS DE ENVÍO */}
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <MapPin className="text-atlas-900" size={20} /> Zonas de Mayor Demanda
+                    </h3>
+                    <div className="space-y-6">
+                        {data.top_zones.map((zona, idx) => (
+                            <div key={idx} className="relative">
+                                <div className="flex justify-between text-sm mb-2">
+                                    <span className="font-bold text-gray-700 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-atlas-900"></span>
+                                        {zona.comuna}
+                                    </span>
+                                    <span className="font-bold text-atlas-900">{zona.envios} Envíos <span className="text-gray-400 font-normal">({zona.porcentaje}%)</span></span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                    <div 
+                                        className="bg-atlas-900 h-2.5 rounded-full transition-all duration-1000 ease-out" 
+                                        style={{ width: `${zona.porcentaje}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        ))}
+                        {data.top_zones.length === 0 && <p className="text-center text-gray-400 text-sm py-4">No hay datos de envíos aún.</p>}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
 
-/* --- KPI CARD --- */
-const KpiCard = ({ title, value, trend, icon, gradientBg, iconColor, trendColor }) => (
-    <div className={`relative overflow-hidden p-6 rounded-[2rem] shadow-xl shadow-gray-100/50 hover:shadow-2xl transition-all duration-300 group ${gradientBg} border-0`}>
-        <div className={`absolute -right-4 -top-4 opacity-10 group-hover:scale-110 duration-500 ${iconColor}`}>{React.cloneElement(icon, { size: 80 })}</div>
+// Componente Tarjeta KPI
+const StatCard = ({ title, value, trend, icon, color }) => (
+    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden group cursor-default">
+        {/* Icono de fondo decorativo */}
+        <div className={`absolute -top-2 -right-2 p-4 opacity-[0.08] group-hover:opacity-20 transition-opacity ${color.replace('bg-', 'text-')} transform rotate-12 group-hover:rotate-0 transition-transform duration-500`}>
+            {React.cloneElement(icon, { size: 64 })}
+        </div>
+        
         <div className="relative z-10">
-            <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-2xl bg-white shadow-sm ${iconColor} group-hover:scale-110 transition-transform`}>{icon}</div>
-                <div className={`flex items-center text-xs font-bold px-3 py-1.5 rounded-full ${trendColor}`}>{trend > 0 ? <ArrowUpRight size={14} className="mr-1" /> : <ArrowDownRight size={14} className="mr-1" />}{Math.abs(trend)}%</div>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-4 ${color} shadow-lg shadow-gray-200 group-hover:shadow-${color.replace('bg-', '')}/30 transition-shadow`}>
+                {icon}
             </div>
-            <div><p className="text-sm text-gray-500 font-medium mb-2">{title}</p><h3 className="text-3xl font-extrabold text-gray-900 tracking-tight">{value}</h3></div>
+            <p className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">{title}</p>
+            <div className="flex items-baseline gap-3">
+                <h4 className="text-3xl font-black text-gray-900 tracking-tight">{value}</h4>
+                {trend !== undefined && (
+                    <span className={`text-xs font-bold px-2 py-1 rounded-lg ${trend >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {trend > 0 ? '+' : ''}{trend}%
+                    </span>
+                )}
+            </div>
         </div>
     </div>
 );
-
-/* --- GRÁFICO SUAVE CON INTERACCIÓN HOVER --- */
-const SmoothAreaChart = ({ data }) => {
-    const safeData = data && data.length > 0 ? data : [0, 0, 0, 0, 0];
-    const width = 800; const height = 300;
-    
-    // Calcular path
-    const maxX = safeData.length > 1 ? safeData.length - 1 : 1;
-    const maxY = Math.max(...safeData) || 100;
-    const points = safeData.map((val, i) => {
-        const x = (i / maxX) * width;
-        const y = height - (val / maxY) * height * 0.7; // 70% altura para dejar espacio arriba
-        return [x, y];
-    });
-    
-    let d = `M ${points[0][0]},${points[0][1]}`;
-    for (let i = 0; i < points.length - 1; i++) {
-        const [x0, y0] = points[i];
-        const [x1, y1] = points[i + 1];
-        const cp1x = x0 + (x1 - x0) * 0.4; const cp1y = y0;
-        const cp2x = x1 - (x1 - x0) * 0.4; const cp2y = y1;
-        d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x1},${y1}`;
-    }
-
-    return (
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
-            <defs>
-                <linearGradient id="blueGradient" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" /><stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                </linearGradient>
-                <filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur" /><feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-            </defs>
-            <path d={`${d} L ${width},${height} L 0,${height} Z`} fill="url(#blueGradient)" />
-            <path d={d} fill="none" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" filter="url(#glow)" className="drop-shadow-lg" />
-            
-            {/* PUNTOS INTERACTIVOS */}
-            {points.map(([x, y], i) => (
-                <g key={i} className="group cursor-pointer">
-                    {/* Área invisible grande para facilitar el hover */}
-                    <circle cx={x} cy={y} r="20" fill="transparent" />
-                    
-                    {/* Punto Visible (se agranda al hover) */}
-                    <circle cx={x} cy={y} r="5" className="fill-white stroke-blue-600 stroke-[3px] transition-all duration-300 group-hover:r-8 group-hover:fill-blue-50" />
-                    
-                    {/* TOOLTIP (Solo visible en group-hover) */}
-                    <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none transform group-hover:-translate-y-2 transition-transform">
-                        <rect x={x - 35} y={y - 50} width="70" height="35" rx="8" className="fill-atlas-900 shadow-xl" />
-                        {/* Triángulo abajo */}
-                        <path d={`M ${x},${y - 15} L ${x - 6},${y - 20} L ${x + 6},${y - 20} Z`} className="fill-atlas-900" />
-                        <text x={x} y={y - 28} textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" style={{fontFamily: 'sans-serif'}}>
-                            ${safeData[i].toLocaleString('es-CL')}
-                        </text>
-                    </g>
-                </g>
-            ))}
-        </svg>
-    );
-};
 
 export default AdminDashboard;

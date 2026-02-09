@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -13,12 +14,44 @@ class DashboardController extends Controller
     public function index()
     {
         $hoy = Carbon::now();
-    
         $inicioMes = $hoy->copy()->startOfMonth();
-        $ventasMes = Order::where('status', 'paid')->where('created_at', '>=', $inicioMes)->sum('total');
-        $pedidosTotal = Order::count();
-        $ticketPromedio = $pedidosTotal > 0 ? round($ventasMes / ($pedidosTotal ?: 1)) : 0;
 
+        // ---------------------------------------------------
+        // KPI: VENTAS (Dinero del Mes)
+        // ---------------------------------------------------
+        $ventasMes = Order::where('status', 'paid')
+            ->where('created_at', '>=', $inicioMes)
+            ->sum('total');
+
+        // ---------------------------------------------------
+        // KPI: PEDIDOS (Total Histórico vs Mes)
+        // ---------------------------------------------------
+        $pedidosTotalHistorico = Order::count();
+        $pedidosMes = Order::where('status', 'paid')
+            ->where('created_at', '>=', $inicioMes)
+            ->count();
+
+        // ---------------------------------------------------
+        // KPI: VALOR PROMEDIO (Corregido)
+        // ---------------------------------------------------
+        $ticketPromedio = $pedidosMes > 0 ? round($ventasMes / $pedidosMes) : 0;
+
+        // ---------------------------------------------------
+        //  KPI: RECLAMOS / TICKETS 
+        // ---------------------------------------------------
+        $ticketsMes = Ticket::where('created_at', '>=', $inicioMes)->count();
+        $inicioMesAnterior = $hoy->copy()->subMonth()->startOfMonth();
+        $finMesAnterior = $hoy->copy()->subMonth()->endOfMonth();
+        $ticketsMesAnterior = Ticket::whereBetween('created_at', [$inicioMesAnterior, $finMesAnterior])->count();
+
+        $tendenciaTickets = 0;
+        if ($ticketsMesAnterior > 0) {
+            $tendenciaTickets = round((($ticketsMes - $ticketsMesAnterior) / $ticketsMesAnterior) * 100, 1);
+        }
+
+        // ---------------------------------------------------
+        // GRÁFICO DE VENTAS (Últimos 10 días)
+        // ---------------------------------------------------
         $chartData = [];
         for ($i = 9; $i >= 0; $i--) {
             $date = $hoy->copy()->subDays($i)->format('Y-m-d');
@@ -26,6 +59,9 @@ class DashboardController extends Controller
             $chartData[] = (int)$total;
         }
 
+        // ---------------------------------------------------
+        // TOP PRODUCTOS
+        // ---------------------------------------------------
         $topProductos = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->select('products.name as nombre', 'products.stock_current as stock', DB::raw('SUM(order_items.quantity) as ventas'), DB::raw('SUM(order_items.total_line) as ingresos'))
@@ -34,6 +70,9 @@ class DashboardController extends Controller
             ->limit(4)
             ->get();
 
+        // ---------------------------------------------------
+        // TOP ZONAS
+        // ---------------------------------------------------
         $topZonas = DB::table('orders')
             ->join('addresses', 'orders.address_id', '=', 'addresses.id')
             ->join('communes', 'addresses.commune_id', '=', 'communes.id')
@@ -50,21 +89,25 @@ class DashboardController extends Controller
             return $zona;
         });
 
+        // ---------------------------------------------------
+        // INSIGHTS & ALERTAS
+        // ---------------------------------------------------
         $insights = [];
 
-        $productosBajos = Product::whereColumn('stock_current', '<=', 'stock_alert')->count();
+        $productosBajos = Product::where('stock_current', '<=', 5)->count();
+        
         if ($productosBajos > 0) {
             $insights[] = [
                 'type' => 'warning',
                 'title' => 'Stock Crítico Detectado',
-                'message' => "Tienes {$productosBajos} productos por debajo del nivel de seguridad. Reabastecer urgente.",
+                'message' => "Tienes {$productosBajos} productos con stock bajo. Reabastecer urgente.",
                 'icon' => 'alert'
             ];
         } else {
             $insights[] = [
                 'type' => 'success',
                 'title' => 'Inventario Saludable',
-                'message' => "Tu niveles de stock están óptimos para la demanda actual.",
+                'message' => "Niveles de stock óptimos.",
                 'icon' => 'check'
             ];
         }
@@ -73,18 +116,22 @@ class DashboardController extends Controller
             $zonaTop = $topZonas->first();
             $insights[] = [
                 'type' => 'info',
-                'title' => 'Oportunidad Local',
-                'message' => "El {$zonaTop->porcentaje}% de tus ventas son en {$zonaTop->comuna}. Considera activar envío express allí.",
+                'title' => 'Zona Top',
+                'message' => "La mayoría de ventas son en {$zonaTop->comuna}.",
                 'icon' => 'map'
             ];
         }
 
+        // ---------------------------------------------------
+        // RESPUESTA FINAL JSON
+        // ---------------------------------------------------
         return response()->json([
             'kpis' => [
                 'ventas' => ['value' => (int)$ventasMes, 'trend' => 12.5],
-                'pedidos' => ['value' => $pedidosTotal, 'trend' => 5.2],
-                'ticket' => ['value' => $ticketPromedio, 'trend' => -1.5],
-                'conversion' => ['value' => '2.4%', 'trend' => 0.5]
+                'pedidos' => ['value' => $pedidosTotalHistorico, 'trend' => 5.2],
+                'ticket' => ['value' => $ticketPromedio, 'trend' => 0],
+                'conversion' => ['value' => '2.4%', 'trend' => 0.5],
+                'reclamos' => ['value' => $ticketsMes, 'trend' => $tendenciaTickets]
             ],
             'top_products' => $topProductos,
             'top_zones' => $zonasConPorcentaje,
