@@ -5,6 +5,7 @@ import {
     MoreVertical, Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
     AlertTriangle, CheckCircle, AlertCircle, List, MinusCircle, PlusCircle
 } from 'lucide-react';
+import { BASE_URL } from '../api/constants';
 
 const AdminProductos = () => {
     // --- ESTADOS DE DATOS ---
@@ -12,7 +13,6 @@ const AdminProductos = () => {
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
-    const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000';
 
     // --- ESTADOS UI ---
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -27,7 +27,7 @@ const AdminProductos = () => {
     const [form, setForm] = useState({
         name: '', sku: '', price: '', cost_price: '',
         stock_current: '', category_id: '', description: '', is_visible: true,
-        specs: [''] // <--- NUEVO: Array para especificaciones
+        specs: ['']
     });
 
     // Gestor de Imágenes
@@ -77,7 +77,7 @@ const AdminProductos = () => {
         cerrarConfirmacion();
     };
 
-    // --- LÓGICA DE ESPECIFICACIONES (NUEVA) ---
+    // --- LÓGICA DE ESPECIFICACIONES ---
     const handleSpecChange = (index, value) => {
         const newSpecs = [...form.specs];
         newSpecs[index] = value;
@@ -108,7 +108,6 @@ const AdminProductos = () => {
                 category_id: producto.category_id,
                 description: producto.description || '',
                 is_visible: Boolean(producto.is_visible),
-                // Cargar specs o iniciar vacío
                 specs: producto.specs && producto.specs.length > 0 ? producto.specs : ['']
             });
             setImagenesExistentes(producto.images || []);
@@ -159,21 +158,16 @@ const AdminProductos = () => {
 
         try {
             const formData = new FormData();
-
-            // Datos de texto y Specs
             Object.keys(form).forEach(key => {
                 if (key === 'is_visible') {
                     formData.append(key, form[key] ? '1' : '0');
                 } else if (key === 'specs') {
-                    // Filtrar vacíos y convertir a JSON String
                     const cleanSpecs = form.specs.filter(s => s.trim() !== '');
                     formData.append('specs', JSON.stringify(cleanSpecs));
                 } else {
                     formData.append(key, form[key]);
                 }
             });
-
-            // Imágenes nuevas
             nuevasImagenes.forEach((file, index) => {
                 formData.append(`images[${index}]`, file);
             });
@@ -419,7 +413,7 @@ const AdminProductos = () => {
                             </div>
                         </div>
 
-                        {/* --- SECCIÓN ESPECIFICACIONES (NUEVA) --- */}
+                        {/* --- SECCIÓN ESPECIFICACIONES --- */}
                         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                             <label className="text-sm font-bold text-gray-900 mb-4 block flex items-center gap-2">
                                 <List size={16} /> Especificaciones Técnicas

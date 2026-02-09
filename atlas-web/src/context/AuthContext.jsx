@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password, remember) => {
-        console.log("Intentando login con:", { email, password, remember });
         const response = await api.post('/login', { 
             email, 
             password,

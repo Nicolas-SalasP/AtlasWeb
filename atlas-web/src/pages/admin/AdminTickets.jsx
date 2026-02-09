@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importante para la navegación
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -9,11 +9,11 @@ import {
     Sparkles, Mail, Building, Calendar, Loader2,
     Trash2, AlertTriangle
 } from 'lucide-react';
+import { BASE_URL } from '../api/constants';
 
 const AdminTickets = () => {
     const { user: adminUser } = useAuth();
-    const navigate = useNavigate(); // Hook para redirigir
-    const BASE_URL = 'http://127.0.0.1:8000';
+    const navigate = useNavigate();
 
     // --- ESTADOS DE DATOS ---
     const [tickets, setTickets] = useState([]);
@@ -28,13 +28,13 @@ const AdminTickets = () => {
     const [enviando, setEnviando] = useState(false);
 
     // --- MODALES Y UX ---
-    const [usuarioDetalle, setUsuarioDetalle] = useState(null); // Drawer Perfil
+    const [usuarioDetalle, setUsuarioDetalle] = useState(null);
     const [drawerOpen, setDrawerOpen] = useState(false); 
     
-    // Sistema de Notificaciones (Toasts)
+    // Sistema de Notificaciones
     const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
     
-    // Modal de Confirmación (Reemplazo de window.confirm)
+    // Modal de Confirmación
     const [confirmModal, setConfirmModal] = useState({ show: false, message: '', action: null });
 
     const fileInputRef = useRef(null);
@@ -47,7 +47,6 @@ const AdminTickets = () => {
     // 2. POLLING (Auto-actualización)
     useEffect(() => {
         const intervalo = setInterval(() => {
-            // Solo actualizamos si no hay modales abiertos ni estamos escribiendo
             if (!enviando && !drawerOpen && !confirmModal.show) {
                 cargarTickets(true); 
             }
@@ -111,7 +110,6 @@ const AdminTickets = () => {
     // --- NAVEGACIÓN A PERFIL COMPLETO ---
     const irAPerfilCompleto = () => {
         if (usuarioDetalle) {
-            // Navegamos pasando el ID en el state para que AdminUsuarios lo capture
             navigate('/admin/usuarios', { state: { abrirUsuarioId: usuarioDetalle.id } });
         }
     };
@@ -136,7 +134,7 @@ const AdminTickets = () => {
             const msgNuevo = response.data;
             const actualizado = {
                 ...ticketActivo,
-                status: 'abierto', // Si el admin responde, se abre
+                status: 'abierto',
                 messages: [...ticketActivo.messages, msgNuevo]
             };
 
@@ -260,8 +258,6 @@ const AdminTickets = () => {
                                         <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase ${t.priority === 'alta' ? 'bg-red-100 text-red-600' : t.priority === 'media' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>{t.priority}</span>
                                     </div>
                                     <h3 className="font-bold text-gray-800 text-sm truncate pr-6">{t.subject}</h3>
-                                    
-                                    {/* Botón Eliminar (Visible en Hover) */}
                                     <button 
                                         onClick={(e) => { e.stopPropagation(); eliminarTicket(t.id); }}
                                         className="absolute right-2 top-10 p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -322,8 +318,6 @@ const AdminTickets = () => {
                                         <div className={`max-w-[85%] md:max-w-[70%] ${esAdmin ? 'order-1' : ''}`}>
                                             <div className={`p-4 md:p-5 rounded-[1.5rem] shadow-sm ${esAdmin ? 'bg-atlas-900 text-white rounded-tr-none' : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none'}`}>
                                                 <p className="text-sm leading-relaxed">{msg.message}</p>
-
-                                                {/* Adjuntos */}
                                                 {msg.attachments && msg.attachments.length > 0 && (
                                                     <div className="mt-3 space-y-2">
                                                         {msg.attachments.map((file, index) => {

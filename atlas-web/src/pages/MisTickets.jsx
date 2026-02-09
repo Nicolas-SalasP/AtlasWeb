@@ -6,11 +6,10 @@ import {
     MoreVertical, ArrowLeft, Layout, Tag, AlignLeft, Loader2,
     FileText, Image as ImageIcon
 } from 'lucide-react';
+import { BASE_URL } from '../api/constants';
 
 const MisTickets = () => {
     const { user } = useAuth();
-    // URL Base para las imágenes
-    const BASE_URL = 'http://127.0.0.1:8000';
 
     // --- ESTADOS DE DATOS ---
     const [tickets, setTickets] = useState([]);

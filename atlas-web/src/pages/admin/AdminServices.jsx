@@ -5,13 +5,13 @@ import {
     Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
     AlertTriangle, CheckCircle, AlertCircle, Check, MinusCircle, PlusCircle
 } from 'lucide-react';
+import { BASE_URL } from '../api/constants';
 
 const AdminServices = () => {
     // --- ESTADOS DE DATOS ---
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
-    const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000';
 
     // --- ESTADOS UI ---
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -28,7 +28,7 @@ const AdminServices = () => {
         price: '',
         duration_days: 30,
         description: '',
-        features: [''], // Array de strings
+        features: [''],
         image: null,
         previewUrl: null
     });
@@ -133,17 +133,14 @@ const AdminServices = () => {
             formData.append('duration_days', form.duration_days);
             formData.append('description', form.description);
 
-            // Imagen
             if (form.image instanceof File) {
                 formData.append('image', form.image);
             }
-
-            // Features (limpiamos vacíos y enviamos como JSON string)
             const cleanFeatures = form.features.filter(f => f.trim() !== '');
             formData.append('features', JSON.stringify(cleanFeatures));
 
             if (editando) {
-                formData.append('_method', 'PUT'); // Truco Laravel para PUT con archivos
+                formData.append('_method', 'PUT');
                 await api.post(`/admin/services/${editando.id}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });

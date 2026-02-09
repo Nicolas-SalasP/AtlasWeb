@@ -7,14 +7,10 @@ import { useAuth } from '../context/AuthContext';
 const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
-
-    // Estados de UI
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({ email: '', password: '' });
-    const [rememberMe, setRememberMe] = useState(false); // Estado para el checkbox
-    const [isSubmitting, setIsSubmitting] = useState(false); // Estado de carga
-
-    // Estado del Modal
+    const [rememberMe, setRememberMe] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [modal, setModal] = useState({ open: false, type: 'success', title: '', message: '' });
 
     const handleSubmit = async (e) => {

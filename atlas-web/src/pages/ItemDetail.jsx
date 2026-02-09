@@ -8,6 +8,7 @@ import {
     ChevronRight, AlertCircle, Layers, Plus, Minus 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { BASE_URL } from '../api/constants';
 
 const ItemDetail = () => {
     const { type, id } = useParams(); 
@@ -18,10 +19,7 @@ const ItemDetail = () => {
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     
-    // NUEVO ESTADO: CANTIDAD
     const [quantity, setQuantity] = useState(1);
-
-    const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000';
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -44,7 +42,6 @@ const ItemDetail = () => {
 
                 if (data) {
                     setItem(data);
-                    // Resetear cantidad al cambiar de ítem
                     setQuantity(1);
                 } else {
                     toast.error("Ítem no encontrado");
@@ -60,9 +57,7 @@ const ItemDetail = () => {
         fetchDetail();
     }, [type, id, navigate]);
 
-    // --- LÓGICA DEL CONTADOR ---
     const handleIncrement = () => {
-        // Si es producto, validamos stock
         if (!item.is_service && quantity >= item.stock_current) {
             toast.error("No hay más stock disponible");
             return;
@@ -76,11 +71,8 @@ const ItemDetail = () => {
         }
     };
 
-    // --- AGREGAR AL CARRITO ---
     const handleAddToCart = () => {
         if (!item) return;
-
-        // Construimos el objeto a enviar
         const itemToAdd = item.is_service ? {
             id: `service-${item.id}`,
             name: item.name,
@@ -91,7 +83,6 @@ const ItemDetail = () => {
             duration: item.duration_days
         } : item;
 
-        // Enviamos el ítem y la cantidad seleccionada
         addToCart(itemToAdd, quantity);
         
         toast.success(`Agregado: ${quantity} x ${item.name}`);
@@ -122,8 +113,6 @@ const ItemDetail = () => {
 
                 <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
                     <div className="grid lg:grid-cols-2 gap-0">
-                        
-                        {/* COLUMNA IZQUIERDA: GALERÍA (Igual que antes) */}
                         <div className="p-8 md:p-12 bg-gray-50/50 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col justify-center">
                             <div className="relative aspect-square rounded-3xl bg-white border border-gray-200 shadow-sm flex items-center justify-center p-8 mb-6 overflow-hidden group">
                                 {mainImage ? (
@@ -154,8 +143,6 @@ const ItemDetail = () => {
                                 </div>
                             )}
                         </div>
-
-                        {/* COLUMNA DERECHA: INFO + CANTIDAD */}
                         <div className="p-8 md:p-12 flex flex-col h-full relative">
                             <div className="mb-8">
                                 <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 leading-tight">{item.name}</h1>
@@ -180,8 +167,6 @@ const ItemDetail = () => {
                                     <p className="text-gray-400 italic text-sm">No se han especificado detalles técnicos.</p>
                                 )}
                             </div>
-
-                            {/* SECCIÓN PRECIO Y COMPRA */}
                             <div className="mt-auto bg-white border-t border-gray-100 pt-8">
                                 <div className="flex flex-col gap-6">
                                     
@@ -194,11 +179,7 @@ const ItemDetail = () => {
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* SELECTOR DE CANTIDAD + BOTÓN COMPRA */}
                                     <div className="flex flex-col sm:flex-row gap-4">
-                                        
-                                        {/* CONTADOR */}
                                         <div className="flex items-center justify-between sm:justify-start bg-gray-100 rounded-2xl p-1 w-full sm:w-auto min-w-[140px]">
                                             <button 
                                                 onClick={handleDecrement}
@@ -216,8 +197,6 @@ const ItemDetail = () => {
                                                 <Plus size={20} />
                                             </button>
                                         </div>
-
-                                        {/* BOTÓN PRINCIPAL */}
                                         <button
                                             onClick={handleAddToCart}
                                             disabled={!item.is_service && item.stock_current <= 0}

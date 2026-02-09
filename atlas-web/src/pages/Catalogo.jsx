@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Filter, Box, ChevronDown, ArrowUpDown, Loader2, Briefcase, CheckCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import api from '../api/axiosConfig';
+import { BASE_URL } from '../api/constants';
 
 const CATEGORIAS = ["Todos", "Seguridad", "Redes", "Infraestructura", "Software", "Servicios"];
 
@@ -125,8 +126,6 @@ const ProductCard = ({ producto }) => {
     const navigate = useNavigate();
     
     const sinStock = !producto.is_service && producto.stock_current <= 0;
-    const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000';
-
     const goToDetail = () => {
         navigate(`/item/${producto.is_service ? 'service' : 'product'}/${producto.id}`);
     };
