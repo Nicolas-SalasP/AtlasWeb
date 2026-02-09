@@ -70,7 +70,7 @@ class PaymentController extends Controller
         $buyOrder = $order->order_number;
         $sessionId = session()->getId();
         $amount = (int) $order->total;
-        $returnUrl = url('/api/webpay/return'); 
+        $returnUrl = url('/api/webpay/return');
 
         try {
             $options = $this->getTransbankOptions();
@@ -96,10 +96,11 @@ class PaymentController extends Controller
 
     public function commitWebpay(Request $request)
     {
-        $token = $request->input('token_ws') ?? $request->input('TBK_TOKEN');
-        $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+        $token = $request->input('token_ws');
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
 
         if (!$token) {
+            $token = $request->input('TBK_TOKEN');
             return redirect($frontendUrl . '/checkout?status=cancelled');
         }
 
@@ -114,11 +115,6 @@ class PaymentController extends Controller
                 $order->status = 'paid';
                 $order->payment_data = json_encode($response);
                 $order->save();
-
-                $clientEmail = $order->customer_data['email'] ?? null;
-                if ($clientEmail) {
-                    Mail::to($clientEmail)->send(new OrderPlaced($order));
-                }
 
                 return redirect($frontendUrl . '/checkout/success?order=' . $order->order_number);
             } else {
