@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { CreditCard, Building2, Loader2, ChevronRight, CheckCircle, Copy } from 'lucide-react';
+import { CreditCard, Building2, Loader2, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import api from '../../api/axiosConfig';
 
 const PaymentSelector = ({ orderId }) => {
     const [method, setMethod] = useState('webpay'); // 'webpay' | 'transfer'
     const [loading, setLoading] = useState(false);
-    const [transferData, setTransferData] = useState(null); // Datos del banco al confirmar transferencia
+    const [errorMsg, setErrorMsg] = useState('');
+    const [transferData, setTransferData] = useState(null);
 
     // --- 1. INICIAR WEBPAY ---
     const handleWebpay = async () => {
         setLoading(true);
+        setErrorMsg(''); // Limpiar errores previos
         try {
-            // Solicitamos token al backend
             const { data } = await api.post('/payment/webpay', { order_id: orderId });
             
-            // Webpay requiere crear un formulario oculto y enviarlo automáticamente (POST)
+            // Formulario oculto automático
             const form = document.createElement('form');
             form.action = data.url;
             form.method = 'POST';
@@ -25,13 +26,13 @@ const PaymentSelector = ({ orderId }) => {
             
             form.appendChild(tokenInput);
             document.body.appendChild(form);
-            
-            // Enviamos al usuario a Transbank
-            form.submit(); 
+            form.submit();
             
         } catch (error) {
             console.error("Error Webpay", error);
-            alert("Error al iniciar el pago. Revisa la consola o intenta más tarde.");
+            // Capturamos el mensaje real que viene del backend ahora corregido
+            const textoError = error.response?.data?.error || "Error de conexión con el servidor de pago.";
+            setErrorMsg(textoError);
             setLoading(false);
         }
     };
@@ -39,21 +40,19 @@ const PaymentSelector = ({ orderId }) => {
     // --- 2. CONFIRMAR TRANSFERENCIA ---
     const handleTransfer = async () => {
         setLoading(true);
+        setErrorMsg('');
         try {
-            // Avisamos al backend que se eligió transferencia
             const { data } = await api.post('/payment/transfer', { order_id: orderId });
-            
-            // Guardamos los datos del banco para mostrarlos
             setTransferData(data.bank_details);
-            
         } catch (error) {
             console.error("Error Transfer", error);
-            alert("No se pudo registrar la intención de transferencia.");
+            const textoError = error.response?.data?.message || "No se pudo registrar la transferencia.";
+            setErrorMsg(textoError);
             setLoading(false);
         }
     };
 
-    // --- VISTA: ÉXITO TRANSFERENCIA (Mostrar Datos Banco) ---
+    // --- VISTA: ÉXITO TRANSFERENCIA ---
     if (transferData) {
         return (
             <div className="bg-green-50 p-6 rounded-3xl border border-green-100 text-center animate-in fade-in zoom-in-95">
@@ -100,14 +99,24 @@ const PaymentSelector = ({ orderId }) => {
 
     // --- VISTA: SELECCIÓN DE MÉTODO ---
     return (
-        <div className="animate-in fade-in slide-in-from-right duration-500">
+        <div className="animate-in fade-in slide-in-from-right duration-500 w-full">
             <h3 className="text-lg font-bold text-gray-900 mb-6 text-center">Selecciona Método de Pago</h3>
+            {errorMsg && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-sm text-red-600 animate-in shake">
+                    <AlertCircle className="shrink-0 mt-0.5" size={16} />
+                    <span>{errorMsg}</span>
+                </div>
+            )}
             
             <div className="space-y-4 mb-8">
                 {/* OPCIÓN WEBPAY */}
                 <div 
-                    onClick={() => setMethod('webpay')}
-                    className={`relative cursor-pointer p-5 rounded-2xl border-2 transition-all flex items-center gap-4 group ${method === 'webpay' ? 'border-atlas-900 bg-gray-50 shadow-md' : 'border-gray-100 hover:border-gray-200 hover:bg-white'}`}
+                    onClick={() => !loading && setMethod('webpay')}
+                    className={`relative cursor-pointer p-5 rounded-2xl border-2 transition-all flex items-center gap-4 group ${
+                        method === 'webpay' 
+                        ? 'border-atlas-900 bg-gray-50 shadow-md' 
+                        : 'border-gray-100 hover:border-gray-200 hover:bg-white'
+                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <div className={`p-3 rounded-xl transition-colors ${method === 'webpay' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
                         <CreditCard size={24}/>
@@ -123,8 +132,12 @@ const PaymentSelector = ({ orderId }) => {
 
                 {/* OPCIÓN TRANSFERENCIA */}
                 <div 
-                    onClick={() => setMethod('transfer')}
-                    className={`relative cursor-pointer p-5 rounded-2xl border-2 transition-all flex items-center gap-4 group ${method === 'transfer' ? 'border-atlas-900 bg-gray-50 shadow-md' : 'border-gray-100 hover:border-gray-200 hover:bg-white'}`}
+                    onClick={() => !loading && setMethod('transfer')}
+                    className={`relative cursor-pointer p-5 rounded-2xl border-2 transition-all flex items-center gap-4 group ${
+                        method === 'transfer' 
+                        ? 'border-atlas-900 bg-gray-50 shadow-md' 
+                        : 'border-gray-100 hover:border-gray-200 hover:bg-white'
+                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <div className={`p-3 rounded-xl transition-colors ${method === 'transfer' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
                         <Building2 size={24}/>
