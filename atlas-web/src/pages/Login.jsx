@@ -18,7 +18,7 @@ const Login = () => {
         setIsSubmitting(true);
 
         try {
-            const usuarioLogueado = await login(formData.email, formData.password, rememberMe);
+            await login(formData.email, formData.password, rememberMe);
 
             setModal({
                 open: true,
@@ -29,13 +29,7 @@ const Login = () => {
 
             setTimeout(() => {
                 setModal({ ...modal, open: false });
-
-                if (usuarioLogueado.role_id === 1) {
-                    navigate('/admin');
-                } else {
-                    navigate('/perfil');
-                }
-
+                navigate('/perfil');
             }, 1500);
 
         } catch (error) {

@@ -9,7 +9,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->user()->role_id !== 1) {
+        if ($request->user()->role_id != 1) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
@@ -22,7 +22,7 @@ class UserController extends Controller
 
     public function show(Request $request, $id)
     {
-        if ($request->user()->role_id !== 1) {
+        if ($request->user()->role_id != 1) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
@@ -44,7 +44,7 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        if ($request->user()->role_id !== 1) return response()->json(['message' => 'No autorizado'], 403);
+        if ($request->user()->role_id != 1) return response()->json(['message' => 'No autorizado'], 403);
 
         $user = User::find($id);
         if (!$user) return response()->json(['message' => 'Usuario no encontrado'], 404);

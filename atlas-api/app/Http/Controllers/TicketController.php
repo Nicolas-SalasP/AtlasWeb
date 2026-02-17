@@ -56,7 +56,7 @@ class TicketController extends Controller
     }
     public function indexAll(Request $request)
     {
-        if ($request->user()->role_id !== 1) {
+        if ($request->user()->role_id != 1) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
         return response()->json($this->ticketService->getAllTickets());
@@ -64,7 +64,7 @@ class TicketController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        if ($request->user()->role_id !== 1) {
+        if ($request->user()->role_id != 1) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
         $request->validate(['status' => 'required|in:nuevo,abierto,cerrado']);

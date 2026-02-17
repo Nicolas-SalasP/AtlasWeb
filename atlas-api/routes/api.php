@@ -49,6 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- USUARIO GENERAL (CLIENTE) ---
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
     Route::get('/me', [AuthController::class, 'me']);
 
     // Perfil de Usuario

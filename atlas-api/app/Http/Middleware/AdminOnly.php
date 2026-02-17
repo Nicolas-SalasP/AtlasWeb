@@ -10,7 +10,8 @@ class AdminOnly
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || $request->user()->role->name !== 'admin') {
+        $user = $request->user();
+        if (!$user || $user->role_id != 1) {
             return response()->json([
                 'message' => 'Acceso denegado. Se requieren privilegios de Administrador.'
             ], 403);
