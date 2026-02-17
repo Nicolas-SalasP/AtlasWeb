@@ -70,6 +70,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/security-logs', [ProfileController::class, 'getSecurityLogs']);
     });
 
+    // Gestion de Direcciones
+    Route::get('/addresses', [App\Http\Controllers\AddressController::class, 'index']);
+    Route::post('/addresses', [App\Http\Controllers\AddressController::class, 'store']);
+    Route::delete('/addresses/{id}', [App\Http\Controllers\AddressController::class, 'destroy']);
+    Route::put('/addresses/{id}/default', [App\Http\Controllers\AddressController::class, 'setDefault']);
+
+
     // Tickets (Lado Cliente)
     Route::get('/tickets', [TicketController::class, 'index']);
     Route::post('/tickets', [TicketController::class, 'store']);
@@ -105,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-        
+
         // Imágenes de Productos
         Route::delete('/product-images/{id}', [ProductController::class, 'destroyImage']);
         Route::post('/product-images/{id}/cover', [ProductController::class, 'setCover']);

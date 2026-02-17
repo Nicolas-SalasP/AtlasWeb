@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->id();
             $table->string('order_number')->unique();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('address_id')->nullable()->constrained();
+            $table->foreignId('address_id')->nullable();
             $table->decimal('subtotal', 12, 0);
             $table->decimal('shipping_cost', 12, 0);
             $table->decimal('total', 12, 0);
