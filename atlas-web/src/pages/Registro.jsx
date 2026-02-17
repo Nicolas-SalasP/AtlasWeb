@@ -1,51 +1,91 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, UserPlus } from 'lucide-react';
-import AlertModal from '../components/AlertModal'; // <--- IMPORTAMOS EL MODAL
+import { Mail, Lock, User, ArrowRight, UserPlus, CreditCard, Loader2 } from 'lucide-react';
+import AlertModal from '../components/AlertModal';
+import { useAuth } from '../context/AuthContext';
 
 const Registro = () => {
     const navigate = useNavigate();
+    const { register } = useAuth();
+    
     const [formData, setFormData] = useState({
-        nombre: '',
+        name: '',
         email: '',
+        rut: '',
         password: '',
-        confirmPassword: ''
+        password_confirmation: ''
     });
 
-    // Estado del Modal
     const [modal, setModal] = useState({ open: false, type: 'success', title: '', message: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
+    const formatRut = (rut) => {
+        let valor = rut.replace(/[^0-9kK]/g, '');
+        let cuerpo = valor.slice(0, -1);
+        let dv = valor.slice(-1).toUpperCase();
+        
+        if (valor.length < 2) return valor;
+
+        rut = cuerpo + '-' + dv;
+        if (cuerpo.length > 3) {
+            cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            rut = cuerpo + '-' + dv;
+        }
+        return rut;
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'rut') {
+            setFormData({ ...formData, [name]: formatRut(value) });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
-        // VALIDACIÓN DE CONTRASEÑAS
-        if (formData.password !== formData.confirmPassword) {
+        if (formData.password !== formData.password_confirmation) {
             setModal({
                 open: true,
                 type: 'error',
                 title: 'Error de Validación',
-                message: 'Las contraseñas ingresadas no coinciden. Por favor verifícalas.'
+                message: 'Las contraseñas no coinciden.'
             });
+            setIsSubmitting(false);
             return;
         }
 
-        // SIMULACIÓN DE REGISTRO EXITOSO
-        setModal({
-            open: true,
-            type: 'success',
-            title: '¡Cuenta Creada!',
-            message: 'Tu registro ha sido exitoso. Te redirigiremos al inicio de sesión.'
-        });
+        try {
+            await register(formData);
 
-        setTimeout(() => {
-            navigate('/login');
-        }, 2000);
+            setModal({
+                open: true,
+                type: 'success',
+                title: '¡Cuenta Creada!',
+                message: 'Tu cuenta ha sido creada'
+            });
+
+            setTimeout(() => {
+                navigate('/perfil');
+            }, 2000);
+
+        } catch (error) {
+            setModal({
+                open: true,
+                type: 'error',
+                title: 'Error de Registro',
+                message: error.response?.data?.message || 'Hubo un problema al crear tu cuenta.'
+            });
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 pt-20">
 
-            {/* EL MODAL */}
             <AlertModal
                 isOpen={modal.open}
                 onClose={() => setModal({ ...modal, open: false })}
@@ -56,7 +96,6 @@ const Registro = () => {
 
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
 
-                {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-atlas-600 mb-4">
                         <UserPlus size={32} />
@@ -69,7 +108,6 @@ const Registro = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
 
-                    {/* Nombre */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
                         <div className="relative">
@@ -78,15 +116,35 @@ const Registro = () => {
                             </div>
                             <input
                                 type="text"
+                                name="name"
                                 required
                                 placeholder="Juan Pérez"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                value={formData.name}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
 
-                    {/* Email */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">RUT</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <CreditCard size={20} />
+                            </div>
+                            <input
+                                type="text"
+                                name="rut"
+                                required
+                                placeholder="12.345.678-9"
+                                maxLength={12}
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
+                                value={formData.rut}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                         <div className="relative">
@@ -95,15 +153,16 @@ const Registro = () => {
                             </div>
                             <input
                                 type="email"
+                                name="email"
                                 required
                                 placeholder="juan@empresa.com"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                value={formData.email}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
 
-                    {/* Password */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                         <div className="relative">
@@ -112,15 +171,16 @@ const Registro = () => {
                             </div>
                             <input
                                 type="password"
+                                name="password"
                                 required
                                 placeholder="Mínimo 8 caracteres"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                value={formData.password}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
 
-                    {/* Confirm Password */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Repetir Contraseña</label>
                         <div className="relative">
@@ -129,17 +189,25 @@ const Registro = () => {
                             </div>
                             <input
                                 type="password"
+                                name="password_confirmation"
                                 required
                                 placeholder="Repite tu contraseña"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                value={formData.password_confirmation}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
 
                     <div className="pt-2">
-                        <button type="submit" className="w-full bg-atlas-900 text-white font-bold py-3 rounded-xl hover:bg-atlas-800 transition-all shadow-lg hover:shadow-xl flex justify-center items-center gap-2">
-                            Registrarme <ArrowRight size={20} />
+                        <button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className={`w-full font-bold py-3 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2 ${
+                                isSubmitting ? 'bg-atlas-800 text-gray-300 cursor-wait' : 'bg-atlas-900 text-white hover:bg-atlas-800 hover:shadow-xl'
+                            }`}
+                        >
+                            {isSubmitting ? <><Loader2 size={20} className="animate-spin" /> Creando cuenta...</> : <>Registrarme <ArrowRight size={20} /></>}
                         </button>
                     </div>
 

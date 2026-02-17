@@ -13,11 +13,15 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'rut',
         'password',
         'role_id',
+        'is_active',
+        'google_id',
         'avatar',
         'company_name',
-        'is_active'
+        'phone',
+        'address'
     ];
 
     public function role()
