@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Search, User, Mail, Phone,
-    Loader2, ShieldCheck, XCircle, AlertTriangle, CheckCircle, Truck
+    Loader2, ShieldCheck, XCircle, AlertTriangle, CheckCircle, Truck, MapPin, Star, X
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -13,24 +13,7 @@ import api from '../api/axiosConfig';
 import PaymentSelector from '../components/checkout/PaymentSelector';
 import { BASE_URL } from '../api/constants';
 
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-function RecenterAutomatically({ lat, lng }) {
-    const map = useMap();
-    useEffect(() => {
-        map.setView([lat, lng], 15);
-    }, [lat, lng]);
-    return null;
-}
-
+// --- CONSTANTES UNIFICADAS (Desde MAIN) ---
 const REGIONES_CHILE = {
     "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
     "Tarapacá": ["Iquique", "Alto Hospicio", "Pozo Almonte", "Camiña", "Colchane", "Huara", "Pica"],
@@ -57,6 +40,19 @@ const TARIFAS_ENVIO = {
     "Los Ríos": 8990, "Los Lagos": 9990, "Aysén": 12990, "Magallanes": 12990
 };
 
+// --- CONFIGURACIÓN MAPA ---
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({ iconUrl: icon, shadowUrl: iconShadow, iconSize: [25, 41], iconAnchor: [12, 41] });
+L.Marker.prototype.options.icon = DefaultIcon;
+
+function RecenterAutomatically({ lat, lng }) {
+    const map = useMap();
+    useEffect(() => { map.setView([lat, lng], 15); }, [lat, lng]);
+    return null;
+}
+
+// --- UTILIDADES ---
 const formatearRut = (rut) => {
     let valor = rut.replace(/[.-]/g, '');
     if (valor === '') return '';
@@ -85,7 +81,7 @@ const validarRutChileno = (rut) => {
 
 const Checkout = () => {
     const { cart, getCartTotal, clearCart } = useCart();
-    const { isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     const [procesando, setProcesando] = useState(false);
@@ -93,19 +89,60 @@ const Checkout = () => {
     const [orderId, setOrderId] = useState(null);
     const [notification, setNotification] = useState({ show: false, type: 'error', title: '', message: '' });
 
+    // --- ESTADO UNIFICADO ---
     const [datos, setDatos] = useState({
         nombre: '', apellido: '', email: '',
-        telefono: '',
-        rutPersonal: '',
+        telefono: '', rutPersonal: '',
         direccion: '', numero: '', depto: '',
-        region: 'Metropolitana',
-        comuna: REGIONES_CHILE["Metropolitana"][0],
+        region: "Metropolitana",
+        comuna: "Santiago",
         tipoDocumento: 'boleta', rutEmpresa: '', razonSocial: '', giro: ''
     });
 
     const [errorRut, setErrorRut] = useState(false);
     const [costoEnvio, setCostoEnvio] = useState(TARIFAS_ENVIO["Metropolitana"]);
     const [mapCoords, setMapCoords] = useState({ lat: -33.4489, lng: -70.6693 });
+    const [misDirecciones, setMisDirecciones] = useState([]);
+    const [direccionSeleccionadaId, setDireccionSeleccionadaId] = useState(null);
+
+    const comunasDisponibles = REGIONES_CHILE[datos.region] || [];
+
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            setDatos(prev => ({
+                ...prev,
+                nombre: user.name || '',
+                email: user.email || '',
+                rutPersonal: user.rut ? formatearRut(user.rut) : ''
+            }));
+
+            const fetchMisDirecciones = async () => {
+                try {
+                    const res = await api.get('/addresses');
+                    if (res.data && res.data.length > 0) setMisDirecciones(res.data);
+                } catch (error) { console.error(error); }
+            };
+            fetchMisDirecciones();
+        }
+    }, [isAuthenticated, user]);
+
+    const seleccionarDireccion = (addr) => {
+        setDireccionSeleccionadaId(addr.id);
+        const regionValida = REGIONES_CHILE[addr.region] ? addr.region : "Metropolitana";
+
+        setDatos(prev => ({
+            ...prev,
+            direccion: addr.address,
+            numero: addr.number,
+            depto: addr.depto || '',
+            region: regionValida,
+            comuna: addr.commune
+        }));
+
+        setCostoEnvio(TARIFAS_ENVIO[regionValida] || 7990);
+        buscarDireccionEnMapaAutomatico(addr.address, addr.number, addr.commune, regionValida);
+    };
+
     const getCartImage = (item) => {
         if (!item.images || item.images.length === 0) return "https://placehold.co/100?text=No+Img";
         const cover = item.images.find(img => img.is_cover == 1) || item.images[0];
@@ -119,10 +156,12 @@ const Checkout = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (['direccion', 'numero', 'region', 'comuna'].includes(name)) setDireccionSeleccionadaId(null);
+
         setDatos(prev => {
             const nuevosDatos = { ...prev, [name]: value };
             if (name === "region") {
-                nuevosDatos.comuna = REGIONES_CHILE[value][0];
+                nuevosDatos.comuna = REGIONES_CHILE[value] ? REGIONES_CHILE[value][0] : '';
                 setCostoEnvio(TARIFAS_ENVIO[value] || 7990);
             }
             return nuevosDatos;
@@ -132,14 +171,11 @@ const Checkout = () => {
     const handleRutChange = (e, fieldName) => {
         const rawValue = e.target.value.replace(/[^0-9kK]/g, '');
         const formatted = formatearRut(rawValue);
-        setDatos({ ...datos, [fieldName]: formatted });
-        if (formatted.length > 8 && !validarRutChileno(formatted)) setErrorRut(true);
-        else setErrorRut(false);
+        setDatos(prev => ({ ...prev, [fieldName]: formatted }));
+        setErrorRut(formatted.length > 8 && !validarRutChileno(formatted));
     };
 
-    const showModal = (type, title, message) => {
-        setNotification({ show: true, type, title, message });
-    };
+    const showModal = (type, title, message) => setNotification({ show: true, type, title, message });
 
     const buscarDireccionEnMapa = async () => {
         if (!datos.direccion || !datos.comuna) {
@@ -151,16 +187,19 @@ const Checkout = () => {
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
             const data = await response.json();
-            if (data && data.length > 0) {
-                setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-            } else {
-                showModal('info', 'No encontrada', 'No encontramos la dirección exacta.');
-            }
-        } catch (e) {
-            showModal('error', 'Error', 'Error de conexión con el mapa.');
-        } finally {
-            setBuscandoDireccion(false);
-        }
+            if (data && data.length > 0) setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+            else showModal('info', 'No encontrada', 'No encontramos la dirección exacta.');
+        } catch (e) { showModal('error', 'Error', 'Error de conexión con el mapa.');
+        } finally { setBuscandoDireccion(false); }
+    };
+
+    const buscarDireccionEnMapaAutomatico = async (calle, num, comuna, region) => {
+        const query = `${calle} ${num}, ${comuna}, ${region}, Chile`;
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            if (data && data.length > 0) setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        } catch (e) { }
     };
 
     const handleCrearOrden = async (e) => {
@@ -178,12 +217,11 @@ const Checkout = () => {
         }
 
         setProcesando(true);
-
         try {
             const orderPayload = {
                 items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
                 shipping_cost: costoEnvio,
-                shipping_address: `${datos.direccion} #${datos.numero} ${datos.depto ? 'Dpto ' + datos.depto : ''}, ${datos.comuna}, ${datos.region}`,
+                shipping_address: `${datos.direccion} ${datos.numero ? '#' + datos.numero : ''} ${datos.depto ? 'Dpto ' + datos.depto : ''}, ${datos.comuna}, ${datos.region}`,
                 customer_data: {
                     nombre: `${datos.nombre} ${datos.apellido}`,
                     rut: rutAValidar,
@@ -195,25 +233,21 @@ const Checkout = () => {
 
             const { data } = await api.post('/orders', orderPayload);
             if (isAuthenticated && data.is_guest_checkout) {
-                showModal('info', 'Sesión Expirada', 'Tu sesión expiró por seguridad, pero tu compra se procesó correctamente como invitado. Recibirás el comprobante a tu correo.');
+                showModal('info', 'Sesión Expirada', 'Tu sesión expiró por seguridad, pero tu compra se procesó correctamente como invitado.');
             }
-
             setOrderId(data.order_id);
             clearCart();
-
         } catch (error) {
-            console.error("Error creating order:", error);
+            console.error(error);
             showModal('error', 'Error', 'Ocurrió un problema al crear la orden.');
-        } finally {
-            setProcesando(false);
-        }
+        } finally { setProcesando(false); }
     };
 
     if (orderId) {
         return (
             <div className="min-h-screen pt-28 pb-20 bg-gray-50 flex flex-col items-center">
                 <div className="max-w-2xl w-full px-4 text-center">
-                    <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100 mb-8">
+                    <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100 mb-8 animate-in zoom-in-95">
                         <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                             <ShieldCheck size={32} />
                         </div>
@@ -229,13 +263,13 @@ const Checkout = () => {
         );
     }
 
-    if (cart.length === 0) return <div className="min-h-screen pt-24 text-center"><h2 className="text-2xl font-bold">Carrito Vacío</h2><button onClick={() => navigate('/catalogo')} className="underline mt-4">Ir al catálogo</button></div>;
+    if (cart.length === 0) return <div className="min-h-screen pt-24 text-center flex flex-col items-center justify-center"><h2 className="text-2xl font-bold mb-4">Carrito Vacío</h2><button onClick={() => navigate('/catalogo')} className="text-atlas-900 underline">Ir al catálogo</button></div>;
 
     return (
         <div className="bg-gray-50 min-h-screen pt-28 pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 flex items-center gap-2">
-                    <Link to="/catalogo" className="text-gray-500 flex items-center gap-1 text-sm font-medium"><ArrowLeft size={16} /> Volver</Link>
+                    <Link to="/catalogo" className="text-gray-500 flex items-center gap-1 text-sm font-medium hover:text-atlas-900 transition-colors"><ArrowLeft size={16} /> Volver</Link>
                     <span className="text-gray-300">|</span>
                     <h1 className="text-2xl font-bold text-atlas-900">Finalizar Compra</h1>
                 </div>
@@ -251,23 +285,11 @@ const Checkout = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono <span className="text-red-500">*</span></label>
                                     <div className="relative flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-atlas-300">
-                                        <div className="bg-gray-100 px-3 py-2 text-gray-500 font-bold select-none border-r border-gray-300 flex items-center">
-                                            +56
-                                        </div>
-                                        <input
-                                            type="text"
-                                            name="telefono"
-                                            value={datos.telefono}
-                                            onChange={handleChange}
-                                            placeholder="912345678"
-                                            className="w-full px-4 py-2 outline-none"
-                                        />
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                            <Phone size={14} />
-                                        </div>
+                                        <div className="bg-gray-100 px-3 py-2 text-gray-500 font-bold select-none border-r border-gray-300 flex items-center">+56</div>
+                                        <input type="text" name="telefono" value={datos.telefono} onChange={handleChange} placeholder="912345678" className="w-full px-4 py-2 outline-none" />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Phone size={14} /></div>
                                     </div>
                                 </div>
-
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">RUT Personal <span className="text-red-500">*</span></label>
                                     <input type="text" value={datos.rutPersonal} onChange={(e) => handleRutChange(e, 'rutPersonal')} placeholder="12.345.678-9" className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 outline-none" />
@@ -277,33 +299,45 @@ const Checkout = () => {
 
                         <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                             <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-atlas-900 text-white flex items-center justify-center text-xs">2</span> Envío</h2>
+
+                            {isAuthenticated && misDirecciones.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><MapPin size={16} className="text-atlas-500" /> Usar una dirección guardada:</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {misDirecciones.map(addr => (
+                                            <button key={addr.id} type="button" onClick={() => seleccionarDireccion(addr)} className={`text-left p-3 rounded-xl border transition-all flex items-start gap-3 relative ${direccionSeleccionadaId === addr.id ? 'bg-atlas-50 border-atlas-500 ring-1 ring-atlas-500 shadow-sm' : 'bg-white border-gray-200 hover:border-atlas-300 hover:shadow-sm'}`}>
+                                                <div className={`p-2 rounded-full ${direccionSeleccionadaId === addr.id ? 'bg-atlas-200 text-atlas-800' : 'bg-gray-100 text-gray-500'}`}><MapPin size={16} /></div>
+                                                <div className="flex-1">
+                                                    <div className="flex justify-between"><span className="font-bold text-gray-900 text-sm">{addr.alias}</span>{addr.is_default && <Star size={12} className="text-yellow-500 fill-yellow-500" />}</div>
+                                                    <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{addr.address} #{addr.number}</p>
+                                                    <p className="text-xs text-gray-400 mt-1">{addr.commune}, {addr.region}</p>
+                                                </div>
+                                                {direccionSeleccionadaId === addr.id && <div className="absolute top-2 right-2 text-atlas-600"><CheckCircle size={14} /></div>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="relative flex py-5 items-center"><div className="flex-grow border-t border-gray-200"></div><span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">O ingresa otra dirección</span><div className="flex-grow border-t border-gray-200"></div></div>
+                                </div>
+                            )}
+
                             <div className="grid md:grid-cols-2 gap-4 mb-6">
                                 <div className="md:col-span-2"><Input label="Calle / Avenida" name="direccion" value={datos.direccion} onChange={handleChange} /></div>
                                 <Input label="Número" name="numero" value={datos.numero} onChange={handleChange} />
                                 <Input label="Depto" name="depto" value={datos.depto} onChange={handleChange} required={false} />
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Región</label>
-                                    <div className="relative">
-                                        <select name="region" value={datos.region} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer">
-                                            {Object.keys(REGIONES_CHILE).map(reg => <option key={reg} value={reg}>{reg}</option>)}
-                                        </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
-                                    </div>
+                                    <select name="region" value={datos.region} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-atlas-300 outline-none">
+                                        {Object.keys(REGIONES_CHILE).map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Comuna</label>
-                                    <div className="relative">
-                                        <select name="comuna" value={datos.comuna} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer">
-                                            {REGIONES_CHILE[datos.region].map(com => <option key={com} value={com}>{com}</option>)}
-                                        </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
-                                    </div>
+                                    <select name="comuna" value={datos.comuna} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-atlas-300 outline-none">
+                                        {comunasDisponibles.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
                                 </div>
-
                                 <div className="md:col-span-2 flex justify-end">
-                                    <button type="button" onClick={buscarDireccionEnMapa} disabled={buscandoDireccion} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 flex items-center gap-2">
+                                    <button type="button" onClick={buscarDireccionEnMapa} disabled={buscandoDireccion} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 flex items-center gap-2 transition-all active:scale-95 shadow-sm">
                                         {buscandoDireccion ? 'Buscando...' : <><Search size={16} /> Ubicar en Mapa</>}
                                     </button>
                                 </div>
@@ -322,10 +356,7 @@ const Checkout = () => {
                             <div className="flex gap-4 mb-6">
                                 {['boleta', 'factura'].map(tipo => (
                                     <label key={tipo} className={`flex-1 border rounded-lg p-4 cursor-pointer transition-all ${datos.tipoDocumento === tipo ? 'border-atlas-500 bg-blue-50 ring-1 ring-atlas-500' : 'border-gray-200 hover:border-gray-300'}`}>
-                                        <div className="flex items-center gap-3">
-                                            <input type="radio" name="tipoDocumento" value={tipo} checked={datos.tipoDocumento === tipo} onChange={handleChange} className="accent-atlas-900 w-4 h-4" />
-                                            <span className="font-bold text-gray-700 capitalize">{tipo}</span>
-                                        </div>
+                                        <div className="flex items-center gap-3"><input type="radio" name="tipoDocumento" value={tipo} checked={datos.tipoDocumento === tipo} onChange={handleChange} className="accent-atlas-900 w-4 h-4" /><span className="font-bold text-gray-700 capitalize">{tipo}</span></div>
                                     </label>
                                 ))}
                             </div>
@@ -357,7 +388,7 @@ const Checkout = () => {
                             </div>
                             <div className="flex justify-between items-center border-t border-gray-200 mt-4 pt-4 mb-6"><span className="text-lg font-bold text-gray-900">Total</span><span className="text-2xl font-bold text-atlas-900">${totalConEnvio.toLocaleString('es-CL')}</span></div>
 
-                            <button onClick={handleCrearOrden} disabled={procesando} className="w-full bg-atlas-900 text-white font-bold py-4 rounded-xl hover:bg-atlas-800 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+                            <button onClick={handleCrearOrden} disabled={procesando} className="w-full bg-atlas-900 text-white font-bold py-4 rounded-xl hover:bg-atlas-800 shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50">
                                 {procesando ? <Loader2 className="animate-spin" /> : 'Confirmar Datos y Pagar'}
                             </button>
                             {errorRut && <p className="text-center text-xs text-red-500 mt-2">RUT Inválido.</p>}
@@ -367,20 +398,20 @@ const Checkout = () => {
             </div>
 
             {notification.show && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95">
-                        <div className={`p-4 flex justify-center ${notification.type === 'error' ? 'bg-red-50 text-red-500' :
-                                notification.type === 'info' ? 'bg-blue-50 text-blue-500' :
-                                    'bg-green-50 text-green-500'
-                            }`}>
-                            {notification.type === 'error' && <XCircle size={48} />}
-                            {notification.type === 'info' && <AlertTriangle size={48} />}
-                            {notification.type === 'success' && <CheckCircle size={48} />}
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className={`p-4 flex justify-between items-start ${notification.type === 'error' ? 'bg-red-50 text-red-500' : notification.type === 'info' ? 'bg-blue-50 text-blue-500' : 'bg-green-50 text-green-500'}`}>
+                            <div className="flex justify-center w-full">
+                                {notification.type === 'error' && <XCircle size={48} />}
+                                {notification.type === 'info' && <AlertTriangle size={48} />}
+                                {notification.type === 'success' && <CheckCircle size={48} />}
+                            </div>
+                            <button onClick={() => setNotification({ ...notification, show: false })} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
                         </div>
                         <div className="p-6 text-center">
                             <h3 className="text-xl font-bold text-gray-900 mb-2">{notification.title}</h3>
                             <p className="text-gray-500 mb-6 text-sm">{notification.message}</p>
-                            <button onClick={() => setNotification({ ...notification, show: false })} className="w-full bg-atlas-900 text-white font-bold py-3 rounded-xl hover:bg-atlas-800">Entendido</button>
+                            <button onClick={() => setNotification({ ...notification, show: false })} className="w-full bg-atlas-900 text-white font-bold py-3 rounded-xl hover:bg-atlas-800 transition-colors">Entendido</button>
                         </div>
                     </div>
                 </div>
@@ -393,7 +424,7 @@ const Input = ({ label, name, type = "text", placeholder, value, onChange, requi
     <div className="w-full">
         <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
         <div className="relative">
-            <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className={`w-full ${icon ? 'pl-9' : 'px-4'} py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 outline-none`} />
+            <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className={`w-full ${icon ? 'pl-9' : 'px-4'} py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 outline-none transition-all`} />
             {icon && <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>}
         </div>
     </div>

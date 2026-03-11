@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, UserPlus, CreditCard } from 'lucide-react';
-import AlertModal from '../components/AlertModal'; 
-import api from '../api/axiosConfig';
+import { Mail, Lock, User, ArrowRight, UserPlus, CreditCard, Loader2 } from 'lucide-react';
+import AlertModal from '../components/AlertModal';
+import { useAuth } from '../context/AuthContext';
 
-// --- UTILIDADES RUT ---
+// --- UTILIDADES RUT (Rescatadas de Main para máxima precisión) ---
 const formatearRut = (rut) => {
     let valor = rut.replace(/[.-]/g, '');
     if (valor === '') return '';
@@ -33,16 +33,18 @@ const validarRutChileno = (rut) => {
 
 const Registro = () => {
     const navigate = useNavigate();
+    const { register } = useAuth(); // Usamos la función del Contexto
+    
     const [formData, setFormData] = useState({
         name: '',
         rut: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        password_confirmation: '' // Usamos el nombre que espera Laravel
     });
 
     const [modal, setModal] = useState({ open: false, type: 'success', title: '', message: '' });
-    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorRut, setErrorRut] = useState(false);
 
     const handleRutChange = (e) => {
@@ -57,9 +59,13 @@ const Registro = () => {
         }
     };
 
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        
         if (!validarRutChileno(formData.rut)) {
             setModal({
                 open: true,
@@ -70,7 +76,7 @@ const Registro = () => {
             return;
         }
 
-        if (formData.password !== formData.confirmPassword) {
+        if (formData.password !== formData.password_confirmation) {
             setModal({
                 open: true,
                 type: 'error',
@@ -80,25 +86,20 @@ const Registro = () => {
             return;
         }
 
-        setIsLoading(true);
+        setIsSubmitting(true);
 
         try {
-            await api.post('/register', {
-                name: formData.name,
-                rut: formData.rut,
-                email: formData.email,
-                password: formData.password
-            });
+            await register(formData);
 
             setModal({
                 open: true,
                 type: 'success',
                 title: '¡Cuenta Creada!',
-                message: 'Tu registro ha sido exitoso. Te redirigiremos al inicio de sesión.'
+                message: 'Tu registro ha sido exitoso. Entrando al sistema...'
             });
 
             setTimeout(() => {
-                navigate('/login');
+                navigate('/perfil'); // Al registrarse con éxito, el AuthContext ya los loguea
             }, 2000);
 
         } catch (error) {
@@ -109,12 +110,12 @@ const Registro = () => {
                 title: 'Error al registrar',
                 message: errorMessage
             });
-        } finally {
-            setIsLoading(false);
+            setIsSubmitting(false);
         }
     };
 
     return (
+        // Usamos py-36 para que no quede pegado al navbar
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4 py-36">
             <AlertModal
                 isOpen={modal.open}
@@ -144,15 +145,16 @@ const Registro = () => {
                             </div>
                             <input
                                 type="text"
+                                name="name"
                                 required
                                 placeholder="Juan Pérez"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                value={formData.name}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
 
-                    {/* NUEVO CAMPO RUT */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">RUT</label>
                         <div className="relative">
@@ -161,6 +163,7 @@ const Registro = () => {
                             </div>
                             <input
                                 type="text"
+                                name="rut"
                                 required
                                 value={formData.rut}
                                 placeholder="12.345.678-9"
@@ -179,10 +182,12 @@ const Registro = () => {
                             </div>
                             <input
                                 type="email"
+                                name="email"
                                 required
                                 placeholder="juan@empresa.com"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                value={formData.email}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
@@ -195,11 +200,13 @@ const Registro = () => {
                             </div>
                             <input
                                 type="password"
+                                name="password"
                                 required
                                 minLength={8}
                                 placeholder="Mínimo 8 caracteres"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                value={formData.password}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
@@ -212,11 +219,13 @@ const Registro = () => {
                             </div>
                             <input
                                 type="password"
+                                name="password_confirmation"
                                 required
                                 minLength={8}
                                 placeholder="Repite tu contraseña"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
-                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                value={formData.password_confirmation}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
@@ -224,10 +233,16 @@ const Registro = () => {
                     <div className="pt-2">
                         <button 
                             type="submit" 
-                            disabled={isLoading}
-                            className={`w-full text-white font-bold py-3 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2 ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-atlas-900 hover:bg-atlas-800 hover:shadow-xl'}`}
+                            disabled={isSubmitting}
+                            className={`w-full font-bold py-3 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2 ${
+                                isSubmitting ? 'bg-atlas-800 text-gray-300 cursor-wait' : 'bg-atlas-900 text-white hover:bg-atlas-800 hover:shadow-xl'
+                            }`}
                         >
-                            {isLoading ? 'Registrando...' : 'Registrarme'} <ArrowRight size={20} />
+                            {isSubmitting ? (
+                                <><Loader2 size={20} className="animate-spin" /> Creando cuenta...</>
+                            ) : (
+                                <>Registrarme <ArrowRight size={20} /></>
+                            )}
                         </button>
                     </div>
                 </form>

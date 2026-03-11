@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use App\Models\AccessLog;
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
@@ -23,25 +24,57 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
+        // Usamos la validación detallada de tu rama DEV
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'rut' => 'required|string|unique:users',
-            'password' => 'required|string|min:8',
+            'rut' => 'required|string|max:20|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            'name.required' => 'El nombre es obligatorio.',
+            'email.required' => 'El correo es obligatorio.',
+            'email.email' => 'Ingresa un correo válido.',
+            'email.unique' => 'Este correo ya está registrado.',
+            'rut.required' => 'El RUT es obligatorio.',
+            'rut.unique' => 'Este RUT ya está registrado en el sistema.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
-        $data = $this->authService->register($request->only('name', 'email', 'rut', 'password'));
+        $user = User::create([
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'rut' => $validatedData['rut'],
+            'password' => Hash::make($validatedData['password']),
+            'role_id' => 2,
+            'is_active' => true
+        ]);
 
-        $this->logAccess($request, $data['user']->id, 'Registro Exitoso');
+        // Lógica de DEV: Vincular órdenes pasadas usando el RUT
+        if (!empty($user->rut)) {
+            Order::where('rut', $user->rut)
+                ->whereNull('user_id')
+                ->update(['user_id' => $user->id]);
+        }
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+        $this->logAccess($request, $user->id, 'Registro Exitoso');
+
+        // Formato de respuesta alineado para que el frontend no falle
         return response()->json([
             'message' => 'Cuenta creada exitosamente',
-            'data' => $data
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+                'role' => 'cliente'
+            ]
         ], 201);
     }
 
     public function login(Request $request)
     {
+        // Usamos el login optimizado de MAIN
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -72,20 +105,20 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Sesión cerrada']);
     }
-    
+
     public function me(Request $request)
     {
         return response()->json($request->user()->load('role'));
     }
 
-    // --- MÉTODOS DE SEGURIDAD: RECUPERACIÓN DE CONTRASEÑA ---
+    // --- MÉTODOS DE SEGURIDAD: RECUPERACIÓN DE CONTRASEÑA (Desde MAIN) ---
 
     public function sendResetLink(Request $request)
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
         ], [
-            'email.exists' => 'Si el correo existe en nuestra base de datos, enviaremos un enlace.' // Mensaje genérico para evitar filtración de usuarios
+            'email.exists' => 'Si el correo existe en nuestra base de datos, enviaremos un enlace.' 
         ]);
 
         $status = Password::broker()->sendResetLink(

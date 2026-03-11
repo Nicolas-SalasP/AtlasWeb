@@ -13,17 +13,18 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
-        'subtotal',         // Coincide con controller
+        'rut',
+        'subtotal',
         'shipping_cost',
-        'total',            // Coincide con controller (antes era total_amount)
+        'total',
         'status',
-        'shipping_address', // Coincide con controller
-        'customer_data',    // Coincide con controller
+        'shipping_address',
+        'customer_data',
         'notes'
     ];
 
     protected $casts = [
-        'customer_data' => 'array', // Vital para que el JSON funcione
+        'customer_data' => 'array',
         'subtotal' => 'integer',
         'shipping_cost' => 'integer',
         'total' => 'integer',

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        // Roles
+        // 1. Roles
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // Usuarios
+        // 2. Usuarios
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('role_id')->constrained();
@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
-        // Seguridad
+        // 3. Seguridad
         Schema::create('user_securities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -44,21 +44,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // Direcciones
-        Schema::create('addresses', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('commune_id')->constrained();
-            $table->string('street');
-            $table->string('number');
-            $table->string('department')->nullable();
-            $table->string('phone_contact');
-            $table->boolean('is_default')->default(false);
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
-        // Logs de Acceso
+        // 4. Logs de Acceso
         Schema::create('access_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
@@ -70,6 +56,9 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('roles_and_users_tables');
+        Schema::dropIfExists('access_logs');
+        Schema::dropIfExists('user_securities');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
     }
 };

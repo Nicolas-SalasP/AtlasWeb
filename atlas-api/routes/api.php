@@ -13,6 +13,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\AddressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,7 @@ Route::get('/system-status', [SettingController::class, 'publicStatus']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 
+
 // ==============================================================================
 // RUTAS PROTEGIDAS (Requieren Login - auth:sanctum)
 // ==============================================================================
@@ -70,6 +72,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/security-logs', [ProfileController::class, 'getSecurityLogs']);
     });
 
+    // Gestión de Direcciones (Viene de tu rama DEV)
+    Route::get('/addresses', [AddressController::class, 'index']);
+    Route::post('/addresses', [AddressController::class, 'store']);
+    Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
+    Route::put('/addresses/{id}/default', [AddressController::class, 'setDefault']);
+
+    // Órdenes (Listar y Detalle blindado - Viene de MAIN)
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']); 
 
@@ -106,7 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-        
+
         // Imágenes de Productos
         Route::delete('/product-images/{id}', [ProductController::class, 'destroyImage']);
         Route::post('/product-images/{id}/cover', [ProductController::class, 'setCover']);

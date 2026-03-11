@@ -18,6 +18,9 @@ use App\Models\OrderItem;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
         // ---------------------------------------------------
@@ -48,15 +51,16 @@ class DatabaseSeeder extends Seeder
         // ---------------------------------------------------
         // 2. ROLES
         // ---------------------------------------------------
-        $roleAdmin = Role::create(['name' => 'admin', 'permissions' => ['all' => true]]);
-        $roleClient = Role::create(['name' => 'client', 'permissions' => ['buy' => true, 'open_ticket' => true]]);
+        // Rol ID 1: Admin, Rol ID 2: Cliente
+        $roleAdmin = Role::create(['name' => 'admin', 'permissions' => json_encode(['all' => true])]);
+        $roleClient = Role::create(['name' => 'client', 'permissions' => json_encode(['buy' => true, 'open_ticket' => true])]);
 
         // ---------------------------------------------------
         // 3. USUARIOS
         // ---------------------------------------------------
         $admin = User::create([
             'role_id' => $roleAdmin->id,
-            'name' => 'Nicolas Salas',
+            'name' => 'Nicolás Salas',
             'rut' => '11.111.111-1',
             'email' => 'nicolas@atlas.cl',
             'password' => Hash::make('password'),
@@ -97,36 +101,34 @@ class DatabaseSeeder extends Seeder
             'sku' => 'CAM-HL-004',
             'name' => 'Kit 4 Cámaras Hilook 1080p + DVR',
             'slug' => 'kit-4-camaras-hilook',
-            'description' => 'Solución completa de seguridad.',
+            'description' => 'Solución completa de seguridad para tu hogar o empresa.',
             'price' => 149990,
             'stock_current' => 8,
             'category_id' => $catSeguridad->id,
             'is_visible' => true
         ]);
-        ProductImage::create(['product_id' => $prod1->id, 'url' => 'https://images.unsplash.com/photo-1557324232-b8917d3c3d63?q=80&w=1000&auto=format&fit=crop', 'is_cover' => true]);
+        ProductImage::create(['product_id' => $prod1->id, 'url' => '/storage/products/camara.jpg', 'is_cover' => true]);
 
         $prod2 = Product::create([
             'sku' => 'MK-HAP-AC3',
             'name' => 'Router MikroTik hAP ac3',
             'slug' => 'router-mikrotik-hap-ac3',
-            'description' => 'Router Gigabit de doble banda.',
+            'description' => 'Router Gigabit de doble banda con antenas externas.',
             'price' => 65990,
             'stock_current' => 12,
             'category_id' => $catRedes->id,
             'is_visible' => true
         ]);
-        ProductImage::create(['product_id' => $prod2->id, 'url' => 'https://images.unsplash.com/photo-1544197150-b99a580bbcbf?q=80&w=1000&auto=format&fit=crop', 'is_cover' => true]);
+        ProductImage::create(['product_id' => $prod2->id, 'url' => '/storage/products/router.jpg', 'is_cover' => true]);
 
         // ---------------------------------------------------
-        // 6. ÓRDENES 
+        // 6. ÓRDENES (Generación de Historial)
         // ---------------------------------------------------
-
         $clientes = [$client1, $client2];
         $productosDisponibles = [$prod1, $prod2];
 
         foreach ($clientes as $cliente) {
             for ($i = 1; $i <= 2; $i++) {
-                $subtotal = 0;
                 $shipping = 4500;
 
                 $order = Order::create([
@@ -137,6 +139,11 @@ class DatabaseSeeder extends Seeder
                     'shipping_cost' => $shipping,
                     'total' => 0,
                     'status' => 'paid',
+                    'customer_data' => json_encode([
+                        'nombre' => $cliente->name,
+                        'email' => $cliente->email,
+                        'rut' => $cliente->rut
+                    ]),
                     'created_at' => now()->subDays(rand(1, 30))
                 ]);
 
@@ -154,17 +161,15 @@ class DatabaseSeeder extends Seeder
                     'total_line' => $totalLinea
                 ]);
 
-                $subtotal += $totalLinea;
-
                 $order->update([
-                    'subtotal' => $subtotal,
-                    'total' => $subtotal + $shipping
+                    'subtotal' => $totalLinea,
+                    'total' => $totalLinea + $shipping
                 ]);
             }
         }
 
         // ---------------------------------------------------
-        // 7. SOPORTE (Tickets)
+        // 7. SOPORTE (Tickets y Mensajes)
         // ---------------------------------------------------
         $ticket1 = Ticket::create([
             'ticket_code' => 'TK-1025',
@@ -174,7 +179,12 @@ class DatabaseSeeder extends Seeder
             'priority' => 'alta',
             'status' => 'nuevo'
         ]);
-        TicketMessage::create(['ticket_id' => $ticket1->id, 'user_id' => $client1->id, 'message' => 'El sistema lanza error 500.', 'attachments' => []]);
+        TicketMessage::create([
+            'ticket_id' => $ticket1->id, 
+            'user_id' => $client1->id, 
+            'message' => 'El sistema lanza error 500 al intentar exportar el PDF.', 
+            'attachments' => json_encode([])
+        ]);
 
         $ticket2 = Ticket::create([
             'ticket_code' => 'TK-1024',
@@ -184,7 +194,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'baja',
             'status' => 'cerrado'
         ]);
-        TicketMessage::create(['ticket_id' => $ticket2->id, 'user_id' => $client2->id, 'message' => 'Necesito la factura.']);
-        TicketMessage::create(['ticket_id' => $ticket2->id, 'user_id' => $admin->id, 'message' => 'Enviada.']);
+        TicketMessage::create(['ticket_id' => $ticket2->id, 'user_id' => $client2->id, 'message' => '¿Cuándo envían la factura del router?']);
+        TicketMessage::create(['ticket_id' => $ticket2->id, 'user_id' => $admin->id, 'message' => 'Hola, la factura ya fue enviada a tu correo registrado. Saludos.']);
     }
 }

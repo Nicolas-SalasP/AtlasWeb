@@ -14,11 +14,15 @@ class User extends Authenticatable
         'name',
         'rut',
         'email',
+        'rut',
         'password',
         'role_id',
+        'is_active',
+        'google_id',
         'avatar',
         'company_name',
-        'is_active'
+        'phone',
+        'address'
     ];
 
     public function role()
@@ -34,5 +38,10 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
     }
 }
