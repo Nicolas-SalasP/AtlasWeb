@@ -1,0 +1,82 @@
+name: Deploy AtlasWeb Monorepo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout del código
+        uses: actions/checkout@v3
+
+      # ==========================================
+      # 1. FRONTEND (REACT)
+      # ==========================================
+      - name: ⚙️ Setup Node.js (Frontend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 🏗️ Compilar Frontend (React)
+        run: |
+          cd atlas-web
+          npm install
+          npm run build
+
+      - name: 🚀 Subir Frontend a public_html via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./atlas-web/dist/
+          server-dir: /public_html/
+
+      # ==========================================
+      # 2. BACKEND (LARAVEL)
+      # ==========================================
+      - name: ⚙️ Setup PHP (Backend)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: 📦 Instalar Dependencias y Comprimir Backend
+        run: |
+          cd atlas-api
+          composer install --optimize-autoloader --no-dev
+          # Comprimimos para que la subida tarde segundos en vez de horas
+          zip -r ../backend.zip . -x "node_modules/*" -x "tests/*"
+
+      - name: 🚀 Subir Backend comprimido a atlas_project via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: /atlas_project/
+          exclude: |
+            **/*
+            !backend.zip
+
+      # ==========================================
+      # 3. EJECUTAR COMANDOS EN EL SERVIDOR (SSH)
+      # ==========================================
+      - name: 🛠️ Descomprimir y Ejecutar Artisan en cPanel
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }} 
+          port: 22
+          script: |
+            cd ~/atlas_project
+            unzip -o backend.zip
+            rm backend.zip
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan config:cache
