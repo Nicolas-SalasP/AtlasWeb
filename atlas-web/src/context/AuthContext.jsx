@@ -1,11 +1,14 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../api/axiosConfig';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+    const navigate = useNavigate();
+
     const [user, setUser] = useState(() => {
         try {
             const savedUser = localStorage.getItem('user_data') || sessionStorage.getItem('user_data');
@@ -15,7 +18,7 @@ export const AuthProvider = ({ children }) => {
         }
     });
 
-    const [loading, setLoading] = useState(!user);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -101,14 +104,12 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error(error);
         } finally {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user_data');
-            sessionStorage.removeItem('token');
-            sessionStorage.removeItem('user_data');
+            localStorage.clear();
+            sessionStorage.clear();
             
             delete api.defaults.headers.common['Authorization'];
             setUser(null);
-            window.location.href = '/login';
+            navigate('/login');
         }
     };
 

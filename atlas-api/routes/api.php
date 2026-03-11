@@ -24,8 +24,9 @@ use App\Http\Controllers\ServiceController;
 // ==============================================================================
 
 // Autenticación
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [AuthController::class, 'sendResetLink']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:3,1');
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // Catálogo Público

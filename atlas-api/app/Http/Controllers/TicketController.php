@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\TicketService;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
@@ -19,6 +20,24 @@ class TicketController extends Controller
     {
         $tickets = $this->ticketService->getUserTickets($request->user()->id);
         return response()->json($tickets);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        $ticket = Ticket::with('messages')->find($id);
+
+        if (!$ticket) {
+            return response()->json(['message' => 'Ticket no encontrado'], 404);
+        }
+
+        if ($user->role_id !== 1 && $ticket->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Acceso denegado. Este ticket pertenece a otra cuenta.'
+            ], 403);
+        }
+
+        return response()->json($ticket);
     }
 
     public function store(Request $request)
@@ -40,13 +59,26 @@ class TicketController extends Controller
 
     public function reply(Request $request, $id)
     {
+        $user = $request->user();
+        $ticket = Ticket::find($id);
+
+        if (!$ticket) {
+            return response()->json(['message' => 'Ticket no encontrado'], 404);
+        }
+
+        if ($user->role_id !== 1 && $ticket->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Acceso denegado. No puedes responder a un ticket ajeno.'
+            ], 403);
+        }
+
         $request->validate([
             'mensaje' => 'required_without:attachments|string|nullable',
             'attachments.*' => 'file|max:10240'
         ]);
 
         $message = $this->ticketService->addReply(
-            $request->user()->id,
+            $user->id,
             $id,
             $request->mensaje ?? '',
             $request->file('attachments')
@@ -54,6 +86,7 @@ class TicketController extends Controller
 
         return response()->json($message, 201);
     }
+
     public function indexAll(Request $request)
     {
         if ($request->user()->role_id != 1) {

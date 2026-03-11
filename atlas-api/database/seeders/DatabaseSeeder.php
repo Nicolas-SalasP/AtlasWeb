@@ -5,9 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str; // Necesario para generar códigos de orden
-
-// Importamos todos los Modelos
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Category;
@@ -15,8 +13,8 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
-use App\Models\Order;      // <--- NUEVO
-use App\Models\OrderItem;  // <--- NUEVO
+use App\Models\Order;
+use App\Models\OrderItem;
 
 class DatabaseSeeder extends Seeder
 {
@@ -59,6 +57,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'role_id' => $roleAdmin->id,
             'name' => 'Nicolas Salas',
+            'rut' => '11.111.111-1',
             'email' => 'nicolas@atlas.cl',
             'password' => Hash::make('password'),
             'company_name' => 'Atlas Digital Tech',
@@ -67,7 +66,8 @@ class DatabaseSeeder extends Seeder
 
         $client1 = User::create([
             'role_id' => $roleClient->id,
-            'name' => 'Insuban Ltda',
+            'name' => 'Procesadora Insuban Spa',
+            'rut' => '78.730.890-2',
             'email' => 'contacto@insuban.cl',
             'password' => Hash::make('password'),
             'company_name' => 'Insuban',
@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
         $client2 = User::create([
             'role_id' => $roleClient->id,
             'name' => 'Tsuki Ink',
+            'rut' => '33.333.333-3',
             'email' => 'ventas@tsuki.cl',
             'password' => Hash::make('password'),
             'company_name' => 'Tsuki Ink Store',
@@ -117,32 +118,28 @@ class DatabaseSeeder extends Seeder
         ProductImage::create(['product_id' => $prod2->id, 'url' => 'https://images.unsplash.com/photo-1544197150-b99a580bbcbf?q=80&w=1000&auto=format&fit=crop', 'is_cover' => true]);
 
         // ---------------------------------------------------
-        // 6. ÓRDENES (COMPRAS REALES) <--- AQUÍ ESTÁ LA MAGIA NUEVA
+        // 6. ÓRDENES 
         // ---------------------------------------------------
 
         $clientes = [$client1, $client2];
         $productosDisponibles = [$prod1, $prod2];
 
         foreach ($clientes as $cliente) {
-            // Creamos 2 órdenes por cliente
             for ($i = 1; $i <= 2; $i++) {
                 $subtotal = 0;
                 $shipping = 4500;
 
-                // 1. Crear Orden Cabecera
                 $order = Order::create([
                     'order_number' => 'ORD-' . strtoupper(Str::random(8)),
                     'user_id' => $cliente->id,
-                    'address_id' => null, // Opcional por ahora
-                    'subtotal' => 0, // Calculamos abajo
+                    'address_id' => null,
+                    'subtotal' => 0,
                     'shipping_cost' => $shipping,
-                    'total' => 0, // Calculamos abajo
-                    'status' => 'paid', // 'paid', 'pending', etc.
-                    'created_at' => now()->subDays(rand(1, 30)) // Fechas pasadas
+                    'total' => 0,
+                    'status' => 'paid',
+                    'created_at' => now()->subDays(rand(1, 30))
                 ]);
 
-                // 2. Crear Items
-                // Elegimos un producto al azar
                 $prodElegido = $productosDisponibles[array_rand($productosDisponibles)];
                 $cantidad = rand(1, 2);
                 $totalLinea = $prodElegido->price * $cantidad;
@@ -159,7 +156,6 @@ class DatabaseSeeder extends Seeder
 
                 $subtotal += $totalLinea;
 
-                // 3. Actualizar Totales
                 $order->update([
                     'subtotal' => $subtotal,
                     'total' => $subtotal + $shipping
