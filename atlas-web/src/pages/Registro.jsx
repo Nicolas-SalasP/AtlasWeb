@@ -4,59 +4,89 @@ import { Mail, Lock, User, ArrowRight, UserPlus, CreditCard, Loader2 } from 'luc
 import AlertModal from '../components/AlertModal';
 import { useAuth } from '../context/AuthContext';
 
+// --- UTILIDADES RUT (Rescatadas de Main para máxima precisión) ---
+const formatearRut = (rut) => {
+    let valor = rut.replace(/[.-]/g, '');
+    if (valor === '') return '';
+    const cuerpo = valor.slice(0, -1);
+    const dv = valor.slice(-1).toUpperCase();
+    return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + (cuerpo.length > 0 ? "-" : "") + dv;
+};
+
+const validarRutChileno = (rut) => {
+    if (!rut || rut.trim().length < 8) return false;
+    const valor = rut.replace(/[.-]/g, '');
+    const cuerpo = valor.slice(0, -1);
+    const dv = valor.slice(-1).toUpperCase();
+    if (!/^\d+$/.test(cuerpo)) return false;
+    let suma = 0;
+    let multiplicador = 2;
+    for (let i = cuerpo.length - 1; i >= 0; i--) {
+        suma += parseInt(cuerpo.charAt(i)) * multiplicador;
+        multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+    }
+    const resto = suma % 11;
+    const dvCalculado = 11 - resto;
+    let dvEsperado = dvCalculado === 11 ? '0' : dvCalculado === 10 ? 'K' : dvCalculado.toString();
+    return dv === dvEsperado;
+};
+
 const Registro = () => {
     const navigate = useNavigate();
-    const { register } = useAuth();
+    const { register } = useAuth(); // Usamos la función del Contexto
     
     const [formData, setFormData] = useState({
         name: '',
-        email: '',
         rut: '',
+        email: '',
         password: '',
-        password_confirmation: ''
+        password_confirmation: '' // Usamos el nombre que espera Laravel
     });
 
     const [modal, setModal] = useState({ open: false, type: 'success', title: '', message: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorRut, setErrorRut] = useState(false);
 
-    const formatRut = (rut) => {
-        let valor = rut.replace(/[^0-9kK]/g, '');
-        let cuerpo = valor.slice(0, -1);
-        let dv = valor.slice(-1).toUpperCase();
+    const handleRutChange = (e) => {
+        const rawValue = e.target.value.replace(/[^0-9kK]/g, '');
+        const formatted = formatearRut(rawValue);
+        setFormData({ ...formData, rut: formatted });
         
-        if (valor.length < 2) return valor;
-
-        rut = cuerpo + '-' + dv;
-        if (cuerpo.length > 3) {
-            cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            rut = cuerpo + '-' + dv;
+        if (formatted.length > 8 && !validarRutChileno(formatted)) {
+            setErrorRut(true);
+        } else {
+            setErrorRut(false);
         }
-        return rut;
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        if (name === 'rut') {
-            setFormData({ ...formData, [name]: formatRut(value) });
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
+        
+        if (!validarRutChileno(formData.rut)) {
+            setModal({
+                open: true,
+                type: 'error',
+                title: 'RUT Inválido',
+                message: 'Por favor, ingresa un RUT chileno válido.'
+            });
+            return;
+        }
 
         if (formData.password !== formData.password_confirmation) {
             setModal({
                 open: true,
                 type: 'error',
                 title: 'Error de Validación',
-                message: 'Las contraseñas no coinciden.'
+                message: 'Las contraseñas no coinciden. Por favor verifícalas.'
             });
-            setIsSubmitting(false);
             return;
         }
+
+        setIsSubmitting(true);
 
         try {
             await register(formData);
@@ -65,27 +95,28 @@ const Registro = () => {
                 open: true,
                 type: 'success',
                 title: '¡Cuenta Creada!',
-                message: 'Tu cuenta ha sido creada'
+                message: 'Tu registro ha sido exitoso. Entrando al sistema...'
             });
 
             setTimeout(() => {
-                navigate('/perfil');
+                navigate('/perfil'); // Al registrarse con éxito, el AuthContext ya los loguea
             }, 2000);
 
         } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Hubo un problema al crear tu cuenta.';
             setModal({
                 open: true,
                 type: 'error',
-                title: 'Error de Registro',
-                message: error.response?.data?.message || 'Hubo un problema al crear tu cuenta.'
+                title: 'Error al registrar',
+                message: errorMessage
             });
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 pt-20">
-
+        // Usamos py-36 para que no quede pegado al navbar
+        <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4 py-36">
             <AlertModal
                 isOpen={modal.open}
                 onClose={() => setModal({ ...modal, open: false })}
@@ -95,7 +126,6 @@ const Registro = () => {
             />
 
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-atlas-600 mb-4">
                         <UserPlus size={32} />
@@ -107,7 +137,6 @@ const Registro = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
                         <div className="relative">
@@ -136,13 +165,13 @@ const Registro = () => {
                                 type="text"
                                 name="rut"
                                 required
-                                placeholder="12.345.678-9"
-                                maxLength={12}
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
                                 value={formData.rut}
-                                onChange={handleChange}
+                                placeholder="12.345.678-9"
+                                className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 outline-none transition-all ${errorRut ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-atlas-300'}`}
+                                onChange={handleRutChange}
                             />
                         </div>
+                        {errorRut && <p className="text-xs text-red-500 mt-1">El RUT ingresado no es válido.</p>}
                     </div>
 
                     <div>
@@ -173,6 +202,7 @@ const Registro = () => {
                                 type="password"
                                 name="password"
                                 required
+                                minLength={8}
                                 placeholder="Mínimo 8 caracteres"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
                                 value={formData.password}
@@ -191,6 +221,7 @@ const Registro = () => {
                                 type="password"
                                 name="password_confirmation"
                                 required
+                                minLength={8}
                                 placeholder="Repite tu contraseña"
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
                                 value={formData.password_confirmation}
@@ -207,10 +238,13 @@ const Registro = () => {
                                 isSubmitting ? 'bg-atlas-800 text-gray-300 cursor-wait' : 'bg-atlas-900 text-white hover:bg-atlas-800 hover:shadow-xl'
                             }`}
                         >
-                            {isSubmitting ? <><Loader2 size={20} className="animate-spin" /> Creando cuenta...</> : <>Registrarme <ArrowRight size={20} /></>}
+                            {isSubmitting ? (
+                                <><Loader2 size={20} className="animate-spin" /> Creando cuenta...</>
+                            ) : (
+                                <>Registrarme <ArrowRight size={20} /></>
+                            )}
                         </button>
                     </div>
-
                 </form>
 
                 <div className="mt-8 text-center text-sm text-gray-500 border-t border-gray-100 pt-6">
@@ -219,13 +253,7 @@ const Registro = () => {
                         Inicia Sesión aquí
                     </Link>
                 </div>
-
             </div>
-
-            <p className="mt-8 text-gray-400 text-xs text-center">
-                &copy; 2026 Atlas Digital Tech. Todos los derechos reservados.
-            </p>
-
         </div>
     );
 };

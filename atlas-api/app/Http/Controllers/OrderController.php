@@ -16,7 +16,43 @@ class OrderController extends Controller
 {
     public function index()
     {
-        return Order::with(['user', 'items'])->orderBy('created_at', 'desc')->get();
+        $user = auth('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'No autorizado'], 401);
+        }
+
+        if ($user->role_id === 1) {
+            return Order::with(['user', 'items'])->orderBy('created_at', 'desc')->get();
+        }
+
+        return Order::with('items')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    public function show($id)
+    {
+        $user = auth('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'No autorizado'], 401);
+        }
+
+        $order = Order::with(['user', 'items'])->find($id);
+
+        if (!$order) {
+            return response()->json(['message' => 'Orden no encontrada'], 404);
+        }
+
+        if ($user->role_id !== 1 && $order->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Acceso denegado. No tienes permisos para ver esta orden.'
+            ], 403);
+        }
+
+        return response()->json($order);
     }
 
     public function store(Request $request)
@@ -27,8 +63,8 @@ class OrderController extends Controller
             'items' => 'required|array',
             'items.*.id' => 'required', 
             'items.*.quantity' => 'required|integer|min:1',
-            'shipping_cost' => 'required|numeric',
             'customer_data' => 'required|array',
+            'customer_data.region' => 'required|string',
         ]);
 
         try {
@@ -65,13 +101,11 @@ class OrderController extends Controller
                         throw new \Exception("El producto ID {$item['id']} no existe.");
                     }
 
-                    // Validar Stock
                     if ($product->stock_current < $item['quantity']) {
                         DB::rollBack();
                         return response()->json(['message' => "Stock insuficiente para {$product->name}. Quedan {$product->stock_current} unidades."], 400);
                     }
 
-                    // Descontar Stock
                     $product->decrement('stock_current', $item['quantity']);
 
                     $lineTotal = $product->price * $item['quantity'];
@@ -91,11 +125,17 @@ class OrderController extends Controller
                 }
             }
 
-            // Totales
-            $shipping = $request->shipping_cost;
+            $tarifasEnvio = [
+                "Metropolitana" => 3990, "Valparaíso" => 5990, "Biobío" => 6990, "Arica y Parinacota" => 10990,
+                "Tarapacá" => 10990, "Antofagasta" => 8990, "Atacama" => 7990, "Coquimbo" => 6990,
+                "O'Higgins" => 5990, "Maule" => 6990, "Ñuble" => 6990, "La Araucanía" => 7990,
+                "Los Ríos" => 8990, "Los Lagos" => 9990, "Aysén" => 12990, "Magallanes" => 12990
+            ];
+
+            $regionCliente = $request->customer_data['region'] ?? 'Metropolitana';
+            $shipping = $tarifasEnvio[$regionCliente] ?? 7990; 
             $total = $subtotalOrden + $shipping;
 
-            // Crear Orden
             $order = Order::create([
                 'user_id' => $user ? $user->id : null,
                 'order_number' => 'ORD-' . strtoupper(Str::random(8)),
@@ -107,15 +147,11 @@ class OrderController extends Controller
                 'customer_data' => $request->customer_data,
             ]);
 
-            // Guardar Ítems
             foreach ($itemsToInsert as $itemData) {
                 $order->items()->create($itemData);
             }
 
-            // Confirmar transacción (Aquí se liberan los bloqueos)
             DB::commit();
-
-            // Intento de envío de correo (No bloqueante)
             try {
                 $clientEmail = $request->customer_data['email'] ?? null;
                 if ($clientEmail) {

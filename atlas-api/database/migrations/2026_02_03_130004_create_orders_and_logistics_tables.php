@@ -11,8 +11,8 @@ return new class extends Migration {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->string('order_number')->unique();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('address_id')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained();
+            $table->unsignedBigInteger('address_id')->nullable();
             $table->decimal('subtotal', 12, 0);
             $table->decimal('shipping_cost', 12, 0);
             $table->decimal('total', 12, 0);

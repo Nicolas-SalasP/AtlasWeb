@@ -12,26 +12,26 @@ import L from 'leaflet';
 import api from '../api/axiosConfig';
 import PaymentSelector from '../components/checkout/PaymentSelector';
 import { BASE_URL } from '../api/constants';
-import { regiones } from '../api/chileData';
 
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-function RecenterAutomatically({ lat, lng }) {
-    const map = useMap();
-    useEffect(() => {
-        map.setView([lat, lng], 15);
-    }, [lat, lng]);
-    return null;
-}
+// --- CONSTANTES UNIFICADAS (Desde MAIN) ---
+const REGIONES_CHILE = {
+    "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
+    "Tarapacá": ["Iquique", "Alto Hospicio", "Pozo Almonte", "Camiña", "Colchane", "Huara", "Pica"],
+    "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "Ollagüe", "San Pedro de Atacama", "Tocopilla", "María Elena"],
+    "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "Chañaral", "Diego de Almagro", "Vallenar", "Alto del Carmen", "Freirina", "Huasco"],
+    "Coquimbo": ["La Serena", "Coquimbo", "Andacollo", "La Higuera", "Paiguano", "Vicuña", "Illapel", "Canela", "Los Vilos", "Salamanca", "Ovalle", "Combarbalá", "Monte Patria", "Punitaqui", "Río Hurtado"],
+    "Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Viña del Mar", "Isla de Pascua", "Los Andes", "Calle Larga", "Rinconada", "San Esteban", "La Ligua", "Cabildo", "Papudo", "Petorca", "Zapallar", "Quillota", "Calera", "Hijuelas", "La Cruz", "Nogales", "San Antonio", "Algarrobo", "Cartagena", "El Quisco", "El Tabo", "Santo Domingo", "San Felipe", "Catemu", "Llaillay", "Panquehue", "Putaendo", "Santa María", "Quilpué", "Limache", "Olmué", "Villa Alemana"],
+    "Metropolitana": ["Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Santiago", "Vitacura", "Puente Alto", "Pirque", "San José de Maipo", "Colina", "Lampa", "Tiltil", "San Bernardo", "Buin", "Calera de Tango", "Paine", "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro", "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"],
+    "O'Higgins": ["Rancagua", "Codegua", "Coinco", "Coltauco", "Doñihue", "Graneros", "Las Cabras", "Machalí", "Malloa", "Mostazal", "Olivar", "Peumo", "Pichidegua", "Quinta de Tilcoco", "Rengo", "Requínoa", "San Vicente", "Pichilemu", "La Estrella", "Litueche", "Marchihue", "Navidad", "Paredones", "San Fernando", "Chépica", "Chimbarongo", "Lolol", "Nancagua", "Palmilla", "Peralillo", "Placilla", "Pumanque", "Santa Cruz"],
+    "Maule": ["Talca", "Constitución", "Curepto", "Empedrado", "Maule", "Pelarco", "Pencahue", "Río Claro", "San Clemente", "San Rafael", "Cauquenes", "Chanco", "Pelluhue", "Curicó", "Hualañé", "Licantén", "Molina", "Rauco", "Romeral", "Sagrada Familia", "Teno", "Vichuquén", "Linares", "Colbún", "Longaví", "Parral", "Retiro", "San Javier", "Villa Alegre", "Yerbas Buenas"],
+    "Ñuble": ["Chillán", "Chillán Viejo", "Bulnes", "Cobquecura", "Coelemu", "Coihueco", "El Carmen", "Ninhue", "Ñiquén", "Pemuco", "Pinto", "Portezuelo", "Quillón", "Quirihue", "Ránquil", "San Carlos", "San Fabián", "San Ignacio", "San Nicolás", "Treguaco", "Yungay"],
+    "Biobío": ["Concepción", "Coronel", "Chiguayante", "Florida", "Hualqui", "Lota", "Penco", "San Pedro de la Paz", "Santa Juana", "Talcahuano", "Tomé", "Hualpén", "Lebu", "Arauco", "Cañete", "Contulmo", "Curanilahue", "Los Álamos", "Tirúa", "Los Ángeles", "Antuco", "Cabrero", "Laja", "Mulchén", "Nacimiento", "Negrete", "Quilaco", "Quilleco", "San Rosendo", "Santa Bárbara", "Tucapel", "Yumbel", "Alto Biobío"],
+    "La Araucanía": ["Temuco", "Carahue", "Cunco", "Curarrehue", "Freire", "Galvarino", "Gorbea", "Lautaro", "Loncoche", "Melipeuco", "Nueva Imperial", "Padre Las Casas", "Perquenco", "Pitrufquén", "Pucón", "Saavedra", "Teodoro Schmidt", "Toltén", "Vilcún", "Villarrica", "Cholchol", "Angol", "Collipulli", "Curacautín", "Ercilla", "Lonquimay", "Los Sauces", "Lumaco", "Purén", "Renaico", "Traiguén", "Victoria"],
+    "Los Ríos": ["Valdivia", "Corral", "Lanco", "Los Lagos", "Máfil", "Mariquina", "Paillaco", "Panguipulli", "La Unión", "Futrono", "Lago Ranco", "Río Bueno"],
+    "Los Lagos": ["Puerto Montt", "Calbuco", "Cochamó", "Fresia", "Frutillar", "Los Muermos", "Llanquihue", "Maullín", "Puerto Varas", "Castro", "Ancud", "Chonchi", "Curaco de Vélez", "Dalcahue", "Puqueldón", "Queilén", "Quellón", "Quemchi", "Quinchao", "Osorno", "Puerto Octay", "Purranque", "Puyehue", "Río Negro", "San Juan de la Costa", "San Pablo", "Chaitén", "Futaleufú", "Hualaihué", "Palena"],
+    "Aysén": ["Coyhaique", "Lago Verde", "Aysén", "Cisnes", "Guaitecas", "Cochrane", "O'Higgins", "Tortel", "Chile Chico", "Río Ibáñez"],
+    "Magallanes": ["Punta Arenas", "Laguna Blanca", "Río Verde", "San Gregorio", "Cabo de Hornos (Ex Navarino)", "Antártica", "Porvenir", "Primavera", "Timaukel", "Natales", "Torres del Paine"]
+};
 
 const TARIFAS_ENVIO = {
     "Metropolitana": 3990, "Valparaíso": 5990, "Biobío": 6990, "Arica y Parinacota": 10990,
@@ -40,6 +40,19 @@ const TARIFAS_ENVIO = {
     "Los Ríos": 8990, "Los Lagos": 9990, "Aysén": 12990, "Magallanes": 12990
 };
 
+// --- CONFIGURACIÓN MAPA ---
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({ iconUrl: icon, shadowUrl: iconShadow, iconSize: [25, 41], iconAnchor: [12, 41] });
+L.Marker.prototype.options.icon = DefaultIcon;
+
+function RecenterAutomatically({ lat, lng }) {
+    const map = useMap();
+    useEffect(() => { map.setView([lat, lng], 15); }, [lat, lng]);
+    return null;
+}
+
+// --- UTILIDADES ---
 const formatearRut = (rut) => {
     let valor = rut.replace(/[.-]/g, '');
     if (valor === '') return '';
@@ -76,27 +89,23 @@ const Checkout = () => {
     const [orderId, setOrderId] = useState(null);
     const [notification, setNotification] = useState({ show: false, type: 'error', title: '', message: '' });
 
-    const regionInicial = regiones.find(r => r.nombre === 'Metropolitana') || regiones[0];
-    const comunaInicial = regionInicial ? regionInicial.comunas[0] : '';
-
+    // --- ESTADO UNIFICADO ---
     const [datos, setDatos] = useState({
         nombre: '', apellido: '', email: '',
-        telefono: '',
-        rutPersonal: '',
+        telefono: '', rutPersonal: '',
         direccion: '', numero: '', depto: '',
-        region: regionInicial.nombre,
-        comuna: comunaInicial,
+        region: "Metropolitana",
+        comuna: "Santiago",
         tipoDocumento: 'boleta', rutEmpresa: '', razonSocial: '', giro: ''
     });
 
     const [errorRut, setErrorRut] = useState(false);
-    const [costoEnvio, setCostoEnvio] = useState(TARIFAS_ENVIO[regionInicial.nombre] || 7990);
+    const [costoEnvio, setCostoEnvio] = useState(TARIFAS_ENVIO["Metropolitana"]);
     const [mapCoords, setMapCoords] = useState({ lat: -33.4489, lng: -70.6693 });
     const [misDirecciones, setMisDirecciones] = useState([]);
     const [direccionSeleccionadaId, setDireccionSeleccionadaId] = useState(null);
 
-    const regionObjeto = regiones.find(r => r.nombre === datos.region);
-    const comunasDisponibles = regionObjeto ? regionObjeto.comunas : [];
+    const comunasDisponibles = REGIONES_CHILE[datos.region] || [];
 
     useEffect(() => {
         if (isAuthenticated && user) {
@@ -110,12 +119,8 @@ const Checkout = () => {
             const fetchMisDirecciones = async () => {
                 try {
                     const res = await api.get('/addresses');
-                    if (res.data && res.data.length > 0) {
-                        setMisDirecciones(res.data);
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
+                    if (res.data && res.data.length > 0) setMisDirecciones(res.data);
+                } catch (error) { console.error(error); }
             };
             fetchMisDirecciones();
         }
@@ -123,9 +128,7 @@ const Checkout = () => {
 
     const seleccionarDireccion = (addr) => {
         setDireccionSeleccionadaId(addr.id);
-
-        const regionExiste = regiones.find(r => r.nombre === addr.region);
-        const regionValida = regionExiste ? addr.region : regionInicial.nombre;
+        const regionValida = REGIONES_CHILE[addr.region] ? addr.region : "Metropolitana";
 
         setDatos(prev => ({
             ...prev,
@@ -136,10 +139,7 @@ const Checkout = () => {
             comuna: addr.commune
         }));
 
-        if (TARIFAS_ENVIO[regionValida]) {
-            setCostoEnvio(TARIFAS_ENVIO[regionValida]);
-        }
-
+        setCostoEnvio(TARIFAS_ENVIO[regionValida] || 7990);
         buscarDireccionEnMapaAutomatico(addr.address, addr.number, addr.commune, regionValida);
     };
 
@@ -156,17 +156,12 @@ const Checkout = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        if (['direccion', 'numero', 'region', 'comuna'].includes(name)) {
-            setDireccionSeleccionadaId(null);
-        }
+        if (['direccion', 'numero', 'region', 'comuna'].includes(name)) setDireccionSeleccionadaId(null);
 
         setDatos(prev => {
             const nuevosDatos = { ...prev, [name]: value };
-
             if (name === "region") {
-                const nuevaRegion = regiones.find(r => r.nombre === value);
-                nuevosDatos.comuna = nuevaRegion ? nuevaRegion.comunas[0] : '';
+                nuevosDatos.comuna = REGIONES_CHILE[value] ? REGIONES_CHILE[value][0] : '';
                 setCostoEnvio(TARIFAS_ENVIO[value] || 7990);
             }
             return nuevosDatos;
@@ -177,13 +172,10 @@ const Checkout = () => {
         const rawValue = e.target.value.replace(/[^0-9kK]/g, '');
         const formatted = formatearRut(rawValue);
         setDatos(prev => ({ ...prev, [fieldName]: formatted }));
-        if (formatted.length > 8 && !validarRutChileno(formatted)) setErrorRut(true);
-        else setErrorRut(false);
+        setErrorRut(formatted.length > 8 && !validarRutChileno(formatted));
     };
 
-    const showModal = (type, title, message) => {
-        setNotification({ show: true, type, title, message });
-    };
+    const showModal = (type, title, message) => setNotification({ show: true, type, title, message });
 
     const buscarDireccionEnMapa = async () => {
         if (!datos.direccion || !datos.comuna) {
@@ -195,16 +187,10 @@ const Checkout = () => {
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
             const data = await response.json();
-            if (data && data.length > 0) {
-                setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-            } else {
-                showModal('info', 'No encontrada', 'No encontramos la dirección exacta.');
-            }
-        } catch (e) {
-            showModal('error', 'Error', 'Error de conexión con el mapa.');
-        } finally {
-            setBuscandoDireccion(false);
-        }
+            if (data && data.length > 0) setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+            else showModal('info', 'No encontrada', 'No encontramos la dirección exacta.');
+        } catch (e) { showModal('error', 'Error', 'Error de conexión con el mapa.');
+        } finally { setBuscandoDireccion(false); }
     };
 
     const buscarDireccionEnMapaAutomatico = async (calle, num, comuna, region) => {
@@ -212,9 +198,7 @@ const Checkout = () => {
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
             const data = await response.json();
-            if (data && data.length > 0) {
-                setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-            }
+            if (data && data.length > 0) setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
         } catch (e) { }
     };
 
@@ -233,7 +217,6 @@ const Checkout = () => {
         }
 
         setProcesando(true);
-
         try {
             const orderPayload = {
                 items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
@@ -243,7 +226,8 @@ const Checkout = () => {
                     nombre: `${datos.nombre} ${datos.apellido}`,
                     rut: rutAValidar,
                     email: datos.email,
-                    phone: `+56 ${datos.telefono}`
+                    phone: `+56 ${datos.telefono}`,
+                    region: datos.region
                 }
             };
 
@@ -251,16 +235,12 @@ const Checkout = () => {
             if (isAuthenticated && data.is_guest_checkout) {
                 showModal('info', 'Sesión Expirada', 'Tu sesión expiró por seguridad, pero tu compra se procesó correctamente como invitado.');
             }
-
             setOrderId(data.order_id);
             clearCart();
-
         } catch (error) {
             console.error(error);
             showModal('error', 'Error', 'Ocurrió un problema al crear la orden.');
-        } finally {
-            setProcesando(false);
-        }
+        } finally { setProcesando(false); }
     };
 
     if (orderId) {
@@ -296,7 +276,6 @@ const Checkout = () => {
 
                 <div className="grid lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-7 space-y-6">
-
                         <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                             <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-atlas-900 text-white flex items-center justify-center text-xs">1</span> Datos Personales</h2>
                             <div className="grid md:grid-cols-2 gap-4">
@@ -323,42 +302,21 @@ const Checkout = () => {
 
                             {isAuthenticated && misDirecciones.length > 0 && (
                                 <div className="mb-6">
-                                    <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                                        <MapPin size={16} className="text-atlas-500" /> Usar una dirección guardada:
-                                    </h3>
+                                    <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><MapPin size={16} className="text-atlas-500" /> Usar una dirección guardada:</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {misDirecciones.map(addr => (
-                                            <button
-                                                key={addr.id}
-                                                type="button"
-                                                onClick={() => seleccionarDireccion(addr)}
-                                                className={`text-left p-3 rounded-xl border transition-all flex items-start gap-3 relative ${direccionSeleccionadaId === addr.id
-                                                        ? 'bg-atlas-50 border-atlas-500 ring-1 ring-atlas-500 shadow-sm'
-                                                        : 'bg-white border-gray-200 hover:border-atlas-300 hover:shadow-sm'
-                                                    }`}
-                                            >
-                                                <div className={`p-2 rounded-full ${direccionSeleccionadaId === addr.id ? 'bg-atlas-200 text-atlas-800' : 'bg-gray-100 text-gray-500'}`}>
-                                                    <MapPin size={16} />
-                                                </div>
+                                            <button key={addr.id} type="button" onClick={() => seleccionarDireccion(addr)} className={`text-left p-3 rounded-xl border transition-all flex items-start gap-3 relative ${direccionSeleccionadaId === addr.id ? 'bg-atlas-50 border-atlas-500 ring-1 ring-atlas-500 shadow-sm' : 'bg-white border-gray-200 hover:border-atlas-300 hover:shadow-sm'}`}>
+                                                <div className={`p-2 rounded-full ${direccionSeleccionadaId === addr.id ? 'bg-atlas-200 text-atlas-800' : 'bg-gray-100 text-gray-500'}`}><MapPin size={16} /></div>
                                                 <div className="flex-1">
-                                                    <div className="flex justify-between">
-                                                        <span className="font-bold text-gray-900 text-sm">{addr.alias}</span>
-                                                        {addr.is_default && <Star size={12} className="text-yellow-500 fill-yellow-500" />}
-                                                    </div>
+                                                    <div className="flex justify-between"><span className="font-bold text-gray-900 text-sm">{addr.alias}</span>{addr.is_default && <Star size={12} className="text-yellow-500 fill-yellow-500" />}</div>
                                                     <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{addr.address} #{addr.number}</p>
                                                     <p className="text-xs text-gray-400 mt-1">{addr.commune}, {addr.region}</p>
                                                 </div>
-                                                {direccionSeleccionadaId === addr.id && (
-                                                    <div className="absolute top-2 right-2 text-atlas-600"><CheckCircle size={14} /></div>
-                                                )}
+                                                {direccionSeleccionadaId === addr.id && <div className="absolute top-2 right-2 text-atlas-600"><CheckCircle size={14} /></div>}
                                             </button>
                                         ))}
                                     </div>
-                                    <div className="relative flex py-5 items-center">
-                                        <div className="flex-grow border-t border-gray-200"></div>
-                                        <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">O ingresa otra dirección</span>
-                                        <div className="flex-grow border-t border-gray-200"></div>
-                                    </div>
+                                    <div className="relative flex py-5 items-center"><div className="flex-grow border-t border-gray-200"></div><span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">O ingresa otra dirección</span><div className="flex-grow border-t border-gray-200"></div></div>
                                 </div>
                             )}
 
@@ -366,27 +324,18 @@ const Checkout = () => {
                                 <div className="md:col-span-2"><Input label="Calle / Avenida" name="direccion" value={datos.direccion} onChange={handleChange} /></div>
                                 <Input label="Número" name="numero" value={datos.numero} onChange={handleChange} />
                                 <Input label="Depto" name="depto" value={datos.depto} onChange={handleChange} required={false} />
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Región</label>
-                                    <div className="relative">
-                                        <select name="region" value={datos.region} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer transition-colors focus:ring-2 focus:ring-atlas-300 outline-none">
-                                            {regiones.map(r => <option key={r.nombre} value={r.nombre}>{r.nombre}</option>)}
-                                        </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
-                                    </div>
+                                    <select name="region" value={datos.region} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-atlas-300 outline-none">
+                                        {Object.keys(REGIONES_CHILE).map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Comuna</label>
-                                    <div className="relative">
-                                        <select name="comuna" value={datos.comuna} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer transition-colors focus:ring-2 focus:ring-atlas-300 outline-none">
-                                            {comunasDisponibles.map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
-                                    </div>
+                                    <select name="comuna" value={datos.comuna} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-atlas-300 outline-none">
+                                        {comunasDisponibles.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
                                 </div>
-
                                 <div className="md:col-span-2 flex justify-end">
                                     <button type="button" onClick={buscarDireccionEnMapa} disabled={buscandoDireccion} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 flex items-center gap-2 transition-all active:scale-95 shadow-sm">
                                         {buscandoDireccion ? 'Buscando...' : <><Search size={16} /> Ubicar en Mapa</>}
@@ -407,10 +356,7 @@ const Checkout = () => {
                             <div className="flex gap-4 mb-6">
                                 {['boleta', 'factura'].map(tipo => (
                                     <label key={tipo} className={`flex-1 border rounded-lg p-4 cursor-pointer transition-all ${datos.tipoDocumento === tipo ? 'border-atlas-500 bg-blue-50 ring-1 ring-atlas-500' : 'border-gray-200 hover:border-gray-300'}`}>
-                                        <div className="flex items-center gap-3">
-                                            <input type="radio" name="tipoDocumento" value={tipo} checked={datos.tipoDocumento === tipo} onChange={handleChange} className="accent-atlas-900 w-4 h-4" />
-                                            <span className="font-bold text-gray-700 capitalize">{tipo}</span>
-                                        </div>
+                                        <div className="flex items-center gap-3"><input type="radio" name="tipoDocumento" value={tipo} checked={datos.tipoDocumento === tipo} onChange={handleChange} className="accent-atlas-900 w-4 h-4" /><span className="font-bold text-gray-700 capitalize">{tipo}</span></div>
                                     </label>
                                 ))}
                             </div>
@@ -442,7 +388,7 @@ const Checkout = () => {
                             </div>
                             <div className="flex justify-between items-center border-t border-gray-200 mt-4 pt-4 mb-6"><span className="text-lg font-bold text-gray-900">Total</span><span className="text-2xl font-bold text-atlas-900">${totalConEnvio.toLocaleString('es-CL')}</span></div>
 
-                            <button onClick={handleCrearOrden} disabled={procesando} className="w-full bg-atlas-900 text-white font-bold py-4 rounded-xl hover:bg-atlas-800 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95">
+                            <button onClick={handleCrearOrden} disabled={procesando} className="w-full bg-atlas-900 text-white font-bold py-4 rounded-xl hover:bg-atlas-800 shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50">
                                 {procesando ? <Loader2 className="animate-spin" /> : 'Confirmar Datos y Pagar'}
                             </button>
                             {errorRut && <p className="text-center text-xs text-red-500 mt-2">RUT Inválido.</p>}

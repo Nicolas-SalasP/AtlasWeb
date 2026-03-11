@@ -44,7 +44,7 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 pt-20">
+        <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 pt-32 pb-12">
 
             <AlertModal
                 isOpen={modal.open}

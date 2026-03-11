@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use App\Models\AccessLog;
-use App\Models\User;   // <--- Agregado
-use App\Models\Order;  // <--- Agregado para vincular compras
+use App\Models\User;
+use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Hash; // <--- Agregado para encriptar password
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -22,6 +24,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Usamos la validación detallada de tu rama DEV
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -38,6 +41,7 @@ class AuthController extends Controller
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
+
         $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
@@ -46,37 +50,41 @@ class AuthController extends Controller
             'role_id' => 2,
             'is_active' => true
         ]);
+
+        // Lógica de DEV: Vincular órdenes pasadas usando el RUT
         if (!empty($user->rut)) {
             Order::where('rut', $user->rut)
                 ->whereNull('user_id')
                 ->update(['user_id' => $user->id]);
         }
-        $token = $user->createToken('auth_token')->plainTextToken;
-        $this->logAccess($request, $user->id, 'Registro de Nuevo Usuario');
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+        $this->logAccess($request, $user->id, 'Registro Exitoso');
+
+        // Formato de respuesta alineado para que el frontend no falle
         return response()->json([
-            'message' => 'Usuario registrado exitosamente',
-            'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
+            'message' => 'Cuenta creada exitosamente',
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+                'role' => 'cliente'
+            ]
         ], 201);
     }
 
     public function login(Request $request)
     {
+        // Usamos el login optimizado de MAIN
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
         $data = $this->authService->login($request->email, $request->password);
-        $userId = null;
-        if (is_array($data) && isset($data['user']['id'])) {
-            $userId = $data['user']['id'];
-        } elseif (is_object($data) && isset($data->user->id)) {
-            $userId = $data->user->id;
-        }
+        $user = auth()->user(); 
 
+        $userId = $user ? $user->id : ($data['user']['id'] ?? null);
+        
         if ($userId) {
             $this->logAccess($request, $userId, 'Inicio de Sesión Exitoso');
         }
@@ -103,33 +111,77 @@ class AuthController extends Controller
         return response()->json($request->user()->load('role'));
     }
 
+    // --- MÉTODOS DE SEGURIDAD: RECUPERACIÓN DE CONTRASEÑA (Desde MAIN) ---
+
+    public function sendResetLink(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.exists' => 'Si el correo existe en nuestra base de datos, enviaremos un enlace.' 
+        ]);
+
+        $status = Password::broker()->sendResetLink(
+            $request->only('email')
+        );
+
+        if ($status === Password::RESET_LINK_SENT) {
+            $user = User::where('email', $request->email)->first();
+            if ($user) {
+                $this->logAccess($request, $user->id, 'Solicitud Recuperación de Contraseña');
+            }
+
+            return response()->json([
+                'message' => 'Te hemos enviado un enlace para restablecer tu contraseña.'
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'No se pudo enviar el enlace. Intenta nuevamente.'
+        ], 400);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $status = Password::broker()->reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->save();
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            $user = User::where('email', $request->email)->first();
+            $user->tokens()->delete();
+            $this->logAccess($request, $user->id, 'Contraseña Restablecida');
+
+            return response()->json([
+                'message' => 'Tu contraseña ha sido restablecida exitosamente.'
+            ]);
+        }
+
+        throw ValidationException::withMessages([
+            'email' => ['El token de recuperación es inválido o ha expirado.']
+        ]);
+    }
+
     private function logAccess(Request $request, $userId, $action)
     {
         try {
             $ip = $request->ip();
-            $city = null;
-            $region = null;
-            if ($ip !== '127.0.0.1' && $ip !== '::1') {
-                $response = Http::timeout(2)->get("http://ip-api.com/json/{$ip}?fields=status,city,regionName");
-
-                if ($response->successful() && $response['status'] === 'success') {
-                    $city = $response['city'];
-                    $region = $response['regionName'];
-                }
-            } else {
-                $city = 'Localhost';
-                $region = 'Dev';
-            }
-
             AccessLog::create([
                 'user_id' => $userId,
                 'ip_address' => $ip,
-                'city' => $city,
-                'region' => $region,
                 'action' => $action,
-                'user_agent' => $request->header('User-Agent'),
             ]);
-
         } catch (\Exception $e) {
             \Log::error("Error guardando AccessLog: " . $e->getMessage());
         }

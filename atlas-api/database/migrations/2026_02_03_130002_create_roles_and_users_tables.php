@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('role_id')->constrained();
             $table->string('name');
+            $table->string('rut')->unique();
             $table->string('email')->unique();
             $table->string('password');
             $table->string('avatar')->nullable();
@@ -31,7 +32,7 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
-        // Seguridad (2FA y Datos Sensibles)
+        // Seguridad
         Schema::create('user_securities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -67,9 +68,6 @@ return new class extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('roles_and_users_tables');
