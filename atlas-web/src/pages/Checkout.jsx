@@ -13,32 +13,8 @@ import api from '../api/axiosConfig';
 import PaymentSelector from '../components/checkout/PaymentSelector';
 import { BASE_URL } from '../api/constants';
 
-// --- CONSTANTES UNIFICADAS (Desde MAIN) ---
-const REGIONES_CHILE = {
-    "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
-    "Tarapacá": ["Iquique", "Alto Hospicio", "Pozo Almonte", "Camiña", "Colchane", "Huara", "Pica"],
-    "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "Ollagüe", "San Pedro de Atacama", "Tocopilla", "María Elena"],
-    "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "Chañaral", "Diego de Almagro", "Vallenar", "Alto del Carmen", "Freirina", "Huasco"],
-    "Coquimbo": ["La Serena", "Coquimbo", "Andacollo", "La Higuera", "Paiguano", "Vicuña", "Illapel", "Canela", "Los Vilos", "Salamanca", "Ovalle", "Combarbalá", "Monte Patria", "Punitaqui", "Río Hurtado"],
-    "Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Viña del Mar", "Isla de Pascua", "Los Andes", "Calle Larga", "Rinconada", "San Esteban", "La Ligua", "Cabildo", "Papudo", "Petorca", "Zapallar", "Quillota", "Calera", "Hijuelas", "La Cruz", "Nogales", "San Antonio", "Algarrobo", "Cartagena", "El Quisco", "El Tabo", "Santo Domingo", "San Felipe", "Catemu", "Llaillay", "Panquehue", "Putaendo", "Santa María", "Quilpué", "Limache", "Olmué", "Villa Alemana"],
-    "Metropolitana": ["Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Santiago", "Vitacura", "Puente Alto", "Pirque", "San José de Maipo", "Colina", "Lampa", "Tiltil", "San Bernardo", "Buin", "Calera de Tango", "Paine", "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro", "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"],
-    "O'Higgins": ["Rancagua", "Codegua", "Coinco", "Coltauco", "Doñihue", "Graneros", "Las Cabras", "Machalí", "Malloa", "Mostazal", "Olivar", "Peumo", "Pichidegua", "Quinta de Tilcoco", "Rengo", "Requínoa", "San Vicente", "Pichilemu", "La Estrella", "Litueche", "Marchihue", "Navidad", "Paredones", "San Fernando", "Chépica", "Chimbarongo", "Lolol", "Nancagua", "Palmilla", "Peralillo", "Placilla", "Pumanque", "Santa Cruz"],
-    "Maule": ["Talca", "Constitución", "Curepto", "Empedrado", "Maule", "Pelarco", "Pencahue", "Río Claro", "San Clemente", "San Rafael", "Cauquenes", "Chanco", "Pelluhue", "Curicó", "Hualañé", "Licantén", "Molina", "Rauco", "Romeral", "Sagrada Familia", "Teno", "Vichuquén", "Linares", "Colbún", "Longaví", "Parral", "Retiro", "San Javier", "Villa Alegre", "Yerbas Buenas"],
-    "Ñuble": ["Chillán", "Chillán Viejo", "Bulnes", "Cobquecura", "Coelemu", "Coihueco", "El Carmen", "Ninhue", "Ñiquén", "Pemuco", "Pinto", "Portezuelo", "Quillón", "Quirihue", "Ránquil", "San Carlos", "San Fabián", "San Ignacio", "San Nicolás", "Treguaco", "Yungay"],
-    "Biobío": ["Concepción", "Coronel", "Chiguayante", "Florida", "Hualqui", "Lota", "Penco", "San Pedro de la Paz", "Santa Juana", "Talcahuano", "Tomé", "Hualpén", "Lebu", "Arauco", "Cañete", "Contulmo", "Curanilahue", "Los Álamos", "Tirúa", "Los Ángeles", "Antuco", "Cabrero", "Laja", "Mulchén", "Nacimiento", "Negrete", "Quilaco", "Quilleco", "San Rosendo", "Santa Bárbara", "Tucapel", "Yumbel", "Alto Biobío"],
-    "La Araucanía": ["Temuco", "Carahue", "Cunco", "Curarrehue", "Freire", "Galvarino", "Gorbea", "Lautaro", "Loncoche", "Melipeuco", "Nueva Imperial", "Padre Las Casas", "Perquenco", "Pitrufquén", "Pucón", "Saavedra", "Teodoro Schmidt", "Toltén", "Vilcún", "Villarrica", "Cholchol", "Angol", "Collipulli", "Curacautín", "Ercilla", "Lonquimay", "Los Sauces", "Lumaco", "Purén", "Renaico", "Traiguén", "Victoria"],
-    "Los Ríos": ["Valdivia", "Corral", "Lanco", "Los Lagos", "Máfil", "Mariquina", "Paillaco", "Panguipulli", "La Unión", "Futrono", "Lago Ranco", "Río Bueno"],
-    "Los Lagos": ["Puerto Montt", "Calbuco", "Cochamó", "Fresia", "Frutillar", "Los Muermos", "Llanquihue", "Maullín", "Puerto Varas", "Castro", "Ancud", "Chonchi", "Curaco de Vélez", "Dalcahue", "Puqueldón", "Queilén", "Quellón", "Quemchi", "Quinchao", "Osorno", "Puerto Octay", "Purranque", "Puyehue", "Río Negro", "San Juan de la Costa", "San Pablo", "Chaitén", "Futaleufú", "Hualaihué", "Palena"],
-    "Aysén": ["Coyhaique", "Lago Verde", "Aysén", "Cisnes", "Guaitecas", "Cochrane", "O'Higgins", "Tortel", "Chile Chico", "Río Ibáñez"],
-    "Magallanes": ["Punta Arenas", "Laguna Blanca", "Río Verde", "San Gregorio", "Cabo de Hornos (Ex Navarino)", "Antártica", "Porvenir", "Primavera", "Timaukel", "Natales", "Torres del Paine"]
-};
-
-const TARIFAS_ENVIO = {
-    "Metropolitana": 3990, "Valparaíso": 5990, "Biobío": 6990, "Arica y Parinacota": 10990,
-    "Tarapacá": 10990, "Antofagasta": 8990, "Atacama": 7990, "Coquimbo": 6990,
-    "O'Higgins": 5990, "Maule": 6990, "Ñuble": 6990, "La Araucanía": 7990,
-    "Los Ríos": 8990, "Los Lagos": 9990, "Aysén": 12990, "Magallanes": 12990
-};
+// --- IMPORTACIONES CENTRALIZADAS ---
+import { REGIONES_CHILE, TARIFAS_ENVIO } from '../api/chileData';
 
 // --- CONFIGURACIÓN MAPA ---
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -96,7 +72,8 @@ const Checkout = () => {
         direccion: '', numero: '', depto: '',
         region: "Metropolitana",
         comuna: "Santiago",
-        tipoDocumento: 'boleta', rutEmpresa: '', razonSocial: '', giro: ''
+        tipoDocumento: 'boleta', rutEmpresa: '', razonSocial: '', giro: '',
+        notas: '' // <-- CAMPO DE NOTAS
     });
 
     const [errorRut, setErrorRut] = useState(false);
@@ -228,7 +205,8 @@ const Checkout = () => {
                     email: datos.email,
                     phone: `+56 ${datos.telefono}`,
                     region: datos.region
-                }
+                },
+                notes: datos.notas // <-- ENVÍO DE NOTAS AL BACKEND
             };
 
             const { data } = await api.post('/orders', orderPayload);
@@ -336,7 +314,20 @@ const Checkout = () => {
                                         {comunasDisponibles.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </div>
-                                <div className="md:col-span-2 flex justify-end">
+
+                                {/* --- CAJA DE TEXTO DE NOTAS --- */}
+                                <div className="md:col-span-2 mt-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Notas del pedido (Opcional)</label>
+                                    <textarea 
+                                        name="notas" 
+                                        value={datos.notas} 
+                                        onChange={handleChange} 
+                                        placeholder="Ej: Dejar en portería, el timbre no funciona, llamar al llegar..."
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 outline-none transition-all resize-none h-24"
+                                    ></textarea>
+                                </div>
+
+                                <div className="md:col-span-2 flex justify-end mt-2">
                                     <button type="button" onClick={buscarDireccionEnMapa} disabled={buscandoDireccion} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 flex items-center gap-2 transition-all active:scale-95 shadow-sm">
                                         {buscandoDireccion ? 'Buscando...' : <><Search size={16} /> Ubicar en Mapa</>}
                                     </button>

@@ -14,15 +14,21 @@ class User extends Authenticatable
         'name',
         'rut',
         'email',
-        'rut',
         'password',
         'role_id',
+        'permissions',
         'is_active',
         'google_id',
         'avatar',
         'company_name',
         'phone',
         'address'
+    ];
+
+    protected $casts = [
+        'permissions' => 'array', 
+        'is_active' => 'boolean',
+        'password' => 'hashed',
     ];
 
     public function role()

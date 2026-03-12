@@ -3,11 +3,11 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
     LayoutDashboard, Package, ShoppingCart, LogOut, 
-    Settings, Home, Users, LifeBuoy, Menu, X, Briefcase, Layers, Zap
+    Settings, Home, Users, LifeBuoy, Menu, X, Zap
 } from 'lucide-react';
 
 const AdminLayout = () => {
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,6 +23,27 @@ const AdminLayout = () => {
 
     const handleNavigation = () => {
         setSidebarOpen(false);
+    };
+
+    const checkPermission = (permisoRequerido) => {
+        if (!user) return false;
+        let rolePerms = {};
+        if (user.role?.permissions) {
+            rolePerms = typeof user.role.permissions === 'string' 
+                ? JSON.parse(user.role.permissions) 
+                : user.role.permissions;
+        }
+
+        let userPerms = {};
+        if (user.permissions) {
+            userPerms = typeof user.permissions === 'string' 
+                ? JSON.parse(user.permissions) 
+                : user.permissions;
+        }
+
+        const perms = Object.keys(userPerms).length > 0 ? userPerms : rolePerms;
+        if (perms.all === true) return true;
+        return perms[permisoRequerido] === true;
     };
 
     return (
@@ -57,25 +78,43 @@ const AdminLayout = () => {
                     <Link to="/admin" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin')}`}>
                         <LayoutDashboard size={20} /> Dashboard
                     </Link>
-                    <Link to="/admin/productos" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/productos')}`}>
-                        <Package size={20} /> Productos
-                    </Link>
-                    <Link to="/admin/services" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/services')}`}>
-                        <Zap size={20} /> Servicios
-                    </Link>
-                    <Link to="/admin/pedidos" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/pedidos')}`}>
-                        <ShoppingCart size={20} /> Pedidos
-                    </Link>
-                    <Link to="/admin/usuarios" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/usuarios')}`}>
-                        <Users size={20} /> Clientes
-                    </Link>
-                    <Link to="/admin/tickets" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/tickets')}`}>
-                        <LifeBuoy size={20} /> Soporte
-                    </Link>
-                    <Link to="/admin/configuracion" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/configuracion')}`}>
-                        <Settings size={20} /> Configuración
-                    </Link>
+                    {checkPermission('manage_products') && (
+                        <Link to="/admin/productos" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/productos')}`}>
+                            <Package size={20} /> Productos
+                        </Link>
+                    )}
+
+                    {checkPermission('manage_services') && (
+                        <Link to="/admin/services" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/services')}`}>
+                            <Zap size={20} /> Servicios
+                        </Link>
+                    )}
+
+                    {checkPermission('view_orders') && (
+                        <Link to="/admin/pedidos" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/pedidos')}`}>
+                            <ShoppingCart size={20} /> Pedidos
+                        </Link>
+                    )}
+
+                    {checkPermission('view_users') && (
+                        <Link to="/admin/usuarios" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/usuarios')}`}>
+                            <Users size={20} /> Clientes
+                        </Link>
+                    )}
+
+                    {checkPermission('view_tickets') && (
+                        <Link to="/admin/tickets" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/tickets')}`}>
+                            <LifeBuoy size={20} /> Soporte
+                        </Link>
+                    )}
+
+                    {checkPermission('manage_settings') && (
+                        <Link to="/admin/configuracion" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/configuracion')}`}>
+                            <Settings size={20} /> Configuración
+                        </Link>
+                    )}
                 </nav>
+
                 <div className="p-4 border-t border-atlas-800 bg-atlas-900">
                     <Link to="/" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors mb-2">
                         <Home size={16} /> Ver Sitio Web
@@ -91,7 +130,6 @@ const AdminLayout = () => {
             <main className="flex-1 w-full overflow-hidden flex flex-col pt-16 md:pt-0">
                 <Outlet />
             </main>
-
         </div>
     );
 };

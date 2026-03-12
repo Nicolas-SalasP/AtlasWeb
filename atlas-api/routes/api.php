@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Órdenes (Listar y Detalle blindado - Viene de MAIN)
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']); 
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
 
     // Tickets (Lado Cliente)
     Route::get('/tickets', [TicketController::class, 'index']);
@@ -96,36 +97,54 @@ Route::middleware('auth:sanctum')->group(function () {
     // ==============================================================================
     // ZONA ADMINISTRADOR (Requieren Login + Rol Admin)
     // ==============================================================================
-    Route::middleware(['admin'])->prefix('admin')->group(function () {
+    Route::prefix('admin')->group(function () {
+        // 1. Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('admin');
 
-        // Dashboard & Analytics
-        Route::get('/dashboard', [DashboardController::class, 'index']);
+        // 2. Configuración Global (Solo permiso: manage_settings)
+        Route::middleware(['admin:manage_settings'])->group(function () {
+            Route::get('/settings', [SettingController::class, 'index']);
+            Route::post('/settings', [SettingController::class, 'update']);
+        });
 
-        // Configuración Global del Sistema
-        Route::get('/settings', [SettingController::class, 'index']);
-        Route::post('/settings', [SettingController::class, 'update']);
+        // 3. Gestión de Usuarios y Clientes (Solo permiso: view_users)
+        Route::middleware(['admin:view_users'])->group(function () {
+            Route::get('/users', [UserController::class, 'index']);
+            Route::get('/users/{id}', [UserController::class, 'show']);
+            Route::put('/users/{id}', [UserController::class, 'update']);
+        });
 
-        // Gestión de Usuarios
-        Route::get('/users', [UserController::class, 'index']);
-        Route::get('/users/{id}', [UserController::class, 'show']);
-        Route::put('/users/{id}', [UserController::class, 'update']);
+        // 4. Gestión de Productos (Solo permiso: manage_products)
+        Route::middleware(['admin:manage_products'])->group(function () {
+            Route::get('/products', [ProductController::class, 'index']);
+            Route::post('/products', [ProductController::class, 'store']);
+            Route::put('/products/{id}', [ProductController::class, 'update']);
+            Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+            Route::delete('/product-images/{id}', [ProductController::class, 'destroyImage']);
+            Route::post('/product-images/{id}/cover', [ProductController::class, 'setCover']);
+        });
 
-        // Gestión de Productos
-        Route::get('/products', [ProductController::class, 'index']);
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::put('/products/{id}', [ProductController::class, 'update']);
-        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+        // 5. Gestión de Servicios (Solo permiso: manage_services)
+        Route::middleware(['admin:manage_services'])->group(function () {
+            Route::apiResource('/services', ServiceController::class);
+        });
 
-        // Imágenes de Productos
-        Route::delete('/product-images/{id}', [ProductController::class, 'destroyImage']);
-        Route::post('/product-images/{id}/cover', [ProductController::class, 'setCover']);
+        // 6. Gestión de Tickets de Soporte (Solo permiso: view_tickets)
+        Route::middleware(['admin:view_tickets'])->group(function () {
+            Route::get('/tickets', [TicketController::class, 'indexAll']);
+            Route::put('/tickets/{id}/status', [TicketController::class, 'updateStatus']);
+        });
 
-        // Gestión de Servicios
-        Route::apiResource('/services', ServiceController::class);
-
-        // Gestión de Tickets (Soporte Admin)
-        Route::get('/tickets', [TicketController::class, 'indexAll']);
-        Route::put('/tickets/{id}/status', [TicketController::class, 'updateStatus']);
+        // 7. Gestión de Pedidos y Comprobantes (Solo permiso: view_orders)
+        Route::middleware(['admin:view_orders'])->group(function () {
+            // Órdenes
+            Route::get('/orders', [OrderController::class, 'indexAll']);
+            Route::put('/orders/{id}', [OrderController::class, 'update']);
+            
+            // Comprobantes Bancarios en Standby
+            Route::get('/bank-receipts/unmatched', [\App\Http\Controllers\BankReceiptController::class, 'getUnmatched']);
+            Route::post('/bank-receipts/{id}/match', [\App\Http\Controllers\BankReceiptController::class, 'manualMatch']);
+        });
     });
 
 });

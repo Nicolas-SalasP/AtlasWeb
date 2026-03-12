@@ -31,7 +31,7 @@ class TicketController extends Controller
             return response()->json(['message' => 'Ticket no encontrado'], 404);
         }
 
-        if ($user->role_id !== 1 && $ticket->user_id !== $user->id) {
+        if ($user->role_id != 1 && $ticket->user_id !== $user->id) {
             return response()->json([
                 'message' => 'Acceso denegado. Este ticket pertenece a otra cuenta.'
             ], 403);
@@ -66,7 +66,7 @@ class TicketController extends Controller
             return response()->json(['message' => 'Ticket no encontrado'], 404);
         }
 
-        if ($user->role_id !== 1 && $ticket->user_id !== $user->id) {
+        if ($user->role_id != 1 && $ticket->user_id !== $user->id) {
             return response()->json([
                 'message' => 'Acceso denegado. No puedes responder a un ticket ajeno.'
             ], 403);

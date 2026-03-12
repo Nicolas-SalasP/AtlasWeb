@@ -41,7 +41,7 @@ const UserProfile = () => {
                 setLoadingData(true);
                 try {
                     const [ordersRes, subRes, ticketRes] = await Promise.all([
-                        api.get('/profile/orders'),
+                        api.get('/orders'),
                         api.get('/profile/subscription'),
                         api.get('/profile/tickets-summary')
                     ]);

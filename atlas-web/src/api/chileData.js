@@ -64,3 +64,27 @@ export const regiones = [
         comunas: ["Punta Arenas", "Laguna Blanca", "Río Verde", "San Gregorio", "Cabo de Hornos", "Antártica", "Porvenir", "Primavera", "Timaukel", "Natales", "Torres del Paine"]
     }
 ];
+
+export const REGIONES_CHILE = regiones.reduce((acc, region) => {
+    acc[region.nombre] = region.comunas;
+    return acc;
+}, {});
+
+export const TARIFAS_ENVIO = {
+    "Metropolitana": 3990,
+    "Valparaíso": 5990,
+    "O'Higgins": 5990,
+    "Maule": 6990,
+    "Ñuble": 6990,
+    "Biobío": 6990,
+    "Coquimbo": 6990,
+    "La Araucanía": 7990,
+    "Atacama": 7990,
+    "Los Ríos": 8990,
+    "Antofagasta": 8990,
+    "Los Lagos": 9990,
+    "Arica y Parinacota": 10990,
+    "Tarapacá": 10990,
+    "Aysén": 12990,
+    "Magallanes": 12990
+};

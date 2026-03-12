@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom'; // <--- 1. IMPORTAR ESTO
+import { useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import {
     Search, User, Mail, Building, Calendar,
@@ -7,31 +7,33 @@ import {
     Eye, Edit, Trash2, X, ShoppingBag, Phone, CheckCircle, XCircle
 } from 'lucide-react';
 
-const AdminUsuarios = () => {
-    // --- HOOKS ---
-    const location = useLocation(); // <--- 2. NECESARIO PARA LEER LA NAVEGACIÓN
+const PERMISOS_DISPONIBLES = [
+    { id: 'all', label: '👑 Acceso Total (Super Admin)' },
+    { id: 'manage_products', label: '📦 Gestionar Productos' },
+    { id: 'manage_services', label: '⚡ Gestionar Servicios' },
+    { id: 'view_orders', label: '🛒 Ver Pedidos' },
+    { id: 'view_users', label: '👥 Ver Usuarios y Clientes' },
+    { id: 'view_tickets', label: '🎧 Responder Soporte' },
+    { id: 'manage_settings', label: '⚙️ Configuración del Sistema' }
+];
 
-    // --- ESTADOS ---
+const AdminUsuarios = () => {
+    const location = useLocation();
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
-
-    // --- ESTADOS DEL DRAWER (VER DETALLE) ---
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [usuarioDetalle, setUsuarioDetalle] = useState(null);
     const [loadingDetalle, setLoadingDetalle] = useState(false);
     const [activeTab, setActiveTab] = useState('perfil');
-
-    // --- ESTADOS DEL MODAL (EDITAR) ---
     const [modalEditarOpen, setModalEditarOpen] = useState(false);
     const [usuarioEditar, setUsuarioEditar] = useState(null);
+    const [permisosEdit, setPermisosEdit] = useState({});
 
-    // 1. CARGAR USUARIOS AL INICIO
     useEffect(() => {
         cargarUsuarios();
     }, []);
 
-    // 2. EFECTO MAGICO: DETECTAR NAVEGACIÓN DESDE TICKETS
     useEffect(() => {
         if (location.state?.abrirUsuarioId) {
             abrirDetalle(location.state.abrirUsuarioId);
@@ -50,7 +52,6 @@ const AdminUsuarios = () => {
         }
     };
 
-    // 3. ABRIR DRAWER (VER DETALLES)
     const abrirDetalle = async (id) => {
         setDrawerOpen(true);
         setLoadingDetalle(true);
@@ -65,17 +66,31 @@ const AdminUsuarios = () => {
         }
     };
 
-    // 4. ABRIR MODAL (EDITAR)
     const abrirEditar = (usuario) => {
         setUsuarioEditar({
             ...usuario,
             company_name: usuario.company_name || ''
         });
+
+        let parsedPerms = {};
+        if (usuario.permissions) {
+            parsedPerms = typeof usuario.permissions === 'string' 
+                ? JSON.parse(usuario.permissions) 
+                : usuario.permissions;
+        }
+        setPermisosEdit(parsedPerms || {});
+
         setModalEditarOpen(true);
         setDrawerOpen(false);
     };
 
-    // 5. GUARDAR EDICIÓN (PUT)
+    const handleTogglePermiso = (id) => {
+        setPermisosEdit(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
+    };
+
     const guardarEdicion = async (e) => {
         e.preventDefault();
         try {
@@ -85,7 +100,8 @@ const AdminUsuarios = () => {
                 role_id: parseInt(usuarioEditar.role_id),
                 is_active: usuarioEditar.is_active,
                 company_name: usuarioEditar.company_name,
-                phone: usuarioEditar.phone
+                phone: usuarioEditar.phone,
+                permissions: permisosEdit
             });
 
             setUsuarios(usuarios.map(u => u.id === usuarioEditar.id ? response.data : u));
@@ -96,14 +112,12 @@ const AdminUsuarios = () => {
         }
     };
 
-    // FILTRO
     const usuariosFiltrados = usuarios.filter(u =>
         u.name.toLowerCase().includes(busqueda.toLowerCase()) ||
         u.email.toLowerCase().includes(busqueda.toLowerCase()) ||
         (u.company_name && u.company_name.toLowerCase().includes(busqueda.toLowerCase()))
     );
 
-    // CONTADORES
     const totalClientes = usuarios.length;
     const totalAdmins = usuarios.filter(u => u.role_id === 1).length;
 
@@ -111,8 +125,6 @@ const AdminUsuarios = () => {
 
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
-
-            {/* HEADER Y STATS */}
             <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 flex-shrink-0">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Directorio</h1>
@@ -130,9 +142,7 @@ const AdminUsuarios = () => {
                 </div>
             </div>
 
-            {/* TABLA PRINCIPAL */}
             <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden flex flex-col flex-1">
-                {/* Buscador */}
                 <div className="p-6 border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
                     <div className="relative max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -140,7 +150,6 @@ const AdminUsuarios = () => {
                     </div>
                 </div>
 
-                {/* Tabla Scrolleable */}
                 <div className="overflow-auto flex-1 custom-scrollbar">
                     <table className="w-full min-w-[800px]">
                         <thead className="bg-gray-50 border-b border-gray-100 text-left sticky top-0 z-10">
@@ -200,7 +209,6 @@ const AdminUsuarios = () => {
                 </div>
             </div>
 
-            {/* --- DRAWER (PANEL LATERAL) --- */}
             <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setDrawerOpen(false)} />
             <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 {loadingDetalle || !usuarioDetalle ? (
@@ -227,7 +235,6 @@ const AdminUsuarios = () => {
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-gray-50/50">
-                            {/* TAB PERFIL */}
                             {activeTab === 'perfil' && (
                                 <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
                                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
@@ -242,7 +249,6 @@ const AdminUsuarios = () => {
                                 </div>
                             )}
 
-                            {/* TAB TICKETS */}
                             {activeTab === 'tickets' && (
                                 <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
                                     {usuarioDetalle.tickets?.length > 0 ? (
@@ -262,7 +268,6 @@ const AdminUsuarios = () => {
                                 </div>
                             )}
 
-                            {/* TAB COMPRAS (ORDENES) */}
                             {activeTab === 'compras' && (
                                 <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
                                     {usuarioDetalle.orders?.length > 0 ? (
@@ -291,37 +296,68 @@ const AdminUsuarios = () => {
                 )}
             </div>
 
-            {/* --- MODAL EDITAR USUARIO --- */}
             {modalEditarOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
-                    <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95">
-                        <h2 className="text-xl font-bold text-gray-900 mb-6">Editar Usuario</h2>
-                        <form onSubmit={guardarEdicion} className="space-y-4">
-                            <div>
-                                <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
-                                <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none bg-gray-100" value={usuarioEditar.name} onChange={e => setUsuarioEditar({ ...usuarioEditar, name: e.target.value })} required />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-gray-500 uppercase">Empresa</label>
-                                <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none bg-gray-100" value={usuarioEditar.company_name} onChange={e => setUsuarioEditar({ ...usuarioEditar, company_name: e.target.value })} />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-3xl w-full max-w-2xl p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                        <h2 className="text-xl font-bold text-gray-900 mb-6">Editar Usuario y Permisos</h2>
+                        <form onSubmit={guardarEdicion} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
+                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none" value={usuarioEditar.name} onChange={e => setUsuarioEditar({ ...usuarioEditar, name: e.target.value })} required />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase">Empresa</label>
+                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none" value={usuarioEditar.company_name} onChange={e => setUsuarioEditar({ ...usuarioEditar, company_name: e.target.value })} />
+                                </div>
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Rol</label>
-                                    <select className="w-full p-3 bg-gray-50 rounded-xl outline-none bg-gray-100" value={usuarioEditar.role_id} onChange={e => setUsuarioEditar({ ...usuarioEditar, role_id: e.target.value })}>
+                                    <select className="w-full p-3 bg-gray-50 rounded-xl outline-none" value={usuarioEditar.role_id} onChange={e => setUsuarioEditar({ ...usuarioEditar, role_id: parseInt(e.target.value) })}>
                                         <option value={1}>Admin</option>
                                         <option value={2}>Cliente</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Estado</label>
-                                    <select className="w-full p-3 bg-gray-50 rounded-xl outline-none bg-gray-100" value={usuarioEditar.is_active ? 1 : 0} onChange={e => setUsuarioEditar({ ...usuarioEditar, is_active: e.target.value == 1 })}>
+                                    <select className="w-full p-3 bg-gray-50 rounded-xl outline-none" value={usuarioEditar.is_active ? 1 : 0} onChange={e => setUsuarioEditar({ ...usuarioEditar, is_active: e.target.value == 1 })}>
                                         <option value={1}>Activo</option>
                                         <option value={0}>Inactivo</option>
                                     </select>
                                 </div>
                             </div>
-                            <div className="flex gap-3 pt-4">
+
+                            {usuarioEditar.role_id === 1 && (
+                                <div className="mt-4">
+                                    <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider flex items-center gap-2">
+                                        <Shield size={16} /> Permisos de Acceso Administrativo
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-5 bg-gray-50/70 rounded-2xl border border-gray-200">
+                                        {PERMISOS_DISPONIBLES.map(permiso => (
+                                            <label key={permiso.id} className="flex items-center gap-3 cursor-pointer group">
+                                                <div className="relative flex items-center">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="peer w-5 h-5 cursor-pointer appearance-none rounded-md border border-gray-300 checked:bg-atlas-900 checked:border-atlas-900 transition-all"
+                                                        checked={permisosEdit[permiso.id] || false}
+                                                        onChange={() => handleTogglePermiso(permiso.id)}
+                                                    />
+                                                    <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                                <span className={`text-sm font-medium transition-colors ${permisosEdit[permiso.id] ? 'text-atlas-900 font-bold' : 'text-gray-600 group-hover:text-atlas-900'}`}>
+                                                    {permiso.label}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-2 italic">
+                                        * Nota: "Acceso Total" (Super Admin) anula todos los demás permisos y otorga control absoluto.
+                                    </p>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-4 border-t border-gray-100">
                                 <button type="button" onClick={() => setModalEditarOpen(false)} className="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
                                 <button type="submit" className="flex-1 py-3 bg-atlas-900 text-white font-bold rounded-xl hover:bg-atlas-800 shadow-lg transition-all">Guardar Cambios</button>
                             </div>

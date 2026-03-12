@@ -75,10 +75,10 @@ class DashboardController extends Controller
         // ---------------------------------------------------
         $topZonas = DB::table('orders')
             ->join('addresses', 'orders.address_id', '=', 'addresses.id')
-            ->join('communes', 'addresses.commune_id', '=', 'communes.id')
-            ->select('communes.name as comuna', DB::raw('count(*) as envios'))
+            ->select('addresses.commune as comuna', DB::raw('count(*) as envios'))
             ->where('orders.status', 'paid')
-            ->groupBy('communes.name')
+            ->whereNotNull('addresses.commune')
+            ->groupBy('addresses.commune')
             ->orderByDesc('envios')
             ->limit(5)
             ->get();
