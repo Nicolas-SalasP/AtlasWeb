@@ -22,14 +22,21 @@ class OrderController extends Controller
             return response()->json(['message' => 'No autorizado'], 401);
         }
 
-        if ($user->role_id === 1) {
-            return Order::with(['user', 'items'])->orderBy('created_at', 'desc')->get();
-        }
+        return response()->json(
+            Order::with('items.product')
+                ->where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+        );
+    }
 
-        return Order::with('items')
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+    public function indexAll()
+    {
+        return response()->json(
+            Order::with(['user', 'items.product'])
+                ->orderBy('created_at', 'desc')
+                ->get()
+        );
     }
 
     public function show($id)
@@ -40,7 +47,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'No autorizado'], 401);
         }
 
-        $order = Order::with(['user', 'items'])->find($id);
+        $order = Order::with(['user', 'items.product'])->find($id);
 
         if (!$order) {
             return response()->json(['message' => 'Orden no encontrada'], 404);
@@ -61,7 +68,7 @@ class OrderController extends Controller
 
         $request->validate([
             'items' => 'required|array',
-            'items.*.id' => 'required', 
+            'items.*.id' => 'required',
             'items.*.quantity' => 'required|integer|min:1',
             'customer_data' => 'required|array',
             'customer_data.region' => 'required|string',
@@ -74,13 +81,13 @@ class OrderController extends Controller
             $itemsToInsert = [];
 
             foreach ($request->items as $item) {
-                $idStr = (string)$item['id'];
+                $idStr = (string) $item['id'];
                 if (str_starts_with($idStr, 'service-')) {
                     $serviceId = str_replace('service-', '', $idStr);
                     $service = Service::findOrFail($serviceId);
 
                     $lineTotal = $service->price * $item['quantity'];
-                    
+
                     $itemsToInsert[] = [
                         'product_id' => null,
                         'service_id' => $service->id,
@@ -89,9 +96,9 @@ class OrderController extends Controller
                         'quantity' => $item['quantity'],
                         'unit_price' => $service->price,
                         'total_line' => $lineTotal,
-                        'item_status' => 'active' 
+                        'item_status' => 'active'
                     ];
-                    
+
                     $subtotalOrden += $lineTotal;
 
                 } else {
@@ -109,7 +116,7 @@ class OrderController extends Controller
                     $product->decrement('stock_current', $item['quantity']);
 
                     $lineTotal = $product->price * $item['quantity'];
-                    
+
                     $itemsToInsert[] = [
                         'product_id' => $product->id,
                         'service_id' => null,
@@ -126,20 +133,32 @@ class OrderController extends Controller
             }
 
             $tarifasEnvio = [
-                "Metropolitana" => 3990, "Valparaíso" => 5990, "Biobío" => 6990, "Arica y Parinacota" => 10990,
-                "Tarapacá" => 10990, "Antofagasta" => 8990, "Atacama" => 7990, "Coquimbo" => 6990,
-                "O'Higgins" => 5990, "Maule" => 6990, "Ñuble" => 6990, "La Araucanía" => 7990,
-                "Los Ríos" => 8990, "Los Lagos" => 9990, "Aysén" => 12990, "Magallanes" => 12990
+                "Metropolitana" => 3990,
+                "Valparaíso" => 5990,
+                "Biobío" => 6990,
+                "Arica y Parinacota" => 10990,
+                "Tarapacá" => 10990,
+                "Antofagasta" => 8990,
+                "Atacama" => 7990,
+                "Coquimbo" => 6990,
+                "O'Higgins" => 5990,
+                "Maule" => 6990,
+                "Ñuble" => 6990,
+                "La Araucanía" => 7990,
+                "Los Ríos" => 8990,
+                "Los Lagos" => 9990,
+                "Aysén" => 12990,
+                "Magallanes" => 12990
             ];
 
             $regionCliente = $request->customer_data['region'] ?? 'Metropolitana';
-            $shipping = $tarifasEnvio[$regionCliente] ?? 7990; 
+            $shipping = $tarifasEnvio[$regionCliente] ?? 7990;
             $total = $subtotalOrden + $shipping;
 
             $order = Order::create([
                 'user_id' => $user ? $user->id : null,
                 'order_number' => 'ORD-' . strtoupper(Str::random(8)),
-                'status' => 'pending', 
+                'status' => 'pending',
                 'subtotal' => $subtotalOrden,
                 'shipping_cost' => $shipping,
                 'total' => $total,
@@ -174,7 +193,7 @@ class OrderController extends Controller
             DB::rollBack();
             Log::error("Critical Order Error: " . $e->getMessage());
             return response()->json([
-                'message' => 'Error al procesar la orden', 
+                'message' => 'Error al procesar la orden',
                 'error' => 'Ocurrió un problema interno. Por favor intenta nuevamente.'
             ], 500);
         }

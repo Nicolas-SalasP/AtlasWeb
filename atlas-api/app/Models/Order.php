@@ -23,6 +23,8 @@ class Order extends Model
         'notes',
         'shipping_provider', 
         'tracking_number',
+        'transfer_reference', 
+        'transfer_date',
     ];
 
     protected $casts = [

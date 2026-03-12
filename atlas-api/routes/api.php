@@ -134,6 +134,17 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/tickets', [TicketController::class, 'indexAll']);
             Route::put('/tickets/{id}/status', [TicketController::class, 'updateStatus']);
         });
+
+        // 7. Gestión de Pedidos y Comprobantes (Solo permiso: view_orders)
+        Route::middleware(['admin:view_orders'])->group(function () {
+            // Órdenes
+            Route::get('/orders', [OrderController::class, 'indexAll']);
+            Route::put('/orders/{id}', [OrderController::class, 'update']);
+            
+            // Comprobantes Bancarios en Standby
+            Route::get('/bank-receipts/unmatched', [\App\Http\Controllers\BankReceiptController::class, 'getUnmatched']);
+            Route::post('/bank-receipts/{id}/match', [\App\Http\Controllers\BankReceiptController::class, 'manualMatch']);
+        });
     });
 
 });

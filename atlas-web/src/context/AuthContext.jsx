@@ -84,7 +84,6 @@ export const AuthProvider = ({ children }) => {
                 remember_me: remember
             });
 
-            console.log("📡 RESPUESTA SERVIDOR LOGIN:", response.data);
             let token = response.data.token || response.data.access_token;
             if (!token && response.data.data) {
                 token = response.data.data.token || response.data.data.access_token;
