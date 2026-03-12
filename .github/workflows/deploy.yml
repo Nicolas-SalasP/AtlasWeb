@@ -19,7 +19,7 @@ jobs:
       - name: ⚙️ Setup Node.js (Frontend)
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: 🏗️ Compilar Frontend (React)
         run: |
@@ -73,7 +73,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: 22 
+          port: 2200 
           script: |
             cd ~/atlas_project
             unzip -o backend.zip
