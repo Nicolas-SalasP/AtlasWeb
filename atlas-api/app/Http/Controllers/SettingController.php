@@ -17,17 +17,35 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
-        $data = $request->except(['password_current', 'password_new']);
+        // --- SEGURIDAD: Whitelist de configuraciones permitidas ---
+        $allowedSettings = [
+            'maintenance_mode',
+            'webpay_enabled',
+            'bank_name',
+            'bank_account_type',
+            'bank_account_number',
+            'bank_rut',
+            'bank_email'
+        ];
+
+        $data = $request->only($allowedSettings);
 
         foreach ($data as $key => $value) {
-            SystemSetting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value]
-            );
+            if ($value !== null) {
+                SystemSetting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $value]
+                );
+            }
         }
+        
         Cache::forget('system_maintenance_status');
-
         if ($request->filled('password_new')) {
+            $request->validate([
+                'password_current' => 'required',
+                'password_new' => 'required|min:8'
+            ]);
+
             $user = $request->user();
             
             if (!Hash::check($request->password_current, $user->password)) {
@@ -37,7 +55,7 @@ class SettingController extends Controller
             $user->update(['password' => Hash::make($request->password_new)]);
         }
 
-        return response()->json(['message' => 'Configuración guardada']);
+        return response()->json(['message' => 'Configuración guardada de manera segura']);
     }
 
     public function publicStatus()
