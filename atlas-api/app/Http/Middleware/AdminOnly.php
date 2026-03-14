@@ -25,8 +25,7 @@ class AdminOnly
             ? json_decode($user->permissions, true) 
             : ($user->permissions ?? []);
 
-        $permissions = !empty($userPerms) ? $userPerms : $rolePerms;
-
+        $permissions = ($user->permissions !== null) ? $userPerms : $rolePerms;
         if (isset($permissions['all']) && $permissions['all'] === true) {
             return $next($request);
         }
@@ -35,6 +34,12 @@ class AdminOnly
             if (!isset($permissions[$requiredPermission]) || $permissions[$requiredPermission] !== true) {
                 return response()->json([
                     'message' => 'Acceso denegado. No tienes permisos para esta acción específica.'
+                ], 403);
+            }
+        } else {
+            if (empty($permissions)) {
+                return response()->json([
+                    'message' => 'Acceso denegado. Tu cuenta administrativa no tiene permisos habilitados.'
                 ], 403);
             }
         }

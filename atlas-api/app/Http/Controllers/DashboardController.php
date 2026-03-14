@@ -139,4 +139,15 @@ class DashboardController extends Controller
             'chart_data' => $chartData
         ]);
     }
+
+    public function getNotificationsSummary()
+    {
+        $pendingOrders = Order::where('status', 'pending')->count();
+        $newTickets = Ticket::where('status', 'nuevo')->count();
+
+        return response()->json([
+            'pending_orders' => $pendingOrders,
+            'new_tickets' => $newTickets
+        ]);
+    }
 }

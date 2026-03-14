@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 
 class SettingController extends Controller
 {
@@ -24,6 +25,7 @@ class SettingController extends Controller
                 ['value' => $value]
             );
         }
+        Cache::forget('system_maintenance_status');
 
         if ($request->filled('password_new')) {
             $user = $request->user();
@@ -40,7 +42,10 @@ class SettingController extends Controller
 
     public function publicStatus()
     {
-        $maintenance = SystemSetting::where('key', 'maintenance_mode')->value('value');
+        $maintenance = Cache::remember('system_maintenance_status', 60, function () {
+            return SystemSetting::where('key', 'maintenance_mode')->value('value');
+        });
+
         return response()->json([
             'maintenance_mode' => $maintenance
         ]);

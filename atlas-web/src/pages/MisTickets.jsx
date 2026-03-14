@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     Plus, Search, Send, Paperclip, X, Clock, MessageSquare,
     MoreVertical, ArrowLeft, Layout, Tag, AlignLeft, Loader2,
-    FileText, Image as ImageIcon
+    FileText, Image as ImageIcon, ShieldCheck, CheckCircle
 } from 'lucide-react';
 import { BASE_URL } from '../api/constants';
 
@@ -27,6 +27,7 @@ const MisTickets = () => {
     const [enviandoMensaje, setEnviandoMensaje] = useState(false);
 
     const fileInputRef = useRef(null);
+    const mensajesFinRef = useRef(null); // Ref para auto-scroll
 
     // Formulario Nuevo Ticket
     const [nuevoForm, setNuevoForm] = useState({
@@ -41,13 +42,20 @@ const MisTickets = () => {
         cargarTickets();
     }, []);
 
-    // 2. POLLING
+    // 2. AUTO-SCROLL EN CHAT
+    useEffect(() => {
+        if (ticketActivo && mensajesFinRef.current) {
+            mensajesFinRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [ticketActivo?.messages]);
+
+    // 3. POLLING
     useEffect(() => {
         const intervalo = setInterval(() => {
             if (!enviandoMensaje && !crearModalOpen) {
                 cargarTickets(true);
             }
-        }, 5000);
+        }, 8000); // Polling relajado a 8 segundos
         return () => clearInterval(intervalo);
     }, [enviandoMensaje, ticketActivo, crearModalOpen]);
 
@@ -101,9 +109,12 @@ const MisTickets = () => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            const nuevoMsg = response.data;
+            // Forzar inyección del usuario actual para la UI local
+            const nuevoMsg = { ...response.data, user };
+
             const ticketActualizado = {
                 ...ticketActivo,
+                status: 'abierto', // Al responder, asumimos que sigue abierto
                 messages: [...ticketActivo.messages, nuevoMsg]
             };
 
@@ -135,12 +146,21 @@ const MisTickets = () => {
         }
     };
 
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'nuevo': return 'bg-emerald-500 shadow-emerald-200 shadow-md';
+            case 'abierto': return 'bg-blue-500 shadow-blue-200 shadow-md';
+            case 'cerrado': return 'bg-gray-400';
+            default: return 'bg-gray-300';
+        }
+    };
+
     const filtrados = tickets.filter(t =>
         t.subject?.toLowerCase().includes(busqueda.toLowerCase()) ||
         t.ticket_code?.toLowerCase().includes(busqueda.toLowerCase())
     );
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2"><Loader2 className="animate-spin" /> Cargando...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2"><Loader2 className="animate-spin text-atlas-900" /> <span className="text-atlas-900 font-medium">Cargando Centro de Soporte...</span></div>;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-4 h-[calc(100vh-10px)] flex flex-col overflow-hidden">
@@ -148,10 +168,10 @@ const MisTickets = () => {
             {/* HEADER */}
             <div className={`flex-shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4 ${vistaMovil === 'chat' ? 'hidden md:flex' : 'flex'}`}>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Mis Solicitudes</h1>
-                    <p className="text-gray-500 text-xs mt-1">Gestiona tus incidencias</p>
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">Mis Solicitudes</h1>
+                    <p className="text-gray-500 text-sm mt-1 font-medium">Gestiona y haz seguimiento a tus incidencias</p>
                 </div>
-                <button onClick={() => setCrearModalOpen(true)} className="bg-atlas-900 text-white px-5 py-2 rounded-xl font-bold shadow-lg hover:bg-atlas-800 transition-all flex items-center gap-2 text-sm">
+                <button onClick={() => setCrearModalOpen(true)} className="bg-atlas-900 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg hover:bg-atlas-800 hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm">
                     <Plus size={18} /> Nuevo Ticket
                 </button>
             </div>
@@ -160,24 +180,36 @@ const MisTickets = () => {
 
                 {/* LISTA LATERAL */}
                 <div className={`w-full md:w-[320px] flex flex-col gap-4 ${vistaMovil === 'lista' ? 'flex' : 'hidden md:flex'}`}>
-                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full overflow-hidden">
+                    <div className="bg-white p-4 rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 flex flex-col h-full overflow-hidden">
                         <div className="relative mb-3 flex-shrink-0">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <input type="text" placeholder="Buscar..." value={busqueda} onChange={e => setBusqueda(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-gray-50 rounded-xl text-sm focus:ring-2 focus:ring-atlas-100 outline-none transition-all" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Buscar tickets..."
+                                value={busqueda}
+                                onChange={e => setBusqueda(e.target.value)}
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-atlas-200 focus:bg-white outline-none transition-all"
+                            />
                         </div>
 
                         <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                             {filtrados.length === 0 ? (
-                                <div className="text-center py-10 text-gray-400 text-sm">No hay tickets.</div>
+                                <div className="text-center py-10 text-gray-400 flex flex-col items-center">
+                                    <CheckCircle size={32} className="mb-2 opacity-30 text-emerald-500" />
+                                    <span className="text-sm font-medium">No hay tickets.</span>
+                                </div>
                             ) : (
                                 filtrados.map(t => (
-                                    <div key={t.id} onClick={() => { setTicketActivo(t); setVistaMovil('chat'); }} className={`p-3 rounded-xl cursor-pointer transition-all border ${ticketActivo?.id === t.id ? 'bg-atlas-50 border-atlas-200' : 'bg-white border-transparent hover:bg-gray-50'}`}>
+                                    <div key={t.id} onClick={() => { setTicketActivo(t); setVistaMovil('chat'); }} className={`p-4 rounded-2xl cursor-pointer transition-all border group ${ticketActivo?.id === t.id ? 'bg-white border-atlas-300 shadow-md scale-[1.02]' : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-sm'}`}>
                                         <div className="flex justify-between items-center mb-1">
-                                            <span className="text-[10px] font-bold text-gray-400 tracking-wide">{t.ticket_code}</span>
-                                            <span className={`w-2 h-2 rounded-full ${t.status === 'nuevo' ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                            <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">{t.ticket_code}</span>
+                                            <span className={`w-2.5 h-2.5 rounded-full border border-white ${getStatusColor(t.status)}`}></span>
                                         </div>
-                                        <h3 className={`text-sm font-bold truncate ${ticketActivo?.id === t.id ? 'text-atlas-900' : 'text-gray-700'}`}>{t.subject}</h3>
-                                        <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded mt-1 inline-block">{t.category}</span>
+                                        <h3 className={`text-sm font-bold truncate leading-tight ${ticketActivo?.id === t.id ? 'text-atlas-900' : 'text-gray-800 group-hover:text-atlas-700'}`}>{t.subject}</h3>
+                                        <div className="flex justify-between mt-2 items-center">
+                                            <span className="text-[10px] font-bold uppercase text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md inline-block">{t.category}</span>
+                                            <span className="text-[10px] text-gray-400 font-medium">{new Date(t.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                        </div>
                                     </div>
                                 ))
                             )}
@@ -185,160 +217,201 @@ const MisTickets = () => {
                     </div>
                 </div>
 
-                {/* CHAT */}
-                <div className={`flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative ${vistaMovil === 'chat' ? 'flex' : 'hidden md:flex'}`}>
+                {/* CHAT DEL TICKET */}
+                <div className={`flex-1 flex flex-col bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 overflow-hidden relative isolate ${vistaMovil === 'chat' ? 'flex' : 'hidden md:flex'}`}>
                     {ticketActivo ? (
                         <>
                             {/* Header Chat */}
-                            <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-white flex-shrink-0">
+                            <div className="px-4 py-4 md:px-6 md:py-5 border-b border-gray-100 flex justify-between items-center bg-white flex-shrink-0 z-20 shadow-sm">
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <button onClick={() => setVistaMovil('lista')} className="md:hidden p-1 -ml-1 text-gray-500"><ArrowLeft size={20} /></button>
+                                    <button onClick={() => setVistaMovil('lista')} className="md:hidden p-2 -ml-2 text-gray-400 hover:bg-gray-50 rounded-full"><ArrowLeft size={20} /></button>
                                     <div className="min-w-0">
-                                        <h2 className="text-base font-bold text-gray-900 truncate">{ticketActivo.subject}</h2>
-                                        <p className="text-xs text-gray-400 uppercase font-medium">{ticketActivo.status} • {ticketActivo.ticket_code}</p>
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <h2 className="text-base md:text-lg font-black text-gray-900 truncate">{ticketActivo.subject}</h2>
+                                            <span className="text-[10px] font-mono text-gray-500 bg-gray-100 px-2 py-0.5 rounded hidden sm:block">{ticketActivo.ticket_code}</span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-medium flex items-center gap-2">
+                                            <span className={`w-2 h-2 rounded-full ${getStatusColor(ticketActivo.status)}`}></span>
+                                            <span className="uppercase tracking-wide">{ticketActivo.status}</span>
+                                        </p>
                                     </div>
                                 </div>
-                                <button className="text-gray-400 hover:text-atlas-900"><MoreVertical size={20} /></button>
                             </div>
 
                             {/* Mensajes */}
-                            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 custom-scrollbar flex flex-col-reverse">
-                                {[...ticketActivo.messages].reverse().map((msg) => {
+                            <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-50/50 custom-scrollbar flex flex-col-reverse">
+                                {[...ticketActivo.messages].reverse().map((msg, idx) => {
                                     const esMio = msg.user_id === user.id;
+                                    const esAdmin = Number(msg.user?.role_id) === 1;
+
                                     return (
-                                        <div key={msg.id} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
-                                            <div className={`max-w-[85%] md:max-w-[70%] ${esMio ? 'items-end' : 'items-start'} flex flex-col`}>
-                                                <div className={`px-4 py-3 rounded-2xl text-sm shadow-sm ${esMio ? 'bg-atlas-900 text-white rounded-br-none' : 'bg-white border border-gray-100 text-gray-700 rounded-bl-none'}`}>
-                                                    <p>{msg.message}</p>
+                                        <div key={msg.id || idx} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[90%] md:max-w-[75%] ${esMio ? 'order-1' : ''}`}>
+                                                <div className={`px-4 py-2.5 md:px-5 md:py-3 min-w-[140px] rounded-[1.5rem] shadow-sm relative ${esMio ? 'bg-atlas-900 text-white rounded-tr-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
 
-                                                    {/* --- VISUALIZACIÓN DE ADJUNTOS BLINDADA --- */}
+                                                    {/* Etiqueta de Staff si es un Admin */}
+                                                    {esAdmin && !esMio && (
+                                                        <div className="absolute -top-3 left-4 bg-atlas-500 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm whitespace-nowrap">
+                                                            <ShieldCheck size={10} /> Atlas Staff
+                                                        </div>
+                                                    )}
+
+                                                    <p className="text-sm leading-normal whitespace-pre-wrap">{msg.message}</p>
+
+                                                    {/* Visualización de Adjuntos */}
                                                     {msg.attachments && msg.attachments.length > 0 && (
-                                                        <div className="mt-3 space-y-2">
-                                                            {msg.attachments.map((file, index) => {
-                                                                const filePath = typeof file === 'string' ? file : file.path;
-                                                                const fileName = typeof file === 'string' ? 'Archivo Adjunto' : file.name;
-                                                                if (!filePath) return null;
+                                                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                            {(() => {
+                                                                let adjuntosSeguros = [];
+                                                                try {
+                                                                    adjuntosSeguros = typeof msg.attachments === 'string' ? JSON.parse(msg.attachments) : msg.attachments;
+                                                                } catch (e) { adjuntosSeguros = []; }
 
-                                                                return (
-                                                                    <div key={index} className="rounded-lg overflow-hidden border border-gray-200 bg-white/50 hover:bg-white transition-colors">
-                                                                        <a
-                                                                            href={`${BASE_URL}${filePath}`}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            download={fileName}
-                                                                            className="flex items-center gap-3 p-3 group"
-                                                                        >
-                                                                            <div className="bg-gray-100 p-2 rounded-lg text-atlas-500 group-hover:bg-atlas-50 group-hover:text-atlas-600 transition-colors">
-                                                                                {filePath.match(/\.(jpeg|jpg|gif|png)$/i) ? <ImageIcon size={20} /> : <FileText size={20} />}
+                                                                if (!Array.isArray(adjuntosSeguros)) return null;
+
+                                                                return adjuntosSeguros.map((file, index) => {
+                                                                    const filePath = typeof file === 'string' ? file : file.path;
+                                                                    const fileName = typeof file === 'string' ? 'Archivo Adjunto' : file.name;
+                                                                    if (!filePath) return null;
+
+                                                                    return (
+                                                                        <a key={index} href={`${BASE_URL}${filePath}`} target="_blank" rel="noopener noreferrer" download={fileName} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all hover:scale-[1.02] ${esMio ? 'border-white/20 bg-black/10 hover:bg-black/20' : 'border-gray-100 bg-gray-50 hover:bg-gray-100'}`}>
+                                                                            <div className={`${esMio ? 'text-white' : 'text-atlas-500'}`}>
+                                                                                {filePath.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? <ImageIcon size={20} /> : <FileText size={20} />}
                                                                             </div>
                                                                             <div className="flex-1 overflow-hidden">
-                                                                                <p className="text-xs font-bold text-gray-700 truncate group-hover:text-atlas-900">{fileName}</p>
-                                                                                <p className="text-[10px] text-gray-400">Clic para descargar</p>
+                                                                                <p className="text-xs font-bold truncate">{fileName}</p>
+                                                                                <p className={`text-[10px] ${esMio ? 'text-atlas-200' : 'text-gray-400'}`}>Descargar</p>
                                                                             </div>
-                                                                            {filePath.match(/\.(jpeg|jpg|gif|png)$/i) && (
-                                                                                <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100">
-                                                                                    <img src={`${BASE_URL}${filePath}`} alt="preview" className="w-full h-full object-cover" />
-                                                                                </div>
-                                                                            )}
                                                                         </a>
-                                                                    </div>
-                                                                );
-                                                            })}
+                                                                    );
+                                                                });
+                                                            })()}
                                                         </div>
                                                     )}
                                                 </div>
 
-                                                <span className="text-[10px] text-gray-400 mt-1 px-1 flex items-center gap-1">
-                                                    {!esMio && <span className="font-bold">{msg.user?.name}</span>}
+                                                <p className={`text-[10px] mt-1 font-bold tracking-wide text-gray-400 ${esMio ? 'text-right pr-2' : 'text-left pl-2'}`}>
+                                                    {!esMio && msg.user?.name + ' • '}
                                                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
+                                                </p>
                                             </div>
                                         </div>
                                     );
                                 })}
+                                <div ref={mensajesFinRef} />
                             </div>
 
                             {/* Input Area */}
-                            <div className="p-4 bg-white border-t border-gray-50 flex-shrink-0">
+                            <div className="p-4 bg-white border-t border-gray-100 relative z-20 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
+
+                                {/* Overlay Ticket Cerrado */}
+                                {ticketActivo.status === 'cerrado' && (
+                                    <div className="absolute inset-0 z-30 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                                        <p className="text-sm font-bold text-gray-500 bg-white px-6 py-2 rounded-full shadow-sm border border-gray-100 flex items-center gap-2">
+                                            <CheckCircle size={16} className="text-green-500" />
+                                            Este caso ha sido resuelto y cerrado.
+                                        </p>
+                                    </div>
+                                )}
+
                                 {adjuntos.length > 0 && (
-                                    <div className="flex gap-2 mb-2 overflow-x-auto pb-2 custom-scrollbar">
+                                    <div className="flex gap-2 mb-3 overflow-x-auto custom-scrollbar pb-2">
                                         {adjuntos.map((file, i) => (
-                                            <div key={i} className="relative bg-gray-100 rounded-lg p-2 border border-gray-200 flex items-center gap-2 group min-w-[120px]">
-                                                <div className="bg-white p-1 rounded">
-                                                    {file.type.startsWith('image/') ? <ImageIcon size={14} className="text-blue-500" /> : <FileText size={14} className="text-gray-500" />}
-                                                </div>
-                                                <span className="text-[10px] truncate max-w-[80px] text-gray-600">{file.name}</span>
-                                                <button onClick={() => removeFile(i)} className="absolute -top-1.5 -right-1.5 bg-white text-red-500 border border-red-100 rounded-full p-0.5 hover:bg-red-50 shadow-sm"><X size={10} /></button>
+                                            <div key={i} className="relative bg-gray-50 text-gray-800 rounded-xl p-2.5 border border-gray-200 flex items-center gap-2 shrink-0 shadow-sm animate-in zoom-in-95">
+                                                <div className="bg-white p-1.5 rounded-lg shadow-sm text-atlas-500">{file.type.startsWith('image/') ? <ImageIcon size={16} /> : <FileText size={16} />}</div>
+                                                <span className="text-xs font-bold truncate max-w-[120px]">{file.name}</span>
+                                                <button onClick={() => removeFile(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md transition-transform hover:scale-110"><X size={12} /></button>
                                             </div>
                                         ))}
                                     </div>
                                 )}
 
-                                <form onSubmit={enviarRespuesta} className="flex items-center gap-2 bg-gray-50 border border-gray-200 p-2 pl-4 rounded-xl focus-within:ring-2 focus-within:ring-atlas-100 transition-all">
-                                    <button type="button" onClick={() => fileInputRef.current.click()} className="text-gray-400 hover:text-atlas-600 p-1 hover:bg-white rounded-full transition-colors">
-                                        <Paperclip size={20} />
+                                <form onSubmit={enviarRespuesta} className="bg-gray-50 p-2 md:p-2.5 rounded-3xl border border-gray-200 flex items-end gap-3 focus-within:ring-4 focus-within:ring-atlas-100 focus-within:border-atlas-300 transition-all shadow-inner">
+                                    <button type="button" onClick={() => fileInputRef.current.click()} className="p-3 text-gray-400 hover:text-atlas-900 hover:bg-white rounded-full transition-all shrink-0">
+                                        <Paperclip size={22} />
                                     </button>
 
                                     <input type="file" multiple ref={fileInputRef} className="hidden" onChange={handleFileChange} />
 
-                                    <input
-                                        type="text"
-                                        placeholder="Escribe un mensaje..."
-                                        className="flex-1 bg-transparent border-0 outline-none text-sm text-gray-700"
+                                    <textarea
+                                        rows="1"
+                                        placeholder="Escribe un mensaje para soporte..."
+                                        className="flex-1 bg-transparent border-0 outline-none py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 resize-none max-h-32 custom-scrollbar placeholder:text-gray-400"
                                         value={mensaje}
-                                        onChange={e => setMensaje(e.target.value)}
+                                        onChange={(e) => {
+                                            setMensaje(e.target.value);
+                                            e.target.style.height = 'auto';
+                                            e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                                        }}
                                         disabled={enviandoMensaje}
                                     />
 
-                                    <button type="submit" disabled={(!mensaje.trim() && adjuntos.length === 0) || enviandoMensaje} className="bg-atlas-900 text-white p-2 rounded-lg hover:bg-atlas-800 disabled:opacity-50 transition-all shadow-md">
-                                        {enviandoMensaje ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                                    <button type="submit" disabled={(!mensaje.trim() && adjuntos.length === 0) || enviandoMensaje} className="bg-atlas-900 text-white p-3.5 rounded-full shadow-lg hover:bg-atlas-800 hover:scale-105 transition-all shrink-0 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
+                                        {enviandoMensaje ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} className="ml-0.5" />}
                                     </button>
                                 </form>
                             </div>
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
-                            <MessageSquare size={40} className="mb-2 opacity-20" />
-                            <p className="text-sm">Selecciona una solicitud</p>
+                        <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+                            <div className="w-24 h-24 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mb-4">
+                                <MessageSquare size={48} />
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-400 mb-1">Selecciona un ticket</h2>
+                            <p className="text-sm text-gray-400 max-w-xs">Elige una solicitud del panel lateral para ver el historial y comunicarte con el equipo técnico.</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Modal Crear Ticket */}
+            {/* MODAL CREAR TICKET (Mejorado) */}
             {crearModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold text-gray-900">Nueva Solicitud</h2>
-                            <button onClick={() => setCrearModalOpen(false)}><X size={20} className="text-gray-400 hover:text-red-500" /></button>
+                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-8 animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 className="text-2xl font-black text-gray-900 leading-tight">Nueva Solicitud</h2>
+                                <p className="text-sm text-gray-500 font-medium">Ingresa los detalles para ayudarte.</p>
+                            </div>
+                            <button onClick={() => setCrearModalOpen(false)} className="p-2 bg-gray-100 rounded-full text-gray-400 hover:text-gray-700 transition-colors"><X size={20} /></button>
                         </div>
+
                         <form onSubmit={handleCrearTicket} className="space-y-4">
                             <div className="relative group">
-                                <AlignLeft className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input required className="w-full pl-9 p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-100 outline-none text-sm" placeholder="Asunto" value={nuevoForm.asunto} onChange={e => setNuevoForm({ ...nuevoForm, asunto: e.target.value })} />
+                                <AlignLeft className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-900 transition-colors" size={18} />
+                                <input required className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium transition-all" placeholder="Asunto principal" value={nuevoForm.asunto} onChange={e => setNuevoForm({ ...nuevoForm, asunto: e.target.value })} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="relative">
-                                    <Layout className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                    <select className="w-full pl-9 p-3 bg-gray-50 rounded-xl text-sm outline-none appearance-none" value={nuevoForm.categoria} onChange={e => setNuevoForm({ ...nuevoForm, categoria: e.target.value })}>
-                                        <option value="ERP">ERP</option><option value="Web">Web</option><option value="Soporte">Soporte</option><option value="Facturación">Facturación</option>
+                                <div className="relative group">
+                                    <Layout className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-900 transition-colors" size={18} />
+                                    <select className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium appearance-none cursor-pointer transition-all" value={nuevoForm.categoria} onChange={e => setNuevoForm({ ...nuevoForm, categoria: e.target.value })}>
+                                        <option value="ERP">ERP</option>
+                                        <option value="Web">Desarrollo Web</option>
+                                        <option value="Soporte">Soporte Técnico</option>
+                                        <option value="Facturación">Facturación / Pagos</option>
                                     </select>
                                 </div>
-                                <div className="relative">
-                                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                    <select className="w-full pl-9 p-3 bg-gray-50 rounded-xl text-sm outline-none appearance-none" value={nuevoForm.prioridad} onChange={e => setNuevoForm({ ...nuevoForm, prioridad: e.target.value })}>
-                                        <option value="media">Media</option><option value="alta">Alta</option><option value="baja">Baja</option>
+                                <div className="relative group">
+                                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-900 transition-colors" size={18} />
+                                    <select className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium appearance-none cursor-pointer transition-all" value={nuevoForm.prioridad} onChange={e => setNuevoForm({ ...nuevoForm, prioridad: e.target.value })}>
+                                        <option value="baja">Baja</option>
+                                        <option value="media">Media</option>
+                                        <option value="alta">Alta</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <textarea required rows="4" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-100 outline-none text-sm resize-none" placeholder="Detalle de la solicitud..." value={nuevoForm.mensaje} onChange={e => setNuevoForm({ ...nuevoForm, mensaje: e.target.value })} />
+                            <textarea required rows="5" className="w-full p-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium resize-none custom-scrollbar transition-all" placeholder="Describe detalladamente el problema o requerimiento..." value={nuevoForm.mensaje} onChange={e => setNuevoForm({ ...nuevoForm, mensaje: e.target.value })} />
 
-                            <div className="flex justify-between items-center pt-2">
-                                <div className="flex items-center gap-1 text-[10px] text-gray-400"><Clock size={12} /> Respuesta {'<'} 24h</div>
-                                <button type="submit" className="bg-atlas-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-atlas-800 transition-colors shadow-lg">Crear Ticket</button>
+                            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg">
+                                    <Clock size={14} /> Respuesta estimada {'<'} 24h
+                                </div>
+                                <button type="submit" className="bg-atlas-900 text-white px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-atlas-800 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
+                                    <Send size={16} /> Enviar Solicitud
+                                </button>
                             </div>
                         </form>
                     </div>

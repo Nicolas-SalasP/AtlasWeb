@@ -4,7 +4,8 @@ import api from '../../api/axiosConfig';
 import {
     Search, User, Mail, Building, Calendar,
     Shield, Ticket, Loader2, Users,
-    Eye, Edit, Trash2, X, ShoppingBag, Phone, CheckCircle, XCircle
+    Eye, Edit, Trash2, X, ShoppingBag, Phone, CheckCircle, XCircle,
+    Filter, ArrowDownUp
 } from 'lucide-react';
 
 const PERMISOS_DISPONIBLES = [
@@ -22,10 +23,20 @@ const AdminUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
+    
+    // --- NUEVOS ESTADOS DE FILTROS ---
+    const [filtroRol, setFiltroRol] = useState("all");
+    const [filtroEstado, setFiltroEstado] = useState("all");
+    const [filtroTipo, setFiltroTipo] = useState("all"); // Empresa vs Particular
+    const [ordenTickets, setOrdenTickets] = useState("default"); // desc, asc
+    const [mostrarFiltros, setMostrarFiltros] = useState(false); // Para móviles
+
+    // Estados de UI
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [usuarioDetalle, setUsuarioDetalle] = useState(null);
     const [loadingDetalle, setLoadingDetalle] = useState(false);
     const [activeTab, setActiveTab] = useState('perfil');
+    
     const [modalEditarOpen, setModalEditarOpen] = useState(false);
     const [usuarioEditar, setUsuarioEditar] = useState(null);
     const [permisosEdit, setPermisosEdit] = useState({});
@@ -112,49 +123,124 @@ const AdminUsuarios = () => {
         }
     };
 
-    const usuariosFiltrados = usuarios.filter(u =>
-        u.name.toLowerCase().includes(busqueda.toLowerCase()) ||
-        u.email.toLowerCase().includes(busqueda.toLowerCase()) ||
-        (u.company_name && u.company_name.toLowerCase().includes(busqueda.toLowerCase()))
-    );
+    // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
+    let usuariosFiltrados = usuarios.filter(u => {
+        const coincideBusqueda = u.name.toLowerCase().includes(busqueda.toLowerCase()) ||
+                                 u.email.toLowerCase().includes(busqueda.toLowerCase()) ||
+                                 (u.company_name && u.company_name.toLowerCase().includes(busqueda.toLowerCase()));
+        
+        const coincideRol = filtroRol === "all" || Number(u.role_id) === Number(filtroRol);
+        const coincideEstado = filtroEstado === "all" || 
+                               (filtroEstado === "active" ? u.is_active : !u.is_active);
+        const coincideTipo = filtroTipo === "all" || 
+                             (filtroTipo === "empresa" ? !!u.company_name : !u.company_name);
+
+        return coincideBusqueda && coincideRol && coincideEstado && coincideTipo;
+    });
+
+    if (ordenTickets === "desc") {
+        usuariosFiltrados.sort((a, b) => (b.tickets_count || 0) - (a.tickets_count || 0));
+    } else if (ordenTickets === "asc") {
+        usuariosFiltrados.sort((a, b) => (a.tickets_count || 0) - (b.tickets_count || 0));
+    }
 
     const totalClientes = usuarios.length;
-    const totalAdmins = usuarios.filter(u => u.role_id === 1).length;
+    // Fix: Asegurar de convertir a número para el conteo de total de admins
+    const totalAdmins = usuarios.filter(u => Number(u.role_id) === 1).length;
 
     if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Directorio...</div>;
 
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 flex-shrink-0">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-4 flex-shrink-0">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Directorio</h1>
-                    <p className="text-gray-500 mt-1">Gestión de clientes y accesos</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Directorio</h1>
+                    <p className="text-gray-500 mt-1 text-sm md:text-base">Gestión de clientes y accesos</p>
                 </div>
-                <div className="flex gap-4">
-                    <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Users size={18} /></div>
+                <div className="flex gap-3 w-full md:w-auto">
+                    <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 flex-1 md:flex-none">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg hidden sm:block"><Users size={18} /></div>
                         <div><p className="text-[10px] uppercase text-gray-400 font-bold">Total</p><p className="font-bold text-gray-900">{totalClientes}</p></div>
                     </div>
-                    <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
-                        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Shield size={18} /></div>
+                    <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 flex-1 md:flex-none">
+                        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg hidden sm:block"><Shield size={18} /></div>
                         <div><p className="text-[10px] uppercase text-gray-400 font-bold">Admins</p><p className="font-bold text-gray-900">{totalAdmins}</p></div>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden flex flex-col flex-1">
-                <div className="p-6 border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
-                    <div className="relative max-w-md">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input type="text" placeholder="Buscar cliente..." className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-atlas-200 outline-none text-sm" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+            <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden flex flex-col flex-1">
+                
+                {/* --- BARRA DE BÚSQUEDA Y FILTROS --- */}
+                <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex flex-col gap-4 flex-shrink-0 transition-all">
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar por nombre, correo o empresa..." 
+                                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none text-sm md:text-base transition-all" 
+                                value={busqueda} 
+                                onChange={(e) => setBusqueda(e.target.value)} 
+                            />
+                        </div>
+                        <button 
+                            onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                            className={`md:hidden p-3 rounded-xl border transition-colors ${mostrarFiltros ? 'bg-atlas-900 text-white border-atlas-900' : 'bg-white text-gray-600 border-gray-200'}`}
+                        >
+                            <Filter size={20} />
+                        </button>
+                    </div>
+
+                    <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 ${mostrarFiltros ? 'flex' : 'hidden md:grid'}`}>
+                        <select 
+                            value={filtroRol} 
+                            onChange={e => setFiltroRol(e.target.value)}
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer"
+                        >
+                            <option value="all">Todos los Roles</option>
+                            <option value="1">Solo Administradores</option>
+                            <option value="2">Solo Clientes</option>
+                        </select>
+
+                        <select 
+                            value={filtroTipo} 
+                            onChange={e => setFiltroTipo(e.target.value)}
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer"
+                        >
+                            <option value="all">Todas las Entidades</option>
+                            <option value="empresa">Empresas</option>
+                            <option value="particular">Particulares</option>
+                        </select>
+
+                        <select 
+                            value={filtroEstado} 
+                            onChange={e => setFiltroEstado(e.target.value)}
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer"
+                        >
+                            <option value="all">Cualquier Estado</option>
+                            <option value="active">Cuentas Activas</option>
+                            <option value="inactive">Cuentas Inactivas</option>
+                        </select>
+
+                        <select 
+                            value={ordenTickets} 
+                            onChange={e => setOrdenTickets(e.target.value)}
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer flex items-center"
+                        >
+                            <option value="default">Tickets: Por Defecto</option>
+                            <option value="desc">Mayor cant. Tickets</option>
+                            <option value="asc">Menor cant. Tickets</option>
+                        </select>
                     </div>
                 </div>
 
+                {/* --- TABLA --- */}
                 <div className="overflow-auto flex-1 custom-scrollbar">
                     <table className="w-full min-w-[800px]">
                         <thead className="bg-gray-50 border-b border-gray-100 text-left sticky top-0 z-10">
                             <tr>
-                                <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Usuario</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Usuario</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Empresa</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Rol</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Estado</th>
@@ -163,11 +249,19 @@ const AdminUsuarios = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
+                            {usuariosFiltrados.length === 0 && (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-16 text-gray-400">
+                                        <Filter size={40} className="mx-auto mb-3 opacity-20"/>
+                                        <p>No se encontraron usuarios con esos filtros.</p>
+                                    </td>
+                                </tr>
+                            )}
                             {usuariosFiltrados.map((u) => (
                                 <tr key={u.id} className="hover:bg-gray-50/50 transition-colors group">
-                                    <td className="px-8 py-4">
+                                    <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 font-bold">
+                                            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 font-bold shrink-0">
                                                 {u.name.charAt(0)}
                                             </div>
                                             <div>
@@ -180,20 +274,21 @@ const AdminUsuarios = () => {
                                         {u.company_name ? <span className="flex items-center gap-2 font-medium"><Building size={14} className="text-gray-400" /> {u.company_name}</span> : <span className="italic text-gray-400">Particular</span>}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {u.role_id === 1 ?
+                                        {/* FIX: Parsear a Number para evitar bug de string vs int */}
+                                        {Number(u.role_id) === 1 ?
                                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-atlas-900 text-white"><Shield size={10} /> ADMIN</span> :
                                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100"><User size={10} /> CLIENTE</span>
                                         }
                                     </td>
                                     <td className="px-6 py-4">
                                         {u.is_active ?
-                                            <span className="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg w-fit"><CheckCircle size={12} /> Activo</span> :
-                                            <span className="flex items-center gap-1 text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded-lg w-fit"><XCircle size={12} /> Inactivo</span>
+                                            <span className="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 border border-green-100 px-2 py-1 rounded-lg w-fit"><CheckCircle size={12} /> Activo</span> :
+                                            <span className="flex items-center gap-1 text-xs font-bold text-red-500 bg-red-50 border border-red-100 px-2 py-1 rounded-lg w-fit"><XCircle size={12} /> Inactivo</span>
                                         }
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-bold ${u.tickets_count > 0 ? 'bg-orange-50 text-orange-600' : 'text-gray-400 bg-gray-50'}`}>
-                                            <Ticket size={14} /> {u.tickets_count}
+                                            <Ticket size={14} /> {u.tickets_count || 0}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -209,39 +304,40 @@ const AdminUsuarios = () => {
                 </div>
             </div>
 
+            {/* DRAWER DETALLE (Sin Cambios Estructurales) */}
             <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setDrawerOpen(false)} />
-            <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] lg:w-[700px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 {loadingDetalle || !usuarioDetalle ? (
                     <div className="h-full flex items-center justify-center text-atlas-900 gap-2"><Loader2 className="animate-spin" /> Cargando...</div>
                 ) : (
                     <>
-                        <div className="h-48 bg-atlas-900 relative flex-shrink-0">
+                        <div className="h-40 md:h-48 bg-atlas-900 relative flex-shrink-0">
                             <button onClick={() => setDrawerOpen(false)} className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 p-2 rounded-full backdrop-blur-md transition-colors"><X size={20} /></button>
-                            <div className="absolute -bottom-10 left-8 flex items-end gap-4">
-                                <div className="w-24 h-24 bg-white rounded-2xl p-1.5 shadow-lg">
-                                    <div className="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center text-4xl font-black text-gray-400">{usuarioDetalle.name.charAt(0)}</div>
+                            <div className="absolute -bottom-10 left-6 md:left-8 flex items-end gap-4">
+                                <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-2xl p-1.5 shadow-lg">
+                                    <div className="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center text-3xl md:text-4xl font-black text-gray-400">{usuarioDetalle.name.charAt(0)}</div>
                                 </div>
                                 <div className="mb-3">
-                                    <h2 className="text-2xl font-bold text-white leading-none">{usuarioDetalle.name}</h2>
-                                    <p className="text-atlas-300 text-sm mt-1">{usuarioDetalle.email}</p>
+                                    <h2 className="text-xl md:text-2xl font-bold text-white leading-none">{usuarioDetalle.name}</h2>
+                                    <p className="text-atlas-300 text-xs md:text-sm mt-1">{usuarioDetalle.email}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-14 px-8 border-b border-gray-100 flex gap-6 flex-shrink-0">
+                        <div className="mt-14 px-6 md:px-8 border-b border-gray-100 flex gap-6 flex-shrink-0 overflow-x-auto custom-scrollbar">
                             {['perfil', 'tickets', 'compras'].map(tab => (
-                                <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-4 text-sm font-bold capitalize transition-colors border-b-2 ${activeTab === tab ? 'border-atlas-900 text-atlas-900' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>{tab}</button>
+                                <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-4 text-sm font-bold capitalize transition-colors border-b-2 whitespace-nowrap ${activeTab === tab ? 'border-atlas-900 text-atlas-900' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>{tab}</button>
                             ))}
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-gray-50/50">
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-gray-50/50">
                             {activeTab === 'perfil' && (
                                 <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
                                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                                         <h3 className="text-lg font-bold text-gray-900 mb-4">Información General</h3>
-                                        <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4">
                                             <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Empresa</p><p className="text-gray-800 font-medium flex items-center gap-2"><Building size={16} className="text-gray-400" /> {usuarioDetalle.company_name || 'No registrada'}</p></div>
-                                            <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Rol</p><span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">{usuarioDetalle.role_id === 1 ? 'Admin' : 'Cliente'}</span></div>
+                                            <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Rol</p><span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">{Number(usuarioDetalle.role_id) === 1 ? 'Admin' : 'Cliente'}</span></div>
                                             <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Teléfono</p><p className="text-gray-800 font-medium flex items-center gap-2"><Phone size={16} className="text-gray-400" /> {usuarioDetalle.phone || 'Sin teléfono'}</p></div>
                                             <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Estado</p><span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${usuarioDetalle.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{usuarioDetalle.is_active ? 'Activo' : 'Inactivo'}</span></div>
                                         </div>
@@ -272,7 +368,7 @@ const AdminUsuarios = () => {
                                 <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
                                     {usuarioDetalle.orders?.length > 0 ? (
                                         usuarioDetalle.orders.map(orden => (
-                                            <div key={orden.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center hover:shadow-md transition-all">
+                                            <div key={orden.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3 hover:shadow-md transition-all">
                                                 <div className="flex items-center gap-4">
                                                     <div className="p-3 bg-green-50 text-green-600 rounded-lg"><ShoppingBag size={20} /></div>
                                                     <div>
@@ -280,7 +376,7 @@ const AdminUsuarios = () => {
                                                         <p className="text-xs text-gray-500">{new Date(orden.created_at).toLocaleDateString()}</p>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
+                                                <div className="text-left sm:text-right ml-14 sm:ml-0">
                                                     <p className="font-bold text-gray-900">${parseInt(orden.total).toLocaleString('es-CL')}</p>
                                                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${orden.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{orden.status}</span>
                                                 </div>
@@ -296,12 +392,17 @@ const AdminUsuarios = () => {
                 )}
             </div>
 
+            {/* MODAL EDITAR USUARIO */}
             {modalEditarOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
-                    <div className="bg-white rounded-3xl w-full max-w-2xl p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
-                        <h2 className="text-xl font-bold text-gray-900 mb-6">Editar Usuario y Permisos</h2>
+                    <div className="bg-white rounded-3xl w-full max-w-2xl p-6 md:p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Editar Usuario</h2>
+                            <button onClick={() => setModalEditarOpen(false)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-500"><X size={20}/></button>
+                        </div>
+
                         <form onSubmit={guardarEdicion} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
                                     <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none" value={usuarioEditar.name} onChange={e => setUsuarioEditar({ ...usuarioEditar, name: e.target.value })} required />
@@ -326,15 +427,15 @@ const AdminUsuarios = () => {
                                 </div>
                             </div>
 
-                            {usuarioEditar.role_id === 1 && (
+                            {Number(usuarioEditar.role_id) === 1 && (
                                 <div className="mt-4">
                                     <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider flex items-center gap-2">
                                         <Shield size={16} /> Permisos de Acceso Administrativo
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-5 bg-gray-50/70 rounded-2xl border border-gray-200">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 md:p-5 bg-gray-50/70 rounded-2xl border border-gray-200">
                                         {PERMISOS_DISPONIBLES.map(permiso => (
                                             <label key={permiso.id} className="flex items-center gap-3 cursor-pointer group">
-                                                <div className="relative flex items-center">
+                                                <div className="relative flex items-center shrink-0">
                                                     <input 
                                                         type="checkbox" 
                                                         className="peer w-5 h-5 cursor-pointer appearance-none rounded-md border border-gray-300 checked:bg-atlas-900 checked:border-atlas-900 transition-all"
@@ -345,21 +446,21 @@ const AdminUsuarios = () => {
                                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                     </svg>
                                                 </div>
-                                                <span className={`text-sm font-medium transition-colors ${permisosEdit[permiso.id] ? 'text-atlas-900 font-bold' : 'text-gray-600 group-hover:text-atlas-900'}`}>
+                                                <span className={`text-sm leading-tight font-medium transition-colors ${permisosEdit[permiso.id] ? 'text-atlas-900 font-bold' : 'text-gray-600 group-hover:text-atlas-900'}`}>
                                                     {permiso.label}
                                                 </span>
                                             </label>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-2 italic">
+                                    <p className="text-xs text-gray-400 mt-2 italic leading-relaxed">
                                         * Nota: "Acceso Total" (Super Admin) anula todos los demás permisos y otorga control absoluto.
                                     </p>
                                 </div>
                             )}
 
                             <div className="flex gap-3 pt-4 border-t border-gray-100">
-                                <button type="button" onClick={() => setModalEditarOpen(false)} className="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
-                                <button type="submit" className="flex-1 py-3 bg-atlas-900 text-white font-bold rounded-xl hover:bg-atlas-800 shadow-lg transition-all">Guardar Cambios</button>
+                                <button type="button" onClick={() => setModalEditarOpen(false)} className="flex-1 py-3.5 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
+                                <button type="submit" className="flex-1 py-3.5 bg-atlas-900 text-white font-bold rounded-xl hover:bg-atlas-800 shadow-lg transition-all">Guardar Cambios</button>
                             </div>
                         </form>
                     </div>

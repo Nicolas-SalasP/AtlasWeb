@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SystemAlert from './components/SystemAlert';
+import api from './api/axiosConfig';
 
 // Lazy Imports
 const Home = lazy(() => import('./pages/Home'));
@@ -53,6 +54,28 @@ const PublicLayout = () => {
 };
 
 function App() {
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const currentPath = window.location.pathname;
+      if (currentPath === '/mantenimiento' || currentPath.startsWith('/admin')) {
+        return;
+      }
+
+      try {
+        const response = await api.get('/system-status');
+        if (response.data.maintenance_mode == '1' || response.data.maintenance_mode === true) {
+          window.location.href = '/mantenimiento';
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 503) {
+            window.location.href = '/mantenimiento';
+        }
+      }
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
@@ -78,6 +101,7 @@ function App() {
               </Route>
             </Route>
 
+            {/* RUTAS DE ADMINISTRADOR */}
             <Route element={<ProtectedRoute requiredRole={1} />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
@@ -90,6 +114,7 @@ function App() {
               </Route>
             </Route>
 
+            {/* RUTA COMODÍN (404 encubierto) */}
             <Route path="*" element={<Navigate to="/" replace />} />
 
           </Routes>

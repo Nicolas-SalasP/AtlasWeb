@@ -100,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->group(function () {
         // 1. Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('admin');
+        Route::get('/notifications-summary', [DashboardController::class, 'getNotificationsSummary'])->middleware('admin');
 
         // 2. Configuración Global (Solo permiso: manage_settings)
         Route::middleware(['admin:manage_settings'])->group(function () {
