@@ -45,10 +45,14 @@ class TicketService
 
         if (!empty($attachments)) {
             foreach ($attachments as $file) {
-                $path = $file->store('tickets', 'public');
+                $extension = $file->getClientOriginalExtension();
+                $filename = Str::random(25) . '.' . $extension;
+                $path = $file->storeAs('tickets', $filename, 'public');
+                $safeOriginalName = htmlspecialchars($file->getClientOriginalName(), ENT_QUOTES, 'UTF-8');
+
                 $filesData[] = [
                     'path' => '/storage/' . $path,
-                    'name' => $file->getClientOriginalName(),
+                    'name' => $safeOriginalName,
                     'mime' => $file->getClientMimeType()
                 ];
             }
