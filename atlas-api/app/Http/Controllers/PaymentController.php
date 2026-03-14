@@ -19,8 +19,8 @@ class PaymentController extends Controller
         $environment = ($dbEnv === 'production') ? Options::ENVIRONMENT_PRODUCTION : Options::ENVIRONMENT_INTEGRATION;
 
         if ($environment === Options::ENVIRONMENT_INTEGRATION) {
-            $commerceCode = '597055555532';
-            $apiKey = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C';
+            $commerceCode = config('services.webpay.integration_code', env('WEBPAY_INTEGRATION_CODE', '597055555532'));
+            $apiKey = config('services.webpay.integration_key', env('WEBPAY_INTEGRATION_KEY', '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C'));
         } else {
             $commerceCode = SystemSetting::where('key', 'webpay_code')->value('value');
             $apiKey = SystemSetting::where('key', 'webpay_api_key')->value('value');
@@ -40,6 +40,11 @@ class PaymentController extends Controller
             }
 
             $order = Order::findOrFail($request->order_id);
+
+            if (in_array($order->status, ['paid', 'cancelled', 'refunded'])) {
+                return response()->json(['error' => 'La orden ya no puede ser pagada porque su estado es: ' . $order->status], 422);
+            }
+
             $amount = (int) round($order->total);
             $buyOrder = 'ORD-' . $order->id . '-' . time();
             $sessionId = session()->getId();
@@ -74,8 +79,8 @@ class PaymentController extends Controller
         try {
             $order = Order::findOrFail($request->order_id);
 
-            if ($order->status === 'paid') {
-                return response()->json(['message' => 'La orden ya está pagada'], 400);
+            if (in_array($order->status, ['paid', 'cancelled', 'refunded'])) {
+                return response()->json(['message' => 'No se puede procesar: la orden ya está en estado ' . $order->status], 422);
             }
 
             $order->status = 'pending';
@@ -119,15 +124,18 @@ class PaymentController extends Controller
         }
 
         try {
-            $options = $this->getTransbankOptions();
-            $transaction = new Transaction($options);
-            $response = $transaction->commit($token);
-
             $order = Order::where('transaction_token', $token)->first();
 
             if (!$order) {
                 return redirect($frontendUrl . '/checkout/failure?reason=order_not_found');
             }
+            if ($order->status === 'paid') {
+                return redirect($frontendUrl . '/checkout/success?order=' . $order->order_number);
+            }
+
+            $options = $this->getTransbankOptions();
+            $transaction = new Transaction($options);
+            $response = $transaction->commit($token);
 
             if ($response->isApproved()) {
                 $order->status = 'paid';
@@ -139,6 +147,7 @@ class PaymentController extends Controller
                 $order->status = 'cancelled';
                 $order->payment_data = json_encode($response);
                 $order->save();
+                
                 return redirect($frontendUrl . '/checkout/failure?order=' . $order->order_number);
             }
 

@@ -23,18 +23,27 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
             'stock_current' => 'required|integer',
-            'specs' => 'nullable'
+            'specs' => 'nullable',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
+
         $data = $request->except(['images']);
         $data['slug'] = Str::slug($request->name) . '-' . Str::random(4);
         $data['is_visible'] = $request->boolean('is_visible', true);
         if ($request->has('specs')) {
-            $data['specs'] = is_string($request->specs) ? json_decode($request->specs, true) : $request->specs;
+            $specs = $request->specs;
+            if (is_string($specs)) { $specs = json_decode($specs, true); }
+            if (is_string($specs)) { $specs = json_decode($specs, true); }
+            $data['specs'] = $specs;
         }
+
         $product = Product::create($data);
+
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $file) {
-                $path = $file->store('products', 'public');
+                $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('products', $filename, 'public');
 
                 ProductImage::create([
                     'product_id' => $product->id,
@@ -55,17 +64,32 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json(['message' => 'Producto no encontrado'], 404);
         }
+        $request->validate([
+            'sku' => 'nullable|unique:products,sku,' . $id,
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048'
+        ]);
+
         $data = $request->except(['images', '_method']);
+        
         if ($request->has('is_visible')) {
             $data['is_visible'] = filter_var($request->is_visible, FILTER_VALIDATE_BOOLEAN);
         }
+        
         if ($request->has('specs')) {
-            $data['specs'] = is_string($request->specs) ? json_decode($request->specs, true) : $request->specs;
+            $specs = $request->specs;
+            if (is_string($specs)) { $specs = json_decode($specs, true); }
+            if (is_string($specs)) { $specs = json_decode($specs, true); }
+            $data['specs'] = $specs;
         }
+
         $product->update($data);
+
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $path = $file->store('products', 'public');
+                $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('products', $filename, 'public');
+                
                 ProductImage::create([
                     'product_id' => $product->id,
                     'url' => '/storage/' . $path,
@@ -80,12 +104,20 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        $product = Product::find($id);
+        $product = Product::with('images')->find($id);
+        
         if ($product) {
-            foreach($product->images as $img)
-            $product->delete();
-            return response()->json(['message' => 'Producto eliminado']);
+            foreach($product->images as $img) {
+                $relativePath = str_replace('/storage/', '', $img->url);
+                if (Storage::disk('public')->exists($relativePath)) {
+                    Storage::disk('public')->delete($relativePath);
+                }
+            }
+            $product->delete(); 
+            
+            return response()->json(['message' => 'Producto y sus imágenes eliminados físicamente']);
         }
+        
         return response()->json(['message' => 'No encontrado'], 404);
     }
 
@@ -94,8 +126,12 @@ class ProductController extends Controller
         $image = ProductImage::find($id);
         if (!$image)
             return response()->json(['message' => 'Imagen no encontrada'], 404);
+            
         $relativePath = str_replace('/storage/', '', $image->url);
-        Storage::disk('public')->delete($relativePath);
+        if (Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->delete($relativePath);
+        }
+        
         $image->delete();
 
         return response()->json(['message' => 'Imagen eliminada']);
@@ -106,6 +142,7 @@ class ProductController extends Controller
         $image = ProductImage::find($imageId);
         if (!$image)
             return response()->json(['message' => 'Imagen no encontrada'], 404);
+            
         ProductImage::where('product_id', $image->product_id)->update(['is_cover' => false]);
         $image->update(['is_cover' => true]);
 
