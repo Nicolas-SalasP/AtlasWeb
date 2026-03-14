@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
@@ -24,12 +26,14 @@ class ServiceController extends Controller
             'price' => 'required|integer',
             'duration_days' => 'required|integer',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
             'features' => 'nullable'
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('services', 'public');
+            $file = $request->file('image');
+            $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('services', $filename, 'public');
             $data['image_url'] = '/storage/' . $path;
         }
 
@@ -44,11 +48,26 @@ class ServiceController extends Controller
     public function update(Request $request, $id)
     {
         $service = Service::findOrFail($id);
-
-        $data = $request->all();
+        $data = $request->validate([
+            'name' => 'nullable|string',
+            'price' => 'nullable|integer',
+            'duration_days' => 'nullable|integer',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'features' => 'nullable'
+        ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('services', 'public');
+            if ($service->image_url) {
+                $oldPath = str_replace('/storage/', '', $service->image_url);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            $file = $request->file('image');
+            $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('services', $filename, 'public');
             $data['image_url'] = '/storage/' . $path;
         }
 
@@ -62,7 +81,20 @@ class ServiceController extends Controller
 
     public function destroy($id)
     {
-        Service::destroy($id);
-        return response()->json(['message' => 'Eliminado']);
+        $service = Service::find($id);
+        
+        if ($service) {
+            if ($service->image_url) {
+                $relativePath = str_replace('/storage/', '', $service->image_url);
+                if (Storage::disk('public')->exists($relativePath)) {
+                    Storage::disk('public')->delete($relativePath);
+                }
+            }
+            
+            $service->delete();
+            return response()->json(['message' => 'Servicio y archivos eliminados']);
+        }
+
+        return response()->json(['message' => 'No encontrado'], 404);
     }
 }

@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use App\Models\AccessLog;
-use Log;
+use Illuminate\Support\Facades\Log;
+use App\Mail\EmailChangeVerification;
 
 class ProfileController extends Controller
 {
@@ -63,11 +64,9 @@ class ProfileController extends Controller
         ], 600);
 
         Log::info("Código de verificación para cambio de correo ({$request->new_email}): {$code}");
-        // Mail::to($request->new_email)->send(new EmailChangeVerification($code));
-
+        Mail::to($request->new_email)->send(new EmailChangeVerification($code));
         return response()->json([
-            'message' => 'Hemos enviado un código de verificación a tu nuevo correo.',
-            'debug_code' => $code
+            'message' => 'Hemos enviado un código de verificación a tu nuevo correo.'
         ]);
     }
 

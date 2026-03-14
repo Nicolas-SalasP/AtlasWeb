@@ -64,7 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/update', [ProfileController::class, 'update']);
         Route::put('/password', [ProfileController::class, 'changePassword']);
         Route::post('/email/request', [ProfileController::class, 'requestEmailChange']);
-        Route::post('/email/verify', [ProfileController::class, 'verifyEmailChange']);
+        Route::post('/email/verify', [ProfileController::class, 'verifyEmailChange'])->middleware('throttle:5,1');
         Route::post('/claim-orders/request-otp', [AuthController::class, 'requestOrderClaimOtp'])->middleware('throttle:3,10');
         Route::post('/claim-orders/confirm', [AuthController::class, 'confirmOrderClaim'])->middleware('throttle:5,1');
         
