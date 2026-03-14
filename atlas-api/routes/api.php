@@ -65,8 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/password', [ProfileController::class, 'changePassword']);
         Route::post('/email/request', [ProfileController::class, 'requestEmailChange']);
         Route::post('/email/verify', [ProfileController::class, 'verifyEmailChange']);
-        Route::post('/claim-orders/request-otp', [AuthController::class, 'requestOrderClaimOtp']);
-        Route::post('/claim-orders/confirm', [AuthController::class, 'confirmOrderClaim']);
+        Route::post('/claim-orders/request-otp', [AuthController::class, 'requestOrderClaimOtp'])->middleware('throttle:3,10');
+        Route::post('/claim-orders/confirm', [AuthController::class, 'confirmOrderClaim'])->middleware('throttle:5,1');
         
         // Datos del Dashboard Cliente
         Route::get('/subscription', [ProfileController::class, 'getSubscription']);
@@ -82,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Órdenes (Listar y Detalle blindado - Viene de MAIN)
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/orders/{id}', [OrderController::class, 'show']); 
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::put('/orders/{id}', [OrderController::class, 'update']);
 
     // Tickets (Lado Cliente)
@@ -143,7 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
             // Órdenes
             Route::get('/orders', [OrderController::class, 'indexAll']);
             Route::put('/orders/{id}', [OrderController::class, 'update']);
-            
+
             // Comprobantes Bancarios en Standby
             Route::get('/bank-receipts/unmatched', [\App\Http\Controllers\BankReceiptController::class, 'getUnmatched']);
             Route::post('/bank-receipts/{id}/match', [\App\Http\Controllers\BankReceiptController::class, 'manualMatch']);

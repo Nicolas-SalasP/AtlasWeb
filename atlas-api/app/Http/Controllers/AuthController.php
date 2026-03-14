@@ -64,9 +64,9 @@ class AuthController extends Controller
 
             if ($unlinkedOrders->isNotEmpty()) {
                 foreach ($unlinkedOrders as $order) {
-                    $customerData = $order->customer_data;
+                    $customerData = is_string($order->customer_data) ? json_decode($order->customer_data, true) : $order->customer_data;
                     if (is_string($customerData)) { $customerData = json_decode($customerData, true); }
-                    if (is_string($customerData)) { $customerData = json_decode($customerData, true); }
+                    
                     $email = $customerData['email'] ?? null;
                     
                     if ($email) {
@@ -104,8 +104,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         $hasOrders = Order::where('rut', $user->rut)->whereNull('user_id')->get()->contains(function ($order) use ($request) {
-            $data = $order->customer_data;
-            if (is_string($data)) { $data = json_decode($data, true); }
+            $data = is_string($order->customer_data) ? json_decode($order->customer_data, true) : $order->customer_data;
             if (is_string($data)) { $data = json_decode($data, true); }
             return ($data['email'] ?? '') === $request->historical_email;
         });
@@ -174,13 +173,13 @@ class AuthController extends Controller
 
         if ($user) {
             $this->logAccess($request, $user->id, 'Inicio de Sesión Exitoso');
+
             if (!empty($user->rut)) {
                 $unlinkedOrders = Order::where('rut', $user->rut)->whereNull('user_id')->get();
 
                 if ($unlinkedOrders->isNotEmpty()) {
                     foreach ($unlinkedOrders as $order) {
-                        $customerData = $order->customer_data;
-                        if (is_string($customerData)) { $customerData = json_decode($customerData, true); }
+                        $customerData = is_string($order->customer_data) ? json_decode($order->customer_data, true) : $order->customer_data;
                         if (is_string($customerData)) { $customerData = json_decode($customerData, true); }
                         
                         $email = $customerData['email'] ?? null;
@@ -233,29 +232,21 @@ class AuthController extends Controller
     public function sendResetLink(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ], [
-            'email.exists' => 'Si el correo existe en nuestra base de datos, enviaremos un enlace.' 
+            'email' => 'required|email',
         ]);
 
-        $status = Password::broker()->sendResetLink(
+        Password::broker()->sendResetLink(
             $request->only('email')
         );
 
-        if ($status === Password::RESET_LINK_SENT) {
-            $user = User::where('email', $request->email)->first();
-            if ($user) {
-                $this->logAccess($request, $user->id, 'Solicitud Recuperación de Contraseña');
-            }
-
-            return response()->json([
-                'message' => 'Te hemos enviado un enlace para restablecer tu contraseña.'
-            ]);
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            $this->logAccess($request, $user->id, 'Solicitud Recuperación de Contraseña');
         }
 
         return response()->json([
-            'message' => 'No se pudo enviar el enlace. Intenta nuevamente.'
-        ], 400);
+            'message' => 'Si el correo está en nuestra base de datos, recibirás un enlace de recuperación pronto.'
+        ]);
     }
 
     public function resetPassword(Request $request)
