@@ -23,8 +23,8 @@ Options -Indexes
     # Política de Referencia estricta
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
-    # Content Security Policy (CSP) - Protección contra XSS y scripts maliciosos
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.tudominio.cl https://webpay3g.transbank.cl; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none'; object-src 'none';"
+    # Content Security Policy (CSP) Estricta para OWASP ZAP
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://api.atlasdigitaltech.cl https://webpay3g.transbank.cl; img-src 'self' data: https://ui-avatars.com; font-src 'self' data:; frame-ancestors 'none'; object-src 'none'; form-action 'self'; base-uri 'self';"
 </IfModule>
 
 # ----------------------------------------------------------------------
@@ -68,13 +68,24 @@ Options -Indexes
 </IfModule>
 
 # ----------------------------------------------------------------------
-# 5. CACHÉ DE IMÁGENES
+# 5. CONTROL DE CACHÉ (ESTÁTICOS Y SEGURIDAD ZAP)
 # ----------------------------------------------------------------------
 <IfModule mod_expires.c>
   ExpiresActive On
+  # Caché para estáticos seguros (1 mes) para mejor rendimiento
   ExpiresByType image/jpg "access plus 1 month"
   ExpiresByType image/jpeg "access plus 1 month"
   ExpiresByType image/gif "access plus 1 month"
   ExpiresByType image/png "access plus 1 month"
   ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
+
+<FilesMatch "^(index\.html)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </IfModule>
+</FilesMatch>
