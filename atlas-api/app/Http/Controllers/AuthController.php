@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderClaimOtp;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -53,7 +54,7 @@ class AuthController extends Controller
             'is_active' => true
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::login($user);
         $this->logAccess($request, $user->id, 'Registro Exitoso');
 
         $requiresClaim = false;
@@ -65,10 +66,12 @@ class AuthController extends Controller
             if ($unlinkedOrders->isNotEmpty()) {
                 foreach ($unlinkedOrders as $order) {
                     $customerData = is_string($order->customer_data) ? json_decode($order->customer_data, true) : $order->customer_data;
-                    if (is_string($customerData)) { $customerData = json_decode($customerData, true); }
-                    
+                    if (is_string($customerData)) {
+                        $customerData = json_decode($customerData, true);
+                    }
+
                     $email = $customerData['email'] ?? null;
-                    
+
                     if ($email) {
                         $parts = explode('@', $email);
                         if (count($parts) === 2) {
@@ -79,7 +82,7 @@ class AuthController extends Controller
                         }
                     }
                 }
-                
+
                 if (count($maskedEmails) > 0) {
                     $requiresClaim = true;
                 }
@@ -90,7 +93,6 @@ class AuthController extends Controller
             'message' => 'Cuenta creada exitosamente',
             'data' => [
                 'user' => $user,
-                'token' => $token,
                 'role' => 'cliente',
                 'requires_order_claim' => $requiresClaim,
                 'claimable_emails' => array_values(array_unique($maskedEmails))
@@ -105,7 +107,9 @@ class AuthController extends Controller
 
         $hasOrders = Order::where('rut', $user->rut)->whereNull('user_id')->get()->contains(function ($order) use ($request) {
             $data = is_string($order->customer_data) ? json_decode($order->customer_data, true) : $order->customer_data;
-            if (is_string($data)) { $data = json_decode($data, true); }
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
             return ($data['email'] ?? '') === $request->historical_email;
         });
 
@@ -116,7 +120,7 @@ class AuthController extends Controller
         $otp = rand(100000, 999999);
         $cacheKey = 'order_claim_otp_' . $user->id . '_' . $request->historical_email;
         Cache::put($cacheKey, $otp, now()->addMinutes(15));
-        
+
         Mail::to($request->historical_email)->send(new OrderClaimOtp($otp));
 
         return response()->json(['message' => 'Si hay órdenes asociadas, hemos enviado un código.'], 200);
@@ -139,8 +143,12 @@ class AuthController extends Controller
 
         $ordersToUpdate = Order::where('rut', $user->rut)->whereNull('user_id')->get()->filter(function ($order) use ($request) {
             $data = $order->customer_data;
-            if (is_string($data)) { $data = json_decode($data, true); }
-            if (is_string($data)) { $data = json_decode($data, true); }
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
             return ($data['email'] ?? '') === $request->historical_email;
         });
 
@@ -160,30 +168,30 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        $data = $this->authService->login($request->email, $request->password);
-        $user = User::where('email', $request->email)->first(); 
+        if (Auth::attempt($credentials, $request->remember_me ?? false)) {
+            $request->session()->regenerate();
 
-        $requiresClaim = false;
-        $maskedEmails = [];
+            $user = Auth::user();
+            $requiresClaim = false;
+            $maskedEmails = [];
 
-        if ($user) {
             $this->logAccess($request, $user->id, 'Inicio de Sesión Exitoso');
 
             if (!empty($user->rut)) {
                 $unlinkedOrders = Order::where('rut', $user->rut)->whereNull('user_id')->get();
-
                 if ($unlinkedOrders->isNotEmpty()) {
                     foreach ($unlinkedOrders as $order) {
                         $customerData = is_string($order->customer_data) ? json_decode($order->customer_data, true) : $order->customer_data;
-                        if (is_string($customerData)) { $customerData = json_decode($customerData, true); }
-                        
+                        if (is_string($customerData)) {
+                            $customerData = json_decode($customerData, true);
+                        }
+
                         $email = $customerData['email'] ?? null;
-                        
                         if ($email) {
                             $parts = explode('@', $email);
                             if (count($parts) === 2) {
@@ -194,23 +202,22 @@ class AuthController extends Controller
                             }
                         }
                     }
-                    
                     if (count($maskedEmails) > 0) {
                         $requiresClaim = true;
                     }
                 }
             }
-        }
 
-        if (is_array($data)) {
-            $data['requires_order_claim'] = $requiresClaim;
-            $data['claimable_emails'] = array_values(array_unique($maskedEmails));
+            return response()->json([
+                'message' => 'Login exitoso',
+                'data' => [
+                    'user' => $user,
+                    'requires_order_claim' => $requiresClaim,
+                    'claimable_emails' => array_values(array_unique($maskedEmails))
+                ]
+            ]);
         }
-
-        return response()->json([
-            'message' => 'Login exitoso',
-            'data' => $data
-        ]);
+        return response()->json(['message' => 'Credenciales inválidas'], 401);
     }
 
     public function logout(Request $request)
@@ -218,12 +225,14 @@ class AuthController extends Controller
         $user = $request->user();
         if ($user) {
             $this->logAccess($request, $user->id, 'Cierre de Sesión');
-            $user->currentAccessToken()->delete();
         }
 
-        return response()->json(['message' => 'Sesión cerrada']);
-    }
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
+        return response()->json(['message' => 'Sesión cerrada exitosamente']);
+    }
     public function me(Request $request)
     {
         return response()->json($request->user()->load('role'));

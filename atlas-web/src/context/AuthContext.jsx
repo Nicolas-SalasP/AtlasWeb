@@ -8,6 +8,8 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+    const rootURL = baseURL.endsWith('/api') ? baseURL.slice(0, -4) : baseURL;
 
     const [user, setUser] = useState(() => {
         try {
@@ -22,6 +24,12 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
+            const hasLocalData = localStorage.getItem('user_data') || sessionStorage.getItem('user_data');
+            if (!hasLocalData) {
+                setLoading(false);
+                return; 
+            }
+
             try {
                 const response = await api.get('/user');
                 const userData = response.data.data || response.data;
@@ -45,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (formData) => {
         try {
-            await api.get('/sanctum/csrf-cookie');
+            await api.get('/sanctum/csrf-cookie', { baseURL: rootURL });
             const response = await api.post('/register', formData);
             const payload = response.data.data || response.data;
             const userData = payload.user;
@@ -61,7 +69,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password, remember) => {
         try {
-            await api.get('/sanctum/csrf-cookie');
+            await api.get('/sanctum/csrf-cookie', { baseURL: rootURL });
             const response = await api.post('/login', {
                 email,
                 password,
@@ -94,7 +102,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await api.post('/logout');
         } catch (error) {
-            console.error("Error al cerrar sesión (ignorando):", error);
+            console.error("Error al cerrar sesión:", error);
         } finally {
             localStorage.clear();
             sessionStorage.clear();

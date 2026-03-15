@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || 'https://api.atlasdigitaltech.cl/api';
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
     baseURL: baseURL,
@@ -8,7 +8,8 @@ const api = axios.create({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
-    withCredentials: true
+    withCredentials: true,
+    withXSRFToken: true
 });
 
 api.interceptors.response.use(
@@ -30,7 +31,7 @@ api.interceptors.response.use(
                 localStorage.removeItem('pending_claims');
                 sessionStorage.clear();
                 if (window.location.pathname !== '/login' && window.location.pathname !== '/registro') {
-                     window.location.href = '/login';
+                    window.location.href = '/login';
                 }
             }
         }
