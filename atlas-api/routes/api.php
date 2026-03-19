@@ -65,7 +65,8 @@ Route::middleware(['erp.api.key'])->post('/internal/erp/validate-login', functio
             'atlas_id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'rut' => $user->rut ?? null
+            'rut' => $user->rut ?? null,
+            'is_active' => true
         ]
     ]);
 });
