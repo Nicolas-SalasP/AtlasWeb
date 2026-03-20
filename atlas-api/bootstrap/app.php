@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\VerifyErpApiKey;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'admin' => AdminOnly::class,
+            'erp.api.key' => VerifyErpApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

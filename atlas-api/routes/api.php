@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -45,6 +47,29 @@ Route::get('/system-status', [SettingController::class, 'publicStatus']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 
+// ==============================================================================
+// INTEGRACIÓN S2S CON ERP CONTABLE (Vía API Key)
+// ==============================================================================
+Route::middleware(['erp.api.key'])->post('/internal/erp/validate-login', function (Illuminate\Http\Request $request) {
+    $user = User::where('email', $request->email)->first();
+
+    // 1. Validar si existe y la contraseña es correcta
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return response()->json(['success' => false, 'message' => 'Credenciales inválidas'], 401);
+    }
+
+    // 2. Todo OK, enviamos la info al ERP
+    return response()->json([
+        'success' => true,
+        'user' => [
+            'atlas_id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'rut' => $user->rut ?? null,
+            'is_active' => true
+        ]
+    ]);
+});
 
 // ==============================================================================
 // RUTAS PROTEGIDAS (Requieren Login - auth:sanctum)
