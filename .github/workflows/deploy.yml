@@ -73,7 +73,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: 2200 
+          port: 22 
           script: |
             # Entrar a la carpeta del backend
             cd ~/tenri_backend
