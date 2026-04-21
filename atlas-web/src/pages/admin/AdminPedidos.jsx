@@ -201,7 +201,7 @@ const AdminPedidos = () => {
         return null;
     };
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Módulo...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Módulo...</div>;
 
     const nextState = pedidoSeleccionado ? getNextStateInfo(pedidoSeleccionado.status) : null;
 
@@ -218,13 +218,13 @@ const AdminPedidos = () => {
                 <div className="flex bg-gray-200/50 p-1 rounded-xl">
                     <button
                         onClick={() => setActiveTab('pedidos')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'pedidos' ? 'bg-white text-atlas-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'pedidos' ? 'bg-white text-tenri-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         <Package size={16} /> Pedidos
                     </button>
                     <button
                         onClick={() => setActiveTab('comprobantes')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'comprobantes' ? 'bg-white text-atlas-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'comprobantes' ? 'bg-white text-tenri-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         <div className="relative">
                             <Inbox size={16} />
@@ -243,7 +243,7 @@ const AdminPedidos = () => {
                         <input
                             type="text"
                             placeholder={activeTab === 'pedidos' ? "Buscar por Orden o Cliente..." : "Buscar por Transacción, Nombre o Glosa..."}
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-atlas-200 outline-none text-sm md:text-base"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-tenri-200 outline-none text-sm md:text-base"
                             value={busqueda}
                             onChange={e => setBusqueda(e.target.value)}
                         />
@@ -273,7 +273,7 @@ const AdminPedidos = () => {
                                 )}
                                 {filtradosPedidos.map((p) => (
                                     <tr key={p.id} onClick={() => abrirDetallePedido(p)} className="hover:bg-blue-50/50 cursor-pointer transition-colors group">
-                                        <td className="px-8 py-4 font-mono font-bold text-atlas-900">{p.order_number}</td>
+                                        <td className="px-8 py-4 font-mono font-bold text-tenri-900">{p.order_number}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
@@ -292,7 +292,7 @@ const AdminPedidos = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right font-black text-gray-900">${parseInt(p.total).toLocaleString('es-CL')}</td>
-                                        <td className="px-6 py-4 text-gray-400 group-hover:text-atlas-900"><ChevronRight size={20} /></td>
+                                        <td className="px-6 py-4 text-gray-400 group-hover:text-tenri-900"><ChevronRight size={20} /></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -347,13 +347,13 @@ const AdminPedidos = () => {
             <div className={`fixed inset-y-0 right-0 w-full md:w-3/4 lg:w-[800px] xl:w-[900px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${pedidoSeleccionado ? 'translate-x-0' : 'translate-x-full'}`}>
                 {pedidoSeleccionado && (
                     <>
-                        <div className="h-20 md:h-24 bg-atlas-900 flex items-center justify-between px-6 md:px-10 text-white flex-shrink-0">
+                        <div className="h-20 md:h-24 bg-tenri-900 flex items-center justify-between px-6 md:px-10 text-white flex-shrink-0">
                             <div>
                                 <h2 className="text-xl md:text-2xl font-bold flex items-center gap-3">
                                     {pedidoSeleccionado.order_number}
-                                    {procesando && <Loader2 size={18} className="animate-spin text-atlas-300" />}
+                                    {procesando && <Loader2 size={18} className="animate-spin text-tenri-300" />}
                                 </h2>
-                                <p className="text-atlas-300 text-xs md:text-sm mt-1">{new Date(pedidoSeleccionado.created_at).toLocaleString()}</p>
+                                <p className="text-tenri-300 text-xs md:text-sm mt-1">{new Date(pedidoSeleccionado.created_at).toLocaleString()}</p>
                             </div>
                             <button onClick={() => setPedidoSeleccionado(null)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><X size={20} /></button>
                         </div>
@@ -377,7 +377,7 @@ const AdminPedidos = () => {
                                         <button
                                             onClick={() => cambiarEstado(nextState.value)}
                                             disabled={procesando}
-                                            className="bg-atlas-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-atlas-800 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 disabled:opacity-70"
+                                            className="bg-tenri-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-tenri-800 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 disabled:opacity-70"
                                         >
                                             {procesando ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
                                             Avanzar a {nextState.label}
@@ -409,7 +409,7 @@ const AdminPedidos = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
                                     <div className="flex justify-between items-start mb-4">
-                                        <h3 className="font-bold text-gray-900 flex items-center gap-2"><User size={18} className="text-atlas-500" /> Cliente</h3>
+                                        <h3 className="font-bold text-gray-900 flex items-center gap-2"><User size={18} className="text-tenri-500" /> Cliente</h3>
                                         <span className="text-[10px] font-bold text-gray-400 uppercase bg-gray-100 px-2 py-1 rounded-md">
                                             {pedidoSeleccionado.payment_method === 'webpay' ? '💳 Webpay' : '🏦 Transferencia'}
                                         </span>
@@ -422,7 +422,7 @@ const AdminPedidos = () => {
                                     </div>
                                 </div>
                                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
-                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2"><MapPin size={18} className="text-atlas-500" /> Dirección de Despacho</h3>
+                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2"><MapPin size={18} className="text-tenri-500" /> Dirección de Despacho</h3>
                                     <div className="flex-1 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50 flex items-center mb-4">
                                         <p className="text-sm text-gray-700 leading-relaxed font-medium">
                                             {pedidoSeleccionado.shipping_address || 'Retiro en tienda o sin dirección registrada en la orden.'}
@@ -434,9 +434,9 @@ const AdminPedidos = () => {
                             {/* --- SECCIÓN DE TRACKING / DESPACHO --- */}
                             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                                    <h3 className="font-bold text-gray-900 flex items-center gap-2"><Truck size={18} className="text-atlas-500" /> Tracking de Envío</h3>
+                                    <h3 className="font-bold text-gray-900 flex items-center gap-2"><Truck size={18} className="text-tenri-500" /> Tracking de Envío</h3>
                                     {!editandoTracking ? (
-                                        <button onClick={() => setEditandoTracking(true)} className="text-xs font-bold text-atlas-600 flex items-center gap-1 hover:text-atlas-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
+                                        <button onClick={() => setEditandoTracking(true)} className="text-xs font-bold text-tenri-600 flex items-center gap-1 hover:text-tenri-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
                                             <Edit2 size={14} /> Editar Tracking
                                         </button>
                                     ) : (
@@ -445,7 +445,7 @@ const AdminPedidos = () => {
                                                 setEditandoTracking(false);
                                                 setTrackingData({ provider: pedidoSeleccionado.shipping_provider || '', number: pedidoSeleccionado.tracking_number || '' });
                                             }} className="flex-1 sm:flex-none text-xs font-bold text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">Cancelar</button>
-                                            <button onClick={guardarTracking} disabled={procesando} className="flex-1 sm:flex-none text-xs font-bold text-white bg-atlas-900 flex items-center justify-center gap-1 hover:bg-atlas-800 px-4 py-1.5 rounded-lg transition-colors">
+                                            <button onClick={guardarTracking} disabled={procesando} className="flex-1 sm:flex-none text-xs font-bold text-white bg-tenri-900 flex items-center justify-center gap-1 hover:bg-tenri-800 px-4 py-1.5 rounded-lg transition-colors">
                                                 {procesando ? <Loader2 size={14} className="animate-spin" /> : <><Save size={14} /> Guardar</>}
                                             </button>
                                         </div>
@@ -464,13 +464,13 @@ const AdminPedidos = () => {
                                             <p className="text-xs text-gray-400 font-bold uppercase mb-1">Código de Seguimiento</p>
                                             {pedidoSeleccionado.tracking_number ? (
                                                 <div className="flex items-center gap-3">
-                                                    <p className="font-mono font-bold text-atlas-900">{pedidoSeleccionado.tracking_number}</p>
+                                                    <p className="font-mono font-bold text-tenri-900">{pedidoSeleccionado.tracking_number}</p>
                                                     {pedidoSeleccionado.shipping_provider !== 'propio' && (
                                                         <a
                                                             href={getTrackingLink(pedidoSeleccionado.shipping_provider, pedidoSeleccionado.tracking_number)}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-[10px] bg-atlas-100 text-atlas-700 px-2 py-1 rounded flex items-center gap-1 hover:bg-atlas-200 transition-colors"
+                                                            className="text-[10px] bg-tenri-100 text-tenri-700 px-2 py-1 rounded flex items-center gap-1 hover:bg-tenri-200 transition-colors"
                                                         >
                                                             Rastrear <ExternalLink size={10} />
                                                         </a>
@@ -488,7 +488,7 @@ const AdminPedidos = () => {
                                             <select
                                                 value={trackingData.provider}
                                                 onChange={(e) => setTrackingData({ ...trackingData, provider: e.target.value })}
-                                                className="w-full p-2.5 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-atlas-300"
+                                                className="w-full p-2.5 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-tenri-300"
                                             >
                                                 <option value="">Selecciona Courier...</option>
                                                 {PROVEEDORES_ENVIO.map(p => (
@@ -503,7 +503,7 @@ const AdminPedidos = () => {
                                                 value={trackingData.number}
                                                 onChange={(e) => setTrackingData({ ...trackingData, number: e.target.value })}
                                                 placeholder="Ej: 9923847291"
-                                                className="w-full p-2.5 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-atlas-300 font-mono"
+                                                className="w-full p-2.5 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-tenri-300 font-mono"
                                             />
                                         </div>
                                     </div>
@@ -513,15 +513,15 @@ const AdminPedidos = () => {
                             {/* SECCIÓN DE NOTAS */}
                             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                                    <h3 className="font-bold text-gray-900 flex items-center gap-2"><FileText size={18} className="text-atlas-500" /> Notas del Pedido</h3>
+                                    <h3 className="font-bold text-gray-900 flex items-center gap-2"><FileText size={18} className="text-tenri-500" /> Notas del Pedido</h3>
                                     {!editandoNotas ? (
-                                        <button onClick={() => setEditandoNotas(true)} className="text-xs font-bold text-atlas-600 flex items-center gap-1 hover:text-atlas-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
+                                        <button onClick={() => setEditandoNotas(true)} className="text-xs font-bold text-tenri-600 flex items-center gap-1 hover:text-tenri-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
                                             <Edit2 size={14} /> Editar Notas
                                         </button>
                                     ) : (
                                         <div className="flex items-center gap-2 w-full sm:w-auto">
                                             <button onClick={() => { setEditandoNotas(false); setNotasTemp(pedidoSeleccionado.notes); }} className="flex-1 sm:flex-none text-xs font-bold text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">Cancelar</button>
-                                            <button onClick={guardarNotas} disabled={procesando} className="flex-1 sm:flex-none text-xs font-bold text-white bg-atlas-900 flex items-center justify-center gap-1 hover:bg-atlas-800 px-4 py-1.5 rounded-lg transition-colors">
+                                            <button onClick={guardarNotas} disabled={procesando} className="flex-1 sm:flex-none text-xs font-bold text-white bg-tenri-900 flex items-center justify-center gap-1 hover:bg-tenri-800 px-4 py-1.5 rounded-lg transition-colors">
                                                 {procesando ? <Loader2 size={14} className="animate-spin" /> : <><Save size={14} /> Guardar</>}
                                             </button>
                                         </div>
@@ -538,7 +538,7 @@ const AdminPedidos = () => {
                                     </div>
                                 ) : (
                                     <textarea
-                                        className="w-full p-4 text-sm bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-atlas-300 resize-none h-28 custom-scrollbar"
+                                        className="w-full p-4 text-sm bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-tenri-300 resize-none h-28 custom-scrollbar"
                                         value={notasTemp}
                                         onChange={(e) => setNotasTemp(e.target.value)}
                                         placeholder="Escribe anotaciones internas, incidencias o instrucciones del cliente..."
@@ -548,7 +548,7 @@ const AdminPedidos = () => {
 
                             {/* LISTA DE PRODUCTOS Y TOTALES */}
                             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                                <h3 className="font-bold text-gray-900 mb-5 flex items-center gap-2"><Package size={18} className="text-atlas-500" /> Detalle de Productos</h3>
+                                <h3 className="font-bold text-gray-900 mb-5 flex items-center gap-2"><Package size={18} className="text-tenri-500" /> Detalle de Productos</h3>
                                 <div className="space-y-3 mb-6">
                                     {pedidoSeleccionado.items?.map((item) => (
                                         <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
@@ -558,7 +558,7 @@ const AdminPedidos = () => {
                                             </div>
                                             <div className="text-left sm:text-right border-t border-gray-100 sm:border-0 pt-2 sm:pt-0">
                                                 <p className="text-xs text-gray-500 mb-1">{item.quantity} x ${parseInt(item.unit_price).toLocaleString('es-CL')}</p>
-                                                <p className="font-black text-atlas-900 text-sm md:text-base">${parseInt(item.total_line).toLocaleString('es-CL')}</p>
+                                                <p className="font-black text-tenri-900 text-sm md:text-base">${parseInt(item.total_line).toLocaleString('es-CL')}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -645,12 +645,12 @@ const AdminPedidos = () => {
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-2xl border border-atlas-200 shadow-md">
-                                <h3 className="font-bold text-atlas-900 mb-2 flex items-center gap-2"><LinkIcon size={18} /> Asociar a una Orden</h3>
+                            <div className="bg-white p-6 rounded-2xl border border-tenri-200 shadow-md">
+                                <h3 className="font-bold text-tenri-900 mb-2 flex items-center gap-2"><LinkIcon size={18} /> Asociar a una Orden</h3>
                                 <p className="text-xs text-gray-500 mb-4">Selecciona la orden a la cual pertenece este pago. Al asociarla, pasará automáticamente a estado "Pagado".</p>
 
                                 <select
-                                    className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-atlas-400"
+                                    className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-tenri-400"
                                     value={ordenAsociarId}
                                     onChange={(e) => setOrdenAsociarId(e.target.value)}
                                     disabled={procesando}
@@ -666,7 +666,7 @@ const AdminPedidos = () => {
                                 <button
                                     onClick={asociarComprobanteManual}
                                     disabled={!ordenAsociarId || procesando}
-                                    className="w-full bg-atlas-900 text-white font-bold py-3 rounded-xl hover:bg-atlas-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                                    className="w-full bg-tenri-900 text-white font-bold py-3 rounded-xl hover:bg-tenri-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                                 >
                                     {procesando ? <Loader2 size={18} className="animate-spin" /> : <><CheckCircle size={18} /> Confirmar Asociación</>}
                                 </button>

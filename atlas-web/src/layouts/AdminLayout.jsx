@@ -20,8 +20,8 @@ const AdminLayout = () => {
     };
 
     const isActive = (path) => location.pathname === path
-        ? "bg-atlas-800 text-white border-r-4 border-atlas-300"
-        : "text-gray-400 hover:bg-atlas-800/50 hover:text-white";
+        ? "bg-tenri-800 text-white border-r-4 border-tenri-300"
+        : "text-gray-400 hover:bg-tenri-800/50 hover:text-white";
 
     const handleNavigation = () => {
         setSidebarOpen(false);
@@ -82,8 +82,8 @@ const AdminLayout = () => {
 
     return (
         <div className="min-h-screen flex bg-gray-100">
-            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-atlas-900 z-30 flex items-center px-4 justify-between shadow-md">
-                <span className="text-white font-bold tracking-wider">ATLAS ADMIN</span>
+            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-tenri-900 z-30 flex items-center px-4 justify-between shadow-md">
+                <span className="text-white font-bold tracking-wider">TENRI ADMIN</span>
                 <button onClick={() => setSidebarOpen(true)} className="text-white p-2">
                     <Menu size={24} />
                 </button>
@@ -97,13 +97,13 @@ const AdminLayout = () => {
             )}
 
             <aside className={`
-                fixed inset-y-0 left-0 w-64 bg-atlas-900 text-white flex flex-col z-50 transition-transform duration-300 ease-out shadow-2xl
+                fixed inset-y-0 left-0 w-64 bg-tenri-900 text-white flex flex-col z-50 transition-transform duration-300 ease-out shadow-2xl
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
                 md:translate-x-0 md:static md:shadow-none
             `}>
-                <div className="h-16 md:h-20 flex items-center justify-between px-6 border-b border-atlas-800 flex-shrink-0">
+                <div className="h-16 md:h-20 flex items-center justify-between px-6 border-b border-tenri-800 flex-shrink-0">
                     <div className="font-bold text-xl tracking-wider">
-                        ATLAS <span className="text-atlas-300 ml-1 font-light">ADMIN</span>
+                        TENRI <span className="text-tenri-300 ml-1 font-light">ADMIN</span>
                     </div>
                     <button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white">
                         <X size={24}/>
@@ -166,7 +166,7 @@ const AdminLayout = () => {
                     )}
                 </nav>
 
-                <div className="p-4 border-t border-atlas-800 bg-atlas-900 flex-shrink-0">
+                <div className="p-4 border-t border-tenri-800 bg-tenri-900 flex-shrink-0">
                     <Link to="/" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors mb-2">
                         <Home size={16} /> Ver Sitio Web
                     </Link>

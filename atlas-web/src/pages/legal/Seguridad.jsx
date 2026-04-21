@@ -14,17 +14,17 @@ const Seguridad = () => {
         <div className="prose prose-blue max-w-none text-gray-700 space-y-6">
           <h3 className="text-xl font-bold text-gray-900 mt-8">1. PROPÓSITO Y ALCANCE</h3>
           <p>
-            El presente documento define los controles técnicos, operativos y administrativos implementados por Atlas Digital Tech para salvaguardar la confidencialidad, integridad y disponibilidad (Tríada CIA) de los datos procesados en el ecosistema AtlasWeb y el ERP Contable. Este documento está alineado con las mejores prácticas de la industria y sirve como garantía de seguridad para nuestros clientes comerciales (B2B).
+            El presente documento define los controles técnicos, operativos y administrativos implementados por Tenri Spa para salvaguardar la confidencialidad, integridad y disponibilidad (Tríada CIA) de los datos procesados en el ecosistema Tenri y el ERP Contable. Este documento está alineado con las mejores prácticas de la industria y sirve como garantía de seguridad para nuestros clientes comerciales (B2B).
           </p>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">2. MODELO DE RESPONSABILIDAD COMPARTIDA</h3>
           <p>
-            La seguridad en un entorno de Software as a Service (SaaS) es una responsabilidad conjunta. Atlas Digital Tech garantiza la seguridad <strong>DEL</strong> sistema, mientras que el Cliente es responsable de la seguridad <strong>EN EL</strong> sistema.
+            La seguridad en un entorno de Software as a Service (SaaS) es una responsabilidad conjunta. Tenri Spa garantiza la seguridad <strong>DEL</strong> sistema, mientras que el Cliente es responsable de la seguridad <strong>EN EL</strong> sistema.
           </p>
           
           <div className="space-y-4 mt-4">
             <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <h4 className="font-bold text-gray-900 mb-2">🛡️ Responsabilidad de Atlas Digital Tech (El Proveedor):</h4>
+              <h4 className="font-bold text-gray-900 mb-2">🛡️ Responsabilidad de Tenri Spa (El Proveedor):</h4>
               <ul className="list-disc pl-5 space-y-1 text-sm">
                 <li><strong>Seguridad de la Infraestructura:</strong> Hardening del servidor, mitigación de ataques de red (DDoS), y configuración de firewalls a nivel de centro de datos.</li>
                 <li><strong>Seguridad de la Aplicación:</strong> Prevención de inyecciones SQL, Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF) y mantenimiento del código fuente.</li>
@@ -46,19 +46,19 @@ const Seguridad = () => {
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">3. GESTIÓN DE IDENTIDADES Y CONTROL DE ACCESOS (IAM)</h3>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Autenticación Centralizada (SSO):</strong> El acceso al ERP está protegido por una arquitectura de Single Sign-On gestionada por AtlasWeb. Las sesiones se validan mediante JSON Web Tokens (JWT) firmados criptográficamente, con tiempos de expiración definidos para mitigar el secuestro de sesiones.</li>
+            <li><strong>Autenticación Centralizada (SSO):</strong> El acceso al ERP está protegido por una arquitectura de Single Sign-On gestionada por Tenri. Las sesiones se validan mediante JSON Web Tokens (JWT) firmados criptográficamente, con tiempos de expiración definidos para mitigar el secuestro de sesiones.</li>
             <li><strong>Principio de Mínimo Privilegio (RBAC):</strong> El ERP cuenta con un Control de Acceso Basado en Roles. Cada usuario posee permisos estrictamente limitados a sus funciones operativas, aislando módulos críticos (como configuración de empresas o anulaciones) de perfiles estándar.</li>
             <li><strong>Gestión de Contraseñas:</strong> Ninguna contraseña se almacena en texto plano. Todas son sometidas a algoritmos de derivación de claves fuertemente salteadas (Bcrypt) antes de ser guardadas en la base de datos.</li>
           </ul>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">4. CRIPTOGRAFÍA Y PROTECCIÓN DE DATOS</h3>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Cifrado en Tránsito:</strong> El 100% de la comunicación entre los navegadores de los clientes y los servidores de Atlas fluye a través de túneles encriptados utilizando el protocolo HTTPS con cifrado TLS 1.2 o superior, impidiendo ataques de intermediario (Man-in-the-Middle).</li>
+            <li><strong>Cifrado en Tránsito:</strong> El 100% de la comunicación entre los navegadores de los clientes y los servidores de Tenri fluye a través de túneles encriptados utilizando el protocolo HTTPS con cifrado TLS 1.2 o superior, impidiendo ataques de intermediario (Man-in-the-Middle).</li>
             <li><strong>Aislamiento de Entornos:</strong> Los datos de producción están lógicamente aislados de los entornos de desarrollo y pruebas (Staging). Ningún dato real de clientes es utilizado para pruebas de software.</li>
           </ul>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">5. CICLO DE VIDA DE DESARROLLO SEGURO (SDLC) Y DEPLOYS</h3>
-          <p>Atlas Digital Tech no realiza modificaciones directas en los servidores de producción.</p>
+          <p>Tenri Spa no realiza modificaciones directas en los servidores de producción.</p>
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Integración y Despliegue Continuo (CI/CD):</strong> Todo cambio en el código fuente pasa por repositorios centralizados y versionados (GitHub). Los despliegues a producción se realizan mediante flujos automatizados (GitHub Actions), garantizando la inmutabilidad de la infraestructura.</li>
             <li><strong>Revisión de Código y Variables:</strong> Las credenciales de API, llaves criptográficas y datos de conexión a bases de datos nunca se exponen en el código fuente. Se gestionan exclusivamente mediante variables de entorno inyectadas de forma segura (.env).</li>
@@ -72,7 +72,7 @@ const Seguridad = () => {
           </ul>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">7. GESTIÓN DE INCIDENTES DE SEGURIDAD (INCIDENT RESPONSE)</h3>
-          <p>Atlas Digital Tech mantiene un protocolo formal de respuesta ante incidentes de seguridad, con el objetivo de contener, analizar y mitigar cualquier evento que comprometa la confidencialidad, integridad o disponibilidad de la información.</p>
+          <p>Tenri Spa mantiene un protocolo formal de respuesta ante incidentes de seguridad, con el objetivo de contener, analizar y mitigar cualquier evento que comprometa la confidencialidad, integridad o disponibilidad de la información.</p>
           <div className="space-y-2 mt-4">
             <p><strong>Clasificación de Incidentes:</strong></p>
             <ul className="list-disc pl-5 space-y-1">
@@ -94,7 +94,7 @@ const Seguridad = () => {
           </div>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">8. SEGURIDAD EN SUB-ENCARGADOS Y PROVEEDORES</h3>
-          <p>Atlas Digital Tech utiliza proveedores externos para la operación del servicio (infraestructura, correo, pagos). Se aplican los siguientes controles:</p>
+          <p>Tenri Spa utiliza proveedores externos para la operación del servicio (infraestructura, correo, pagos). Se aplican los siguientes controles:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Evaluación previa de proveedores basada en reputación y estándares de seguridad.</li>
             <li>Uso exclusivo de proveedores con cifrado, aislamiento y buenas prácticas de seguridad.</li>
@@ -104,7 +104,7 @@ const Seguridad = () => {
           <p className="text-sm italic mt-2">El Cliente reconoce que ciertos componentes del servicio dependen de estos terceros, conforme a lo establecido en el SLA y DPA.</p>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">9. CONTROLES DE DISPONIBILIDAD Y RESILIENCIA</h3>
-          <p>Para garantizar la continuidad del servicio, Atlas implementa:</p>
+          <p>Para garantizar la continuidad del servicio, Tenri implementa:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Arquitectura redundante a nivel lógico (backups + repositorios externos).</li>
             <li>Monitoreo continuo de servicios críticos.</li>
@@ -114,7 +114,7 @@ const Seguridad = () => {
           <p className="text-sm italic mt-2">Los objetivos de recuperación (RTO/RPO) se encuentran definidos contractualmente en el SLA y BCP/DRP.</p>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">10. CAPACITACIÓN Y CONCIENTIZACIÓN INTERNA</h3>
-          <p>Atlas Digital Tech se compromete a que cualquier persona con acceso a sistemas productivos:</p>
+          <p>Tenri Spa se compromete a que cualquier persona con acceso a sistemas productivos:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Comprenda las políticas de seguridad aplicables.</li>
             <li>Mantenga confidencialidad sobre credenciales y accesos.</li>

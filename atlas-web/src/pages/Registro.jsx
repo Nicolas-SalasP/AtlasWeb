@@ -176,7 +176,7 @@ const Registro = () => {
                         <div className="p-4 sm:px-6 border-t border-gray-200 bg-white flex justify-end">
                             <button 
                                 onClick={() => setLegalModal({ open: false, type: '' })} 
-                                className="bg-atlas-900 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-atlas-800 transition-colors shadow-md"
+                                className="bg-tenri-900 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-tenri-800 transition-colors shadow-md"
                             >
                                 Entendido, cerrar
                             </button>
@@ -187,12 +187,12 @@ const Registro = () => {
 
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-atlas-600 mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-tenri-600 mb-4">
                         <UserPlus size={32} />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900">Crear Cuenta</h1>
                     <p className="text-gray-500 mt-2 text-sm">
-                        Únete a Atlas Digital Tech y gestiona tus proyectos.
+                        Únete a Tenri y gestiona tus proyectos.
                     </p>
                 </div>
 
@@ -208,7 +208,7 @@ const Registro = () => {
                                 name="name"
                                 required
                                 placeholder="Juan Pérez"
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none transition-all"
                                 value={formData.name}
                                 onChange={handleChange}
                             />
@@ -227,7 +227,7 @@ const Registro = () => {
                                 required
                                 value={formData.rut}
                                 placeholder="12.345.678-9"
-                                className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 outline-none transition-all ${errorRut ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-atlas-300'}`}
+                                className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 outline-none transition-all ${errorRut ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-tenri-300'}`}
                                 onChange={handleRutChange}
                             />
                         </div>
@@ -245,7 +245,7 @@ const Registro = () => {
                                 name="email"
                                 required
                                 placeholder="juan@empresa.com"
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none transition-all"
                                 value={formData.email}
                                 onChange={handleChange}
                             />
@@ -264,7 +264,7 @@ const Registro = () => {
                                 required
                                 minLength={8}
                                 placeholder="Mínimo 8 caracteres"
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none transition-all"
                                 value={formData.password}
                                 onChange={handleChange}
                             />
@@ -283,7 +283,7 @@ const Registro = () => {
                                 required
                                 minLength={8}
                                 placeholder="Repite tu contraseña"
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none transition-all"
                                 value={formData.password_confirmation}
                                 onChange={handleChange}
                             />
@@ -299,19 +299,19 @@ const Registro = () => {
                             required
                             checked={formData.accept_terms}
                             onChange={handleCheckboxChange}
-                            className="mt-1 w-5 h-5 text-atlas-600 border-gray-300 rounded focus:ring-atlas-500 cursor-pointer"
+                            className="mt-1 w-5 h-5 text-tenri-600 border-gray-300 rounded focus:ring-tenri-500 cursor-pointer"
                         />
                         <label htmlFor="accept_terms" className="text-sm text-gray-600 leading-snug">
                             He leído y acepto los{' '}
-                            <button type="button" onClick={() => setLegalModal({ open: true, type: 'terminos' })} className="font-bold text-atlas-600 hover:text-atlas-900 underline">
+                            <button type="button" onClick={() => setLegalModal({ open: true, type: 'terminos' })} className="font-bold text-tenri-600 hover:text-tenri-900 underline">
                                 Términos y Condiciones
                             </button>
                             , la{' '}
-                            <button type="button" onClick={() => setLegalModal({ open: true, type: 'privacidad' })} className="font-bold text-atlas-600 hover:text-atlas-900 underline">
+                            <button type="button" onClick={() => setLegalModal({ open: true, type: 'privacidad' })} className="font-bold text-tenri-600 hover:text-tenri-900 underline">
                                 Política de Privacidad
                             </button>
                             {' '}y el{' '}
-                            <button type="button" onClick={() => setLegalModal({ open: true, type: 'sla' })} className="font-bold text-atlas-600 hover:text-atlas-900 underline">
+                            <button type="button" onClick={() => setLegalModal({ open: true, type: 'sla' })} className="font-bold text-tenri-600 hover:text-tenri-900 underline">
                                 SLA
                             </button>.
                         </label>
@@ -324,7 +324,7 @@ const Registro = () => {
                             className={`w-full font-bold py-3 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2 
                                 ${isSubmitting || !formData.accept_terms 
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                                    : 'bg-atlas-900 text-white hover:bg-atlas-800 hover:shadow-xl'
+                                    : 'bg-tenri-900 text-white hover:bg-tenri-800 hover:shadow-xl'
                                 }`}
                         >
                             {isSubmitting ? (
@@ -338,7 +338,7 @@ const Registro = () => {
 
                 <div className="mt-8 text-center text-sm text-gray-500 border-t border-gray-100 pt-6">
                     ¿Ya tienes cuenta? {' '}
-                    <Link to="/login" className="font-bold text-atlas-600 hover:text-atlas-900 transition-colors">
+                    <Link to="/login" className="font-bold text-tenri-600 hover:text-tenri-900 transition-colors">
                         Inicia Sesión aquí
                     </Link>
                 </div>

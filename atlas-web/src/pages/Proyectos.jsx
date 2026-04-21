@@ -6,10 +6,10 @@ const Proyectos = () => {
         <div className="bg-white min-h-screen pt-20">
 
             {/* HEADER */}
-            <section className="bg-atlas-900 text-white py-20 px-4">
+            <section className="bg-tenri-900 text-white py-20 px-4">
                 <div className="max-w-7xl mx-auto text-center">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
-                        Nuestro Trabajo <span className="text-atlas-300">Habla por Nosotros</span>
+                        Nuestro Trabajo <span className="text-tenri-300">Habla por Nosotros</span>
                     </h1>
                     <p className="text-xl text-gray-300 max-w-2xl mx-auto">
                         Desde plataformas corporativas hasta la modernización de sistemas críticos. Aquí verás lo que somos capaces de construir.
@@ -20,7 +20,7 @@ const Proyectos = () => {
             <div className="max-w-7xl mx-auto px-4 py-20">
 
                 {/* SECCIÓN 1: CASOS DE ÉXITO */}
-                <h2 className="text-2xl font-bold text-atlas-900 mb-12 border-l-4 border-atlas-500 pl-4 uppercase tracking-widest">
+                <h2 className="text-2xl font-bold text-tenri-900 mb-12 border-l-4 border-tenri-500 pl-4 uppercase tracking-widest">
                     Casos de Éxito & Producción
                 </h2>
 
@@ -40,7 +40,7 @@ const Proyectos = () => {
                                 <Badge color="bg-blue-100 text-blue-700">Fintech / Remesas</Badge>
                                 <Badge color="bg-green-100 text-green-700">En Producción</Badge>
                             </div>
-                            <h2 className="text-3xl font-bold text-atlas-900 mb-4">JC Envíos Internacionales</h2>
+                            <h2 className="text-3xl font-bold text-tenri-900 mb-4">JC Envíos Internacionales</h2>
                             <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                                 Plataforma transaccional para el envío de remesas. La estrella del sitio es su **calculadora en tiempo real** que permite a los usuarios cotizar envíos con tasas de cambio actualizadas al instante.
                             </p>
@@ -53,7 +53,7 @@ const Proyectos = () => {
                                 href="https://jcenvios.cl/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-atlas-900 text-white px-6 py-3 rounded-lg hover:bg-atlas-800 transition-colors font-semibold"
+                                className="inline-flex items-center gap-2 bg-tenri-900 text-white px-6 py-3 rounded-lg hover:bg-tenri-800 transition-colors font-semibold"
                             >
                                 Visitar Sitio Web <ExternalLink size={18} />
                             </a>
@@ -67,7 +67,7 @@ const Proyectos = () => {
                                 <Badge color="bg-purple-100 text-purple-700">Sistema ERP</Badge>
                                 <Badge color="bg-gray-100 text-gray-700">Gestión Interna</Badge>
                             </div>
-                            <h2 className="text-3xl font-bold text-atlas-900 mb-4">InsuOrders System</h2>
+                            <h2 className="text-3xl font-bold text-tenri-900 mb-4">InsuOrders System</h2>
                             <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                                 Software integral para la gestión operativa. Incluye un **Dashboard de control** para monitorear gastos, alertas de stock crítico y un cronograma interactivo para mantenimientos.
                             </p>
@@ -81,7 +81,7 @@ const Proyectos = () => {
                                 href="https://github.com/Nicolas-SalasP/InsuOrders"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 border-2 border-atlas-900 bg-atlas-900 text-white px-6 py-3 rounded-lg hover:bg-white hover:text-atlas-900 transition-colors font-semibold shadow-lg"
+                                className="inline-flex items-center gap-2 border-2 border-tenri-900 bg-tenri-900 text-white px-6 py-3 rounded-lg hover:bg-white hover:text-tenri-900 transition-colors font-semibold shadow-lg"
                             >
                                 Ver Código <Github size={18} />
                             </a>
@@ -100,7 +100,7 @@ const Proyectos = () => {
                     </div>
                 </div>
 
-                <h2 className="text-2xl font-bold text-atlas-900 mb-12 border-l-4 border-blue-500 pl-4 uppercase tracking-widest">
+                <h2 className="text-2xl font-bold text-tenri-900 mb-12 border-l-4 border-blue-500 pl-4 uppercase tracking-widest">
                     Laboratorio de Desarrollo & Open Source
                 </h2>
 
@@ -108,10 +108,10 @@ const Proyectos = () => {
 
                     {/* CARD 1: ERP CONTABLE */}
                     <ProjectCard
-                        title="Atlas ERP Core"
+                        title="Tenri ERP Core"
                         desc="El núcleo de nuestro sistema contable. Arquitectura modular para facturación, RRHH y contabilidad general. Actualmente en fase Alpha."
                         tags={['En Desarrollo', 'Backend Heavy']}
-                        icon={<Briefcase size={40} className="text-atlas-500" />}
+                        icon={<Briefcase size={40} className="text-tenri-500" />}
                         link="https://github.com/Nicolas-SalasP/ERP-Contable"
                     />
 
@@ -136,11 +136,11 @@ const Proyectos = () => {
                 </div>
 
                 <div className="mt-20 bg-gray-50 rounded-2xl p-12 text-center border border-gray-200">
-                    <h2 className="text-3xl font-bold text-atlas-900 mb-4">¿Código Nuevo o Legado?</h2>
+                    <h2 className="text-3xl font-bold text-tenri-900 mb-4">¿Código Nuevo o Legado?</h2>
                     <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
                         Manejamos todo el espectro: desde crear tu nueva tienda online hasta salvar ese sistema antiguo que mantiene tu empresa funcionando.
                     </p>
-                    <a href="mailto:contacto@atlasdigitaltech.cl" className="inline-block bg-atlas-300 text-atlas-900 font-bold py-3 px-8 rounded-lg hover:bg-white hover:shadow-lg transition-all">
+                    <a href="mailto:contacto@tenri.cl" className="inline-block bg-tenri-300 text-tenri-900 font-bold py-3 px-8 rounded-lg hover:bg-white hover:shadow-lg transition-all">
                         Consultar por Servicios
                     </a>
                 </div>
@@ -159,7 +159,7 @@ const Badge = ({ children, color }) => (
 );
 
 const TechTag = ({ icon, text }) => (
-    <div className="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-md text-sm text-gray-700 shadow-sm hover:border-atlas-300 transition-colors">
+    <div className="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-md text-sm text-gray-700 shadow-sm hover:border-tenri-300 transition-colors">
         {icon}
         <span>{text}</span>
     </div>
@@ -169,11 +169,11 @@ const ProjectCard = ({ title, desc, tags, icon, link, isWarning }) => (
     <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
         <div className="flex justify-between items-start mb-6">
             <div className="p-3 bg-gray-50 rounded-xl">{icon}</div>
-            <a href={link} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-atlas-900 transition-colors">
+            <a href={link} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-tenri-900 transition-colors">
                 <Github size={20} />
             </a>
         </div>
-        <h3 className="text-xl font-bold text-atlas-900 mb-3">{title}</h3>
+        <h3 className="text-xl font-bold text-tenri-900 mb-3">{title}</h3>
         <p className="text-gray-600 mb-6 text-sm leading-relaxed flex-grow">
             {desc}
         </p>

@@ -13,14 +13,14 @@ const Terminos = () => {
         
         <div className="prose prose-blue max-w-none text-gray-700 space-y-6">
           <p>
-            El presente documento constituye un acuerdo legal, vinculante y de adhesión (en adelante, el "Contrato") entre Atlas Digital Tech (en adelante, el "Licenciante", "Proveedor" o "la Empresa") y la persona natural con inicio de actividades comerciales o persona jurídica, debidamente representada, que accede, se registra o utiliza el sistema ERP Contable (en adelante, el "Licenciatario", "Cliente" o "Usuario").
+            El presente documento constituye un acuerdo legal, vinculante y de adhesión (en adelante, el "Contrato") entre Tenri Spa (en adelante, el "Licenciante", "Proveedor" o "la Empresa") y la persona natural con inicio de actividades comerciales o persona jurídica, debidamente representada, que accede, se registra o utiliza el sistema ERP Contable (en adelante, el "Licenciatario", "Cliente" o "Usuario").
           </p>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">ARTÍCULO 1: DEFINICIONES APLICABLES</h3>
           <p>Para la correcta interpretación de este Contrato, se entenderá por:</p>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Software / Sistema:</strong> La plataforma ERP Contable alojada en los dominios y subdominios de atlasdigitaltech.cl.</li>
-            <li><strong>Plataforma Matriz (AtlasWeb):</strong> El sistema central de Atlas Digital Tech que gestiona las suscripciones, pagos y la autenticación centralizada (SSO).</li>
+            <li><strong>Software / Sistema:</strong> La plataforma ERP Contable alojada en los dominios y subdominios de tenri.cl.</li>
+            <li><strong>Plataforma Matriz (Tenri):</strong> El sistema central de Tenri Spa que gestiona las suscripciones, pagos y la autenticación centralizada (SSO).</li>
             <li><strong>Datos del Licenciatario:</strong> Toda información financiera, contable, tributaria o comercial ingresada, procesada o almacenada por el Usuario dentro del Software.</li>
           </ul>
 
@@ -89,7 +89,7 @@ const Terminos = () => {
               <strong>7.1. Política de Respaldos:</strong> El Licenciante realiza copias de seguridad de las bases de datos con un Objetivo de Punto de Recuperación (RPO) de 24 horas, y un Objetivo de Tiempo de Recuperación (RTO) estimado en 48 horas para casos de fallas catastróficas de infraestructura. Los respaldos se retienen por un máximo de 15 días corridos.
             </li>
             <li>
-              <strong>7.2. Arquitectura SSO y Pérdida de Accesos:</strong> El acceso al ERP depende de la validación en "AtlasWeb". Si el Usuario pierde el acceso a sus credenciales de origen, el Licenciante requerirá un procedimiento estricto de verificación de identidad (ej. validación notarial de representación legal y cruce de RUT de la empresa) previo a realizar cualquier restauración manual de acceso.
+              <strong>7.2. Arquitectura SSO y Pérdida de Accesos:</strong> El acceso al ERP depende de la validación en "Tenri". Si el Usuario pierde el acceso a sus credenciales de origen, el Licenciante requerirá un procedimiento estricto de verificación de identidad (ej. validación notarial de representación legal y cruce de RUT de la empresa) previo a realizar cualquier restauración manual de acceso.
             </li>
           </ul>
 

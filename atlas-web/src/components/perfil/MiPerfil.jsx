@@ -98,7 +98,7 @@ const MiPerfil = ({ user, onOpenEmailModal }) => {
                                 type="text" 
                                 value={formData.name} 
                                 onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-atlas-500 outline-none" 
+                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-tenri-500 outline-none" 
                             />
                         </div>
                     </div>
@@ -110,7 +110,7 @@ const MiPerfil = ({ user, onOpenEmailModal }) => {
                                 type="text" 
                                 value={formData.phone} 
                                 onChange={(e) => setFormData({...formData, phone: e.target.value})} 
-                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-atlas-500 outline-none" 
+                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-tenri-500 outline-none" 
                                 placeholder="+56 9 ..." 
                             />
                         </div>
@@ -132,7 +132,7 @@ const MiPerfil = ({ user, onOpenEmailModal }) => {
                         <button 
                             type="button" 
                             onClick={onOpenEmailModal} 
-                            className="px-4 py-2 text-sm font-bold text-atlas-900 bg-atlas-50 hover:bg-atlas-100 rounded-lg border border-atlas-200"
+                            className="px-4 py-2 text-sm font-bold text-tenri-900 bg-tenri-50 hover:bg-tenri-100 rounded-lg border border-tenri-200"
                         >
                             Cambiar
                         </button>
@@ -144,7 +144,7 @@ const MiPerfil = ({ user, onOpenEmailModal }) => {
                     <button 
                         type="submit" 
                         disabled={loading} 
-                        className="bg-atlas-900 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg hover:bg-atlas-800 transition-all flex items-center gap-2 disabled:opacity-50"
+                        className="bg-tenri-900 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg hover:bg-tenri-800 transition-all flex items-center gap-2 disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Guardar
                     </button>

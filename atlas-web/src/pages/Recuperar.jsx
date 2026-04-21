@@ -33,7 +33,7 @@ const Recuperar = () => {
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
 
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-atlas-100 text-atlas-900 mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-tenri-100 text-tenri-900 mb-4">
                         <Mail size={32} />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900">Recuperar Contraseña</h1>
@@ -58,7 +58,7 @@ const Recuperar = () => {
                                 setEmail('');
                                 setErrorMessage('');
                             }}
-                            className="text-atlas-900 text-sm font-bold hover:underline"
+                            className="text-tenri-900 text-sm font-bold hover:underline"
                         >
                             ¿No llegó? Intentar con otro correo
                         </button>
@@ -85,7 +85,7 @@ const Recuperar = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="tu@email.com"
                                     disabled={status === 'loading'}
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-400"
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-400"
                                 />
                             </div>
                         </div>
@@ -93,7 +93,7 @@ const Recuperar = () => {
                         <button 
                             type="submit" 
                             disabled={status === 'loading' || !email}
-                            className="w-full bg-atlas-900 text-white font-bold py-3 rounded-xl hover:bg-atlas-800 transition-all shadow-lg flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full bg-tenri-900 text-white font-bold py-3 rounded-xl hover:bg-tenri-800 transition-all shadow-lg flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {status === 'loading' ? (
                                 <><Loader2 size={20} className="animate-spin" /> Enviando...</>
@@ -105,7 +105,7 @@ const Recuperar = () => {
                 )}
 
                 <div className="mt-8 text-center">
-                    <Link to="/login" className="inline-flex items-center gap-2 text-gray-500 hover:text-atlas-900 text-sm font-medium transition-colors">
+                    <Link to="/login" className="inline-flex items-center gap-2 text-gray-500 hover:text-tenri-900 text-sm font-medium transition-colors">
                         <ArrowLeft size={16} /> Volver al Login
                     </Link>
                 </div>
@@ -113,7 +113,7 @@ const Recuperar = () => {
             </div>
 
             <p className="mt-8 text-gray-400 text-xs">
-                &copy; {new Date().getFullYear()} Atlas Digital Tech. Todos los derechos reservados.
+                &copy; {new Date().getFullYear()} Tenri Spa. Todos los derechos reservados.
             </p>
 
         </div>

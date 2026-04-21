@@ -14,7 +14,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">ATLAS DIGITAL</div>
+            <div class="logo">Tenri</div>
         </div>
         
         <div class="content">
@@ -30,7 +30,7 @@
 
         <div class="footer">
             <p>Si ya realizaste el pago, por favor ignora este mensaje.</p>
-            &copy; {{ date('Y') }} Atlas Digital Tech. Todos los derechos reservados.
+            &copy; {{ date('Y') }} Tenri Spa. Todos los derechos reservados.
         </div>
     </div>
 </body>

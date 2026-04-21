@@ -62,9 +62,9 @@ class DatabaseSeeder extends Seeder
             'role_id' => $roleAdmin->id,
             'name' => 'Nicolás Salas',
             'rut' => '11.111.111-1',
-            'email' => 'nicolas@atlas.cl',
+            'email' => 'nicolas@tenri.cl',
             'password' => Hash::make('password'),
-            'company_name' => 'Atlas Digital Tech',
+            'company_name' => 'Tenri Spa',
             'avatar' => 'https://ui-avatars.com/api/?name=Nicolas+Salas&background=0F172A&color=fff&bold=true'
         ]);
 

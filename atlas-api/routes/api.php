@@ -19,7 +19,7 @@ use App\Http\Controllers\AddressController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes - Atlas Digital Tech
+| API Routes - Tenri Spa
 |--------------------------------------------------------------------------
 */
 

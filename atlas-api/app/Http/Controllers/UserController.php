@@ -50,11 +50,11 @@ class UserController extends Controller
         $isSuperAdmin = isset($currentPermissions['all']) && $currentPermissions['all'] === true;
 
         // 2. Proteger la integridad de la cuenta maestra
-        if ($userToUpdate->email === 'nsalas@atlasdigitaltech.cl' && !$isSuperAdmin) {
+        if ($userToUpdate->email === 'nsalas@tenri.cl' && !$isSuperAdmin) {
             return response()->json(['message' => 'Operación denegada. Solo el Super Administrador puede modificar esta cuenta.'], 403);
         }
 
-        if ($userToUpdate->email === 'nsalas@atlasdigitaltech.cl' && $request->has('role_id') && $request->role_id != 1) {
+        if ($userToUpdate->email === 'nsalas@tenri.cl' && $request->has('role_id') && $request->role_id != 1) {
             return response()->json(['message' => 'Operación denegada. El Super Admin principal no puede ser degradado.'], 403);
         }
 

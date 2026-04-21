@@ -70,7 +70,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Atlas Digital Tech</h1>
+            <h1>Tenri Spa</h1>
         </div>
         
         <div class="content">
@@ -86,12 +86,12 @@
             <p><strong>Importante:</strong> Este código es de un solo uso y expirará en <strong>15 minutos</strong> por motivos de seguridad.</p>
             
             <div class="warning">
-                <p>Si no te has registrado recientemente en Atlas Digital Tech ni has solicitado vincular órdenes históricas, puedes ignorar este correo de forma segura. Tus datos están protegidos y nadie más puede acceder a ellos sin este código.</p>
+                <p>Si no te has registrado recientemente en Tenri Spa ni has solicitado vincular órdenes históricas, puedes ignorar este correo de forma segura. Tus datos están protegidos y nadie más puede acceder a ellos sin este código.</p>
             </div>
         </div>
         
         <div class="footer">
-            <p>&copy; {{ date('Y') }} Atlas Digital Tech. Todos los derechos reservados.</p>
+            <p>&copy; {{ date('Y') }} Tenri Spa. Todos los derechos reservados.</p>
         </div>
     </div>
 </body>

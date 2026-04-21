@@ -23,7 +23,7 @@ class OrderClaimOtp extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Código de validación para vincular tus compras - Atlas Digital Tech',
+            subject: 'Código de validación para vincular tus compras - Tenri Spa',
         );
     }
 

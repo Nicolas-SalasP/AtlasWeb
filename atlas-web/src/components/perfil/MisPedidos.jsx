@@ -35,7 +35,7 @@ const MisPedidos = ({ orders, loading, onSelectOrder }) => {
             <h2 className="text-xl font-bold text-gray-900 mb-4">Historial de Compras ({orders.length})</h2>
             <div className="grid gap-4">
                 {orders.map((order) => (
-                    <div key={order.id} onClick={() => onSelectOrder(order)} className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md hover:border-atlas-200 transition-all cursor-pointer group">
+                    <div key={order.id} onClick={() => onSelectOrder(order)} className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md hover:border-tenri-200 transition-all cursor-pointer group">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <div className="flex items-center gap-3 mb-1">
@@ -48,7 +48,7 @@ const MisPedidos = ({ orders, loading, onSelectOrder }) => {
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="font-black text-xl text-atlas-900">{formatPrice(order.total)}</p>
+                                <p className="font-black text-xl text-tenri-900">{formatPrice(order.total)}</p>
                             </div>
                         </div>
                         {/* Miniaturas */}
@@ -61,7 +61,7 @@ const MisPedidos = ({ orders, loading, onSelectOrder }) => {
                                 ))}
                                 {order.items?.length > 4 && <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">+{order.items.length - 4}</div>}
                             </div>
-                            <div className="flex items-center gap-1 text-sm font-bold text-atlas-600 group-hover:translate-x-1 transition-transform">Ver detalle <ChevronRight size={16} /></div>
+                            <div className="flex items-center gap-1 text-sm font-bold text-tenri-600 group-hover:translate-x-1 transition-transform">Ver detalle <ChevronRight size={16} /></div>
                         </div>
                     </div>
                 ))}

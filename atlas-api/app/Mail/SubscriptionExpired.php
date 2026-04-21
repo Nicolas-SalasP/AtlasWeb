@@ -22,7 +22,7 @@ class SubscriptionExpired extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tu suscripción ha finalizado - Atlas Digital',
+            subject: 'Tu suscripción ha finalizado - Tenri',
         );
     }
 

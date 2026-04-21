@@ -13,7 +13,7 @@ const Privacidad = () => {
         
         <div className="prose prose-blue max-w-none text-gray-700 space-y-6">
           <p>
-            El presente documento (en adelante, la "Política" o el "DPA") regula el tratamiento, recolección, almacenamiento y protección de los datos personales y comerciales gestionados a través del ecosistema de software provisto por <strong>Atlas Digital Tech</strong> (en adelante, "Atlas", el "Proveedor" o el "Encargado").
+            El presente documento (en adelante, la "Política" o el "DPA") regula el tratamiento, recolección, almacenamiento y protección de los datos personales y comerciales gestionados a través del ecosistema de software provisto por <strong>Tenri Spa</strong> (en adelante, "Tenri", el "Proveedor" o el "Encargado").
           </p>
           <p>
             Este documento es vinculante, forma parte integral de los Términos y Condiciones de Uso, y se somete íntegramente a las disposiciones de la Ley N° 19.628 sobre Protección de la Vida Privada de la República de Chile y estándares internacionales de buenas prácticas (marco GDPR-aligned).
@@ -25,10 +25,10 @@ const Privacidad = () => {
           </p>
           <ul className="list-none pl-0 space-y-3">
             <li>
-              <strong>1.1. Atlas como "Responsable del Tratamiento":</strong> Atlas actúa como Responsable única y exclusivamente respecto a los datos de registro, facturación y contacto del administrador de la cuenta (ej. nombre, RUT de la empresa, correo de acceso a AtlasWeb).
+              <strong>1.1. Tenri como "Responsable del Tratamiento":</strong> Tenri actúa como Responsable única y exclusivamente respecto a los datos de registro, facturación y contacto del administrador de la cuenta (ej. nombre, RUT de la empresa, correo de acceso a Tenri).
             </li>
             <li>
-              <strong>1.2. Atlas como "Encargado del Tratamiento" (Procesador):</strong> Respecto a toda la información ingresada al ERP Contable (ej. nóminas de empleados, facturas de proveedores, RUT de clientes de la empresa, cartolas bancarias, remuneraciones), el Licenciatario (Cliente) es el exclusivo "Responsable del Tratamiento". Atlas actúa meramente como "Encargado", limitándose a proveer la infraestructura técnica para almacenar y procesar dichos datos según las instrucciones automatizadas del Cliente.
+              <strong>1.2. Tenri como "Encargado del Tratamiento" (Procesador):</strong> Respecto a toda la información ingresada al ERP Contable (ej. nóminas de empleados, facturas de proveedores, RUT de clientes de la empresa, cartolas bancarias, remuneraciones), el Licenciatario (Cliente) es el exclusivo "Responsable del Tratamiento". Tenri actúa meramente como "Encargado", limitándose a proveer la infraestructura técnica para almacenar y procesar dichos datos según las instrucciones automatizadas del Cliente.
             </li>
           </ul>
 
@@ -55,14 +55,14 @@ const Privacidad = () => {
             <li><strong>Cumplimiento Legal:</strong> Emitir la facturación electrónica correspondiente al pago de la suscripción.</li>
           </ul>
           <p>
-            <strong>3.2. Base Jurídica del Tratamiento:</strong> El tratamiento de los datos se fundamenta legalmente en: (i) la ejecución del contrato de prestación de servicios SaaS suscrito entre las partes; (ii) el cumplimiento de obligaciones legales y tributarias de Atlas; y (iii) el interés legítimo del Proveedor en garantizar la seguridad de la infraestructura y prevenir el fraude.
+            <strong>3.2. Base Jurídica del Tratamiento:</strong> El tratamiento de los datos se fundamenta legalmente en: (i) la ejecución del contrato de prestación de servicios SaaS suscrito entre las partes; (ii) el cumplimiento de obligaciones legales y tributarias de Tenri; y (iii) el interés legítimo del Proveedor en garantizar la seguridad de la infraestructura y prevenir el fraude.
           </p>
           <p>
-            <strong>3.3. Prohibición de Comercialización:</strong> Atlas declara expresamente que NO vende, arrienda, cede ni comercializa bases de datos, correos electrónicos ni información financiera a terceros o corredores de datos (Data Brokers).
+            <strong>3.3. Prohibición de Comercialización:</strong> Tenri declara expresamente que NO vende, arrienda, cede ni comercializa bases de datos, correos electrónicos ni información financiera a terceros o corredores de datos (Data Brokers).
           </p>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">ARTÍCULO 4: ESTÁNDARES DE SEGURIDAD Y CRIPTOGRAFÍA</h3>
-          <p>Atlas implementa medidas de seguridad técnicas y organizativas de nivel empresarial:</p>
+          <p>Tenri implementa medidas de seguridad técnicas y organizativas de nivel empresarial:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Cifrado en Tránsito:</strong> Toda la comunicación se transmite bajo protocolos criptográficos (HTTPS/TLS).</li>
             <li><strong>Cifrado en Reposo (Credenciales):</strong> Contraseñas sometidas a algoritmos de derivación de claves (Bcrypt).</li>
@@ -75,10 +75,10 @@ const Privacidad = () => {
           <h3 className="text-xl font-bold text-gray-900 mt-8">ARTÍCULO 5: SUB-ENCARGADOS Y TRANSFERENCIA INTERNACIONAL</h3>
           <ul className="list-none pl-0 space-y-3">
             <li>
-              <strong>5.1. Uso de Sub-encargados:</strong> Para garantizar la operatividad del Software, Atlas utiliza infraestructura de terceros (ej. proveedores de alojamiento web como cPanel/AWS, pasarelas de pago y servicios SMTP). Atlas se compromete a exigir a todo Sub-encargado la mantención de estándares de seguridad y confidencialidad equivalentes o superiores a los establecidos en este DPA.
+              <strong>5.1. Uso de Sub-encargados:</strong> Para garantizar la operatividad del Software, Tenri utiliza infraestructura de terceros (ej. proveedores de alojamiento web como cPanel/AWS, pasarelas de pago y servicios SMTP). Tenri se compromete a exigir a todo Sub-encargado la mantención de estándares de seguridad y confidencialidad equivalentes o superiores a los establecidos en este DPA.
             </li>
             <li>
-              <strong>5.2. Transferencia Internacional de Datos:</strong> El Licenciatario reconoce y autoriza expresamente que los datos procesados por el ERP pueden ser alojados, respaldados o enrutados a través de servidores ubicados fuera del territorio chileno (transferencia internacional). Atlas garantiza que dichos proveedores de infraestructura en el extranjero cumplen con niveles adecuados de protección de datos acorde a los estándares de la industria.
+              <strong>5.2. Transferencia Internacional de Datos:</strong> El Licenciatario reconoce y autoriza expresamente que los datos procesados por el ERP pueden ser alojados, respaldados o enrutados a través de servidores ubicados fuera del territorio chileno (transferencia internacional). Tenri garantiza que dichos proveedores de infraestructura en el extranjero cumplen con niveles adecuados de protección de datos acorde a los estándares de la industria.
             </li>
           </ul>
 
@@ -88,10 +88,10 @@ const Privacidad = () => {
               <strong>6.1. Vigencia:</strong> Los datos de operación del ERP serán conservados mientras la suscripción del Cliente se mantenga activa.
             </li>
             <li>
-              <strong>6.2. Protocolo de Eliminación Post-Término:</strong> Tras la terminación del servicio, el Cliente dispondrá de treinta (30) días corridos para la exportación de su información. Al transcurrir el día treinta y uno (31), Atlas ejecutará un borrado físico e irreversible (Hard Delete) de las tablas relacionales asociadas al Cliente, sin retener copias ocultas.
+              <strong>6.2. Protocolo de Eliminación Post-Término:</strong> Tras la terminación del servicio, el Cliente dispondrá de treinta (30) días corridos para la exportación de su información. Al transcurrir el día treinta y uno (31), Tenri ejecutará un borrado físico e irreversible (Hard Delete) de las tablas relacionales asociadas al Cliente, sin retener copias ocultas.
             </li>
             <li>
-              <strong>6.3. Retención Legal:</strong> Atlas conservará únicamente los datos de facturación e historiales de acceso del administrador de la cuenta por el periodo exigido por la legislación aplicable, exclusivamente para defensa jurídica o cumplimiento normativo.
+              <strong>6.3. Retención Legal:</strong> Tenri conservará únicamente los datos de facturación e historiales de acceso del administrador de la cuenta por el periodo exigido por la legislación aplicable, exclusivamente para defensa jurídica o cumplimiento normativo.
             </li>
           </ul>
 
@@ -101,21 +101,21 @@ const Privacidad = () => {
           </p>
           <ul className="list-none pl-0 space-y-3">
             <li>
-              <strong>7.1. Sobre los Datos de Cuenta (Atlas como Responsable):</strong> El Cliente administrador podrá ejercer sus derechos ARCO sobre sus datos de facturación o registro enviando una solicitud formal al correo oficial de privacidad: <code>legal@atlasdigitaltech.cl</code>. Atlas responderá dentro de los plazos legales establecidos.
+              <strong>7.1. Sobre los Datos de Cuenta (Tenri como Responsable):</strong> El Cliente administrador podrá ejercer sus derechos ARCO sobre sus datos de facturación o registro enviando una solicitud formal al correo oficial de privacidad: <code>legal@tenri.cl</code>. Tenri responderá dentro de los plazos legales establecidos.
             </li>
             <li>
-              <strong>7.2. Sobre los Datos del ERP (Atlas como Encargado):</strong> Si un tercero (ej. un empleado, proveedor o cliente del Licenciatario) desea ejercer derechos ARCO sobre información alojada dentro del ERP Contable, <strong>deberá dirigir su solicitud directa y exclusivamente al Licenciatario (Responsable del Tratamiento)</strong>. Si Atlas recibe una solicitud de este tipo de forma directa, se limitará a notificar al Cliente para que este gestione la respuesta. Atlas colaborará técnicamente, en la medida de lo razonable, para que el Cliente pueda cumplir con sus obligaciones legales de rectificación o borrado desde su panel de control.
+              <strong>7.2. Sobre los Datos del ERP (Tenri como Encargado):</strong> Si un tercero (ej. un empleado, proveedor o cliente del Licenciatario) desea ejercer derechos ARCO sobre información alojada dentro del ERP Contable, <strong>deberá dirigir su solicitud directa y exclusivamente al Licenciatario (Responsable del Tratamiento)</strong>. Si Tenri recibe una solicitud de este tipo de forma directa, se limitará a notificar al Cliente para que este gestione la respuesta. Tenri colaborará técnicamente, en la medida de lo razonable, para que el Cliente pueda cumplir con sus obligaciones legales de rectificación o borrado desde su panel de control.
             </li>
           </ul>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">ARTÍCULO 8: BRECHAS DE SEGURIDAD (DATA BREACHES)</h3>
           <p>
-            En el evento de una vulneración a las barreras de seguridad que comprometa la confidencialidad de los datos del ERP, Atlas notificará al administrador de la cuenta afectada en un plazo no superior a 72 horas desde la confirmación técnica del incidente, detallando la naturaleza de la brecha, los datos posiblemente comprometidos y las medidas de mitigación adoptadas.
+            En el evento de una vulneración a las barreras de seguridad que comprometa la confidencialidad de los datos del ERP, Tenri notificará al administrador de la cuenta afectada en un plazo no superior a 72 horas desde la confirmación técnica del incidente, detallando la naturaleza de la brecha, los datos posiblemente comprometidos y las medidas de mitigación adoptadas.
           </p>
 
           <h3 className="text-xl font-bold text-gray-900 mt-8">ARTÍCULO 9: MODIFICACIONES AL DPA</h3>
           <p>
-            Atlas se reserva el derecho de actualizar este DPA en respuesta a cambios en la legislación o la implementación de nuevas tecnologías. Las modificaciones sustanciales serán notificadas por correo electrónico con anticipación a su entrada en vigencia.
+            Tenri se reserva el derecho de actualizar este DPA en respuesta a cambios en la legislación o la implementación de nuevas tecnologías. Las modificaciones sustanciales serán notificadas por correo electrónico con anticipación a su entrada en vigencia.
           </p>
         </div>
       </div>

@@ -23,7 +23,7 @@ const Home = () => {
     }, []);
 
     const getProductImage = (product) => {
-        const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://api.atlasdigitaltech.cl';
+        const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://api.tenri.cl';
         if (product.images && product.images.length > 0) {
             const cover = product.images.find(img => img.is_cover) || product.images[0];
             return `${BASE_URL}${cover.url}`;
@@ -34,18 +34,18 @@ const Home = () => {
     return (
         <div className="bg-white min-h-screen">
 
-            <section className="relative bg-atlas-900 text-white pt-32 pb-24 px-4 overflow-hidden">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-atlas-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-pulse"></div>
+            <section className="relative bg-tenri-900 text-white pt-32 pb-24 px-4 overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-tenri-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-10"></div>
 
                 <div className="max-w-7xl mx-auto relative z-10 grid lg:grid-cols-2 gap-16 items-center">
                     <div className="space-y-6">
-                        <div className="inline-block px-4 py-1 rounded-full bg-atlas-800 border border-atlas-500/30 text-atlas-300 text-sm font-semibold mb-2">
+                        <div className="inline-block px-4 py-1 rounded-full bg-tenri-800 border border-tenri-500/30 text-tenri-300 text-sm font-semibold mb-2">
                             🚀 Tecnología para empresas modernas
                         </div>
                         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
                             Soluciones Digitales <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-atlas-300 to-blue-400">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-tenri-300 to-blue-400">
                                 A Tu Medida
                             </span>
                         </h1>
@@ -53,7 +53,7 @@ const Home = () => {
                             Desde sistemas ERP contables hasta infraestructura de redes y seguridad. Centralizamos la tecnología de tu negocio en un solo lugar.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <Link to="/proyectos" className="bg-atlas-300 hover:bg-white hover:text-atlas-900 text-atlas-900 font-bold py-3 px-8 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-atlas-300/50">
+                            <Link to="/proyectos" className="bg-tenri-300 hover:bg-white hover:text-tenri-900 text-tenri-900 font-bold py-3 px-8 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-tenri-300/50">
                                 Ver Proyectos <ArrowRight size={20} />
                             </Link>
                             <Link to="/contacto" className="border border-gray-600 hover:border-white hover:bg-white/5 text-white font-semibold py-3 px-8 rounded-lg transition-all text-center">
@@ -63,15 +63,15 @@ const Home = () => {
                     </div>
 
                     <div className="relative hidden lg:block">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-atlas-300 to-blue-600 rounded-2xl blur opacity-20"></div>
-                        <div className="relative bg-atlas-900 rounded-2xl p-6 border border-atlas-500/30 shadow-2xl font-mono text-sm">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-tenri-300 to-blue-600 rounded-2xl blur opacity-20"></div>
+                        <div className="relative bg-tenri-900 rounded-2xl p-6 border border-tenri-500/30 shadow-2xl font-mono text-sm">
                             <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
                                 <div className="flex gap-2">
                                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
                                     <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                                 </div>
-                                <span className="text-gray-400 text-xs">root@atlas-server:~</span>
+                                <span className="text-gray-400 text-xs">root@tenri-server:~</span>
                             </div>
 
                             <div className="space-y-3">
@@ -87,11 +87,11 @@ const Home = () => {
                                 <div className="mt-4 pt-4 border-t border-gray-800">
                                     <p className="text-xs text-gray-500 mb-1">CPU Load</p>
                                     <div className="flex items-end gap-1 h-8">
-                                        <div className="w-1 bg-atlas-500 h-[40%]"></div>
-                                        <div className="w-1 bg-atlas-500 h-[60%]"></div>
-                                        <div className="w-1 bg-atlas-500 h-[30%]"></div>
-                                        <div className="w-1 bg-atlas-500 h-[80%]"></div>
-                                        <div className="w-1 bg-atlas-500 h-[50%]"></div>
+                                        <div className="w-1 bg-tenri-500 h-[40%]"></div>
+                                        <div className="w-1 bg-tenri-500 h-[60%]"></div>
+                                        <div className="w-1 bg-tenri-500 h-[30%]"></div>
+                                        <div className="w-1 bg-tenri-500 h-[80%]"></div>
+                                        <div className="w-1 bg-tenri-500 h-[50%]"></div>
                                     </div>
                                 </div>
                             </div>
@@ -100,7 +100,7 @@ const Home = () => {
                 </div>
             </section>
 
-            <div className="bg-atlas-800 border-y border-atlas-700">
+            <div className="bg-tenri-800 border-y border-tenri-700">
                 <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
                     <StatItem number="100%" label="Dedicación" />
                     <StatItem number="24/7" label="Monitoreo" />
@@ -112,7 +112,7 @@ const Home = () => {
             <section className="py-20 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-atlas-900 text-3xl md:text-4xl font-bold mb-4">Nuestras Soluciones</h2>
+                        <h2 className="text-tenri-900 text-3xl md:text-4xl font-bold mb-4">Nuestras Soluciones</h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">
                             Cubrimos todo el ciclo tecnológico de tu empresa, desde la instalación de cables hasta el software de gestión.
                         </p>
@@ -143,11 +143,11 @@ const Home = () => {
 
             <section className="py-20 bg-white overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="bg-atlas-900 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
-                        <div className="absolute -right-20 -top-20 w-96 h-96 bg-atlas-500 rounded-full opacity-10 blur-3xl"></div>
+                    <div className="bg-tenri-900 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
+                        <div className="absolute -right-20 -top-20 w-96 h-96 bg-tenri-500 rounded-full opacity-10 blur-3xl"></div>
                         <div className="flex-1 relative z-10">
-                            <span className="text-atlas-300 font-bold tracking-widest text-sm uppercase mb-2 block">Producto Estrella</span>
-                            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Atlas ERP Cloud</h2>
+                            <span className="text-tenri-300 font-bold tracking-widest text-sm uppercase mb-2 block">Producto Estrella</span>
+                            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Tenri ERP Cloud</h2>
                             <p className="text-gray-300 text-lg mb-8">
                                 Toma el control total de tu contabilidad, inventario y facturación. Sistema diseñado para PYMES chilenas.
                             </p>
@@ -156,7 +156,7 @@ const Home = () => {
                                 <li className="flex items-center gap-3"><Database size={20} className="text-blue-400" /> Control de Stock en tiempo real</li>
                                 <li className="flex items-center gap-3"><Monitor size={20} className="text-purple-400" /> Acceso desde cualquier lugar</li>
                             </ul>
-                            <a href="https://erp.atlasdigitaltech.cl" className="inline-block bg-white text-atlas-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors">
+                            <a href="https://erp.tenri.cl" className="inline-block bg-white text-tenri-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors">
                                 Probar Demo
                             </a>
                         </div>
@@ -178,7 +178,7 @@ const Home = () => {
             {!loadingProducts && productosDestacados.length > 0 && (
                 <section className="py-20 bg-gray-50">
                     <div className="max-w-7xl mx-auto px-4 text-center">
-                        <h2 className="text-3xl font-bold text-atlas-900 mb-8">Hardware Profesional</h2>
+                        <h2 className="text-3xl font-bold text-tenri-900 mb-8">Hardware Profesional</h2>
                         <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
                             Equipamiento seleccionado por expertos para tu infraestructura.
                         </p>
@@ -198,10 +198,10 @@ const Home = () => {
                                         {prod.name}
                                     </h3>
                                     <div className="flex items-center justify-between mt-3">
-                                        <p className="text-atlas-900 font-bold">
+                                        <p className="text-tenri-900 font-bold">
                                             ${parseInt(prod.price).toLocaleString('es-CL')}
                                         </p>
-                                        <div className="bg-atlas-100 text-atlas-900 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="bg-tenri-100 text-tenri-900 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                                             <ShoppingCart size={16} />
                                         </div>
                                     </div>
@@ -210,7 +210,7 @@ const Home = () => {
                         </div>
 
                         <div className="mt-12">
-                            <Link to="/catalogo" className="text-atlas-500 font-bold hover:text-atlas-800 inline-flex items-center gap-2 border-b-2 border-transparent hover:border-atlas-500 transition-all">
+                            <Link to="/catalogo" className="text-tenri-500 font-bold hover:text-tenri-800 inline-flex items-center gap-2 border-b-2 border-transparent hover:border-tenri-500 transition-all">
                                 Ver catálogo completo <ArrowRight size={16} />
                             </Link>
                         </div>
@@ -224,19 +224,19 @@ const Home = () => {
 // Subcomponentes
 const StatItem = ({ number, label }) => (
     <div className="flex flex-col items-center">
-        <span className="text-3xl md:text-4xl font-bold text-atlas-300">{number}</span>
+        <span className="text-3xl md:text-4xl font-bold text-tenri-300">{number}</span>
         <span className="text-sm text-gray-300 mt-1 uppercase tracking-wider">{label}</span>
     </div>
 );
 
 const ServiceCard = ({ icon, title, desc, link }) => (
     <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-        <div className="bg-blue-50 w-16 h-16 rounded-xl flex items-center justify-center mb-6 text-atlas-500 group-hover:bg-atlas-500 group-hover:text-white transition-colors">
+        <div className="bg-blue-50 w-16 h-16 rounded-xl flex items-center justify-center mb-6 text-tenri-500 group-hover:bg-tenri-500 group-hover:text-white transition-colors">
             {icon}
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
         <p className="text-gray-600 mb-6 leading-relaxed">{desc}</p>
-        <Link to={link} className="text-atlas-500 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all">
+        <Link to={link} className="text-tenri-500 font-semibold flex items-center gap-2 group-hover:gap-3 transition-all">
             Más información <ArrowRight size={16} />
         </Link>
     </div>

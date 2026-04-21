@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 .input-config {
-    @apply w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 focus:border-transparent outline-none transition-all;
+    @apply w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-tenri-300 focus:border-transparent outline-none transition-all;
 }

@@ -39,7 +39,7 @@ const AdminServices = lazy(() => import('./pages/admin/AdminServices'));
 
 // Loader Component
 const PageLoader = () => (
-  <div className="flex h-screen w-full items-center justify-center bg-gray-50 text-atlas-900">
+  <div className="flex h-screen w-full items-center justify-center bg-gray-50 text-tenri-900">
     <Loader2 className="animate-spin" size={40} />
   </div>
 );

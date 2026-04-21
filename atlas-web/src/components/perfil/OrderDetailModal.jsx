@@ -91,10 +91,10 @@ const OrderDetailModal = ({ order, onClose }) => {
                             
                             {bankDetails ? (
                                 <div className="bg-white p-5 rounded-xl border border-blue-100 text-sm grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-700 relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-1 h-full bg-atlas-900"></div>
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-tenri-900"></div>
                                     <div><span className="text-gray-400 font-medium">Banco:</span> <span className="font-bold text-gray-900 ml-1">{bankDetails.bank_name || 'No disponible'}</span></div>
                                     <div><span className="text-gray-400 font-medium">Tipo:</span> <span className="font-bold text-gray-900 ml-1">{bankDetails.bank_account_type || 'No disponible'}</span></div>
-                                    <div><span className="text-gray-400 font-medium">N° Cuenta:</span> <span className="font-mono font-bold text-atlas-900 tracking-wider ml-1 text-base">{bankDetails.bank_account_number || 'No disponible'}</span></div>
+                                    <div><span className="text-gray-400 font-medium">N° Cuenta:</span> <span className="font-mono font-bold text-tenri-900 tracking-wider ml-1 text-base">{bankDetails.bank_account_number || 'No disponible'}</span></div>
                                     <div><span className="text-gray-400 font-medium">RUT:</span> <span className="font-bold text-gray-900 ml-1">{bankDetails.bank_rut || 'No disponible'}</span></div>
                                     <div className="sm:col-span-2"><span className="text-gray-400 font-medium">Correo:</span> <span className="font-bold text-gray-900 ml-1">{bankDetails.bank_email || 'No disponible'}</span></div>
                                 </div>
@@ -124,7 +124,7 @@ const OrderDetailModal = ({ order, onClose }) => {
                                     <div className="flex-1 border-t sm:border-t-0 sm:border-l border-gray-100 pt-4 sm:pt-0 sm:pl-6">
                                         <p className="text-xs font-bold text-indigo-400 uppercase mb-1">Código de Seguimiento</p>
                                         <div className="flex flex-wrap items-center gap-3">
-                                            <p className="font-mono font-black text-atlas-900 text-xl tracking-wider">{order.tracking_number}</p>
+                                            <p className="font-mono font-black text-tenri-900 text-xl tracking-wider">{order.tracking_number}</p>
                                             
                                             {order.shipping_provider && order.shipping_provider !== 'propio' && (
                                                 <a 
@@ -146,11 +146,11 @@ const OrderDetailModal = ({ order, onClose }) => {
                     {/* DIRECCIÓN Y NOTAS */}
                     <div className="grid md:grid-cols-2 gap-8">
                         <div>
-                            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2"><MapPin size={18} className="text-atlas-600" /> Dirección de Envío</h4>
+                            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2"><MapPin size={18} className="text-tenri-600" /> Dirección de Envío</h4>
                             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm text-gray-600 leading-relaxed">{order.shipping_address || 'Sin dirección registrada'}</div>
                         </div>
                         <div>
-                            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2"><FileText size={18} className="text-atlas-600" /> Notas del Cliente</h4>
+                            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2"><FileText size={18} className="text-tenri-600" /> Notas del Cliente</h4>
                             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm text-gray-600 italic leading-relaxed">{order.notes || 'No se adjuntaron notas al pedido.'}</div>
                         </div>
                     </div>
@@ -183,7 +183,7 @@ const OrderDetailModal = ({ order, onClose }) => {
                             <div className="flex justify-between text-sm text-gray-600 font-medium"><span>Subtotal Neto</span><span>{formatPrice(Math.round(order.subtotal / 1.19))}</span></div>
                             <div className="flex justify-between text-sm text-gray-600 font-medium"><span>IVA (19%)</span><span>{formatPrice(order.subtotal - Math.round(order.subtotal / 1.19))}</span></div>
                             <div className="flex justify-between text-sm text-gray-600 font-medium border-b border-gray-200 pb-4 mb-1"><span>Envío</span><span>{formatPrice(order.shipping_cost)}</span></div>
-                            <div className="flex justify-between font-black text-2xl text-atlas-900 pt-1"><span>Total</span><span>{formatPrice(order.total)}</span></div>
+                            <div className="flex justify-between font-black text-2xl text-tenri-900 pt-1"><span>Total</span><span>{formatPrice(order.total)}</span></div>
                         </div>
                     </div>
 

@@ -45,33 +45,33 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="bg-atlas-900 text-white fixed w-full z-30 shadow-lg border-b border-atlas-800 transition-all">
+            <nav className="bg-tenri-900 text-white fixed w-full z-30 shadow-lg border-b border-tenri-800 transition-all">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-20">
 
                         <Link to="/" className="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
                             <span className="font-black text-2xl tracking-wider group-hover:opacity-90 transition-opacity">
-                                ATLAS <span className="text-atlas-300 font-light">DIGITAL</span>
+                                Tenri <span className="text-tenri-300 font-light"> SPA</span>
                             </span>
                         </Link>
 
                         <div className="hidden md:block">
                             <div className="ml-10 flex items-baseline space-x-8">
-                                <Link to="/" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Inicio</Link>
-                                <Link to="/proyectos" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Proyectos</Link>
-                                <Link to="/catalogo" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Tienda</Link>
-                                <Link to="/servicios" className="hover:text-atlas-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Servicios</Link>
+                                <Link to="/" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Inicio</Link>
+                                <Link to="/proyectos" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Proyectos</Link>
+                                <Link to="/catalogo" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Tienda</Link>
+                                <Link to="/servicios" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Servicios</Link>
                             </div>
                         </div>
 
                         <div className="hidden md:flex items-center gap-6">
                             <button
                                 onClick={() => setIsCartOpen(true)}
-                                className="relative p-2 hover:bg-atlas-800 rounded-full transition-colors group"
+                                className="relative p-2 hover:bg-tenri-800 rounded-full transition-colors group"
                             >
                                 <ShoppingCart size={22} className="text-gray-300 group-hover:text-white" />
                                 {getCartCount() > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-atlas-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-atlas-900 shadow-sm animate-in zoom-in">
+                                    <span className="absolute -top-1 -right-1 bg-tenri-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-tenri-900 shadow-sm animate-in zoom-in">
                                         {getCartCount()}
                                     </span>
                                 )}
@@ -81,14 +81,14 @@ const Navbar = () => {
                                 <div className="relative" ref={menuRef}>
                                     <button
                                         onClick={() => setShowUserMenu(!showUserMenu)}
-                                        className={`flex items-center gap-3 py-1.5 px-2 pr-4 rounded-full transition-all border ${showUserMenu ? 'bg-atlas-800 border-atlas-700' : 'hover:bg-atlas-800 border-transparent'}`}
+                                        className={`flex items-center gap-3 py-1.5 px-2 pr-4 rounded-full transition-all border ${showUserMenu ? 'bg-tenri-800 border-tenri-700' : 'hover:bg-tenri-800 border-transparent'}`}
                                     >
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-atlas-400 to-atlas-600 flex items-center justify-center font-bold text-sm text-white shadow-inner">
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-tenri-400 to-tenri-600 flex items-center justify-center font-bold text-sm text-white shadow-inner">
                                             {getInitials(user?.name)}
                                         </div>
                                         <div className="text-left hidden lg:block">
                                             <p className="text-xs font-bold text-white leading-none">{getFirstName(user?.name)}</p>
-                                            <p className="text-[10px] text-atlas-300 font-medium leading-none mt-0.5 capitalize">{user?.role_id === 1 ? 'Admin' : 'Cliente'}</p>
+                                            <p className="text-[10px] text-tenri-300 font-medium leading-none mt-0.5 capitalize">{user?.role_id === 1 ? 'Admin' : 'Cliente'}</p>
                                         </div>
                                         <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
                                     </button>
@@ -101,13 +101,13 @@ const Navbar = () => {
                                             </div>
 
                                             <div className="py-2">
-                                                <Link to="/perfil?tab=general" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
-                                                    <User size={18} className="text-gray-400 group-hover:text-atlas-600" /> Mi Perfil
+                                                <Link to="/perfil?tab=general" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-tenri-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
+                                                    <User size={18} className="text-gray-400 group-hover:text-tenri-600" /> Mi Perfil
                                                 </Link>
-                                                <Link to="/perfil?tab=orders" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
+                                                <Link to="/perfil?tab=orders" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-tenri-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
                                                     <Package size={18} className="text-gray-400 group-hover:text-blue-600" /> Mis Compras
                                                 </Link>
-                                                <Link to="/perfil?tab=tickets" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-atlas-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
+                                                <Link to="/perfil?tab=tickets" className="flex items-center gap-3 px-5 py-3 text-sm font-medium hover:bg-gray-50 hover:text-tenri-900 transition-colors group" onClick={() => setShowUserMenu(false)}>
                                                     <MessageSquare size={18} className="text-gray-400 group-hover:text-green-600" /> Mis Tickets
                                                 </Link>
                                             </div>
@@ -126,7 +126,7 @@ const Navbar = () => {
                             ) : (
                                 <Link
                                     to="/login"
-                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all border border-white/10 shadow-lg hover:shadow-atlas-500/20"
+                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all border border-white/10 shadow-lg hover:shadow-tenri-500/20"
                                 >
                                     <LogIn size={18} /> Iniciar Sesión
                                 </Link>
@@ -140,13 +140,13 @@ const Navbar = () => {
                             >
                                 <ShoppingCart size={24} />
                                 {getCartCount() > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-atlas-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                                    <span className="absolute -top-1 -right-1 bg-tenri-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                                         {getCartCount()}
                                     </span>
                                 )}
                             </button>
 
-                            <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-atlas-800 focus:outline-none">
+                            <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-tenri-800 focus:outline-none">
                                 {isOpen ? <X size={28} /> : <Menu size={28} />}
                             </button>
                         </div>
@@ -154,42 +154,42 @@ const Navbar = () => {
                 </div>
 
                 {isOpen && (
-                    <div className="md:hidden bg-atlas-900 border-t border-atlas-800 shadow-inner">
+                    <div className="md:hidden bg-tenri-900 border-t border-tenri-800 shadow-inner">
                         <div className="px-4 pt-4 pb-6 space-y-2 sm:px-3">
-                            <Link to="/" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-atlas-800 transition-colors">Inicio</Link>
-                            <Link to="/proyectos" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-atlas-800 transition-colors">Proyectos</Link>
-                            <Link to="/catalogo" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-atlas-800 transition-colors">Tienda</Link>
+                            <Link to="/" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Inicio</Link>
+                            <Link to="/proyectos" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Proyectos</Link>
+                            <Link to="/catalogo" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Tienda</Link>
 
                             {isAuthenticated ? (
-                                <div className="border-t border-atlas-800 mt-6 pt-6 pb-2 bg-atlas-800/30 rounded-2xl mx-2 px-2">
+                                <div className="border-t border-tenri-800 mt-6 pt-6 pb-2 bg-tenri-800/30 rounded-2xl mx-2 px-2">
                                     <div className="flex items-center px-3 mb-4">
                                         <div className="flex-shrink-0">
-                                            <div className="h-12 w-12 rounded-full bg-atlas-500 flex items-center justify-center font-bold text-white text-lg shadow-lg">
+                                            <div className="h-12 w-12 rounded-full bg-tenri-500 flex items-center justify-center font-bold text-white text-lg shadow-lg">
                                                 {getInitials(user?.name)}
                                             </div>
                                         </div>
                                         <div className="ml-4 overflow-hidden">
                                             <div className="text-lg font-bold leading-none text-white truncate">{user?.name}</div>
-                                            <div className="text-sm font-medium leading-none text-atlas-300 mt-1 truncate">{user?.email}</div>
+                                            <div className="text-sm font-medium leading-none text-tenri-300 mt-1 truncate">{user?.email}</div>
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <Link to="/perfil?tab=general" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
+                                        <Link to="/perfil?tab=general" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-tenri-700">
                                             <User size={20} /> Mi Perfil
                                         </Link>
-                                        <Link to="/perfil?tab=orders" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
+                                        <Link to="/perfil?tab=orders" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-tenri-700">
                                             <Package size={20} /> Mis Compras
                                         </Link>
-                                        <Link to="/perfil?tab=tickets" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-atlas-700">
+                                        <Link to="/perfil?tab=tickets" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-gray-300 hover:text-white hover:bg-tenri-700">
                                             <MessageSquare size={20} /> Mis Tickets
                                         </Link>
-                                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-3 mt-4 rounded-xl text-base font-bold text-red-400 hover:text-red-300 hover:bg-atlas-800 transition-colors">
+                                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-3 mt-4 rounded-xl text-base font-bold text-red-400 hover:text-red-300 hover:bg-tenri-800 transition-colors">
                                             <LogOut size={20} /> Cerrar Sesión
                                         </button>
                                     </div>
                                 </div>
                             ) : (
-                                <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center px-3 py-4 text-white font-bold bg-atlas-600 mt-6 rounded-xl shadow-lg">
+                                <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center px-3 py-4 text-white font-bold bg-tenri-600 mt-6 rounded-xl shadow-lg">
                                     <LogIn size={20} className="inline mr-2" /> Iniciar Sesión
                                 </Link>
                             )}

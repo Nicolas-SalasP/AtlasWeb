@@ -1,4 +1,4 @@
-name: Deploy AtlasWeb Monorepo
+name: Deploy Tenri Spa Monorepo
 
 on:
   push:

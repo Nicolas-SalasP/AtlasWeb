@@ -7,18 +7,30 @@ export default {
     theme: {
         extend: {
             colors: {
-                atlas: {
-                    900: '#06142E', // Azul oscuro profundo
-                    800: '#0F2A4A', // Azul corporativo
-                    500: '#1E4C85', // Azul medio
-                    300: '#5C9CE6', // Azul claro
+                tenri: {
+                    950: '#0B1120', // Fondo principal (dark ultra)
+                    900: '#0F172A', // Fondo base (navbar, sections)
+                    800: '#111827', // Cards / containers
+                    700: '#1F2937', // Bordes / separadores
+                    500: '#22C55E', // Principal (botones, CTA)
+                    400: '#4ADE80', // Hover / activo
+                    300: '#86EFAC', // Detalles suaves
+
+                    accent: '#38BDF8', // Azul tech (links / highlights)
                 },
-                tech: {
-                    gray: '#F3F4F6', // Fondo secciones claras
+
+                neutral: {
+                    100: '#F9FAFB',
+                    200: '#E5E7EB',
+                    400: '#9CA3AF',
+                    500: '#6B7280',
                 }
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
+            },
+            backgroundImage: {
+                'tenri-gradient': 'linear-gradient(135deg, #22C55E 0%, #38BDF8 100%)',
             }
         },
     },

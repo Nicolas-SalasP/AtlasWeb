@@ -30,7 +30,7 @@ const AdminDashboard = () => {
 
     if (loading) return (
         <div className="flex h-screen items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-atlas-900"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tenri-900"></div>
         </div>
     );
 
@@ -45,7 +45,7 @@ const AdminDashboard = () => {
     return (
         <div className="p-6 md:p-10 min-h-screen bg-gray-50/50">
             <div className="mb-8">
-                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dashboard Atlas</h1>
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dashboard Tenri</h1>
                 <p className="text-gray-500">Resumen de operaciones en tiempo real.</p>
             </div>
 
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
                 {/* 2. GRÁFICO DE VENTAS (Últimos 10 días) - Ocupa 2 columnas */}
                 <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <Activity className="text-atlas-900" size={20} /> Tendencia de Ventas (10 días)
+                        <Activity className="text-tenri-900" size={20} /> Tendencia de Ventas (10 días)
                     </h3>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
@@ -122,7 +122,7 @@ const AdminDashboard = () => {
                 <div className="space-y-6">
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-full flex flex-col">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <AlertTriangle className="text-atlas-900" size={20} /> Alertas del Sistema
+                            <AlertTriangle className="text-tenri-900" size={20} /> Alertas del Sistema
                         </h3>
                         <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
                             {data.insights.map((insight, idx) => (
@@ -158,7 +158,7 @@ const AdminDashboard = () => {
                 {/* 4. TOP PRODUCTOS */}
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <Package className="text-atlas-900" size={20} /> Top Productos
+                        <Package className="text-tenri-900" size={20} /> Top Productos
                     </h3>
                     <div className="space-y-3">
                         {data.top_products.map((prod, idx) => (
@@ -168,12 +168,12 @@ const AdminDashboard = () => {
                                         #{idx+1}
                                     </span>
                                     <div>
-                                        <p className="font-bold text-sm text-gray-900 group-hover:text-atlas-600 transition-colors">{prod.nombre}</p>
+                                        <p className="font-bold text-sm text-gray-900 group-hover:text-tenri-600 transition-colors">{prod.nombre}</p>
                                         <p className="text-xs text-gray-500 font-medium">Stock: {prod.stock}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-bold text-atlas-900">${parseInt(prod.ingresos).toLocaleString('es-CL')}</p>
+                                    <p className="font-bold text-tenri-900">${parseInt(prod.ingresos).toLocaleString('es-CL')}</p>
                                     <p className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-md inline-block mt-1">
                                         {prod.ventas} unid.
                                     </p>
@@ -187,21 +187,21 @@ const AdminDashboard = () => {
                 {/* 5. TOP ZONAS DE ENVÍO */}
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <MapPin className="text-atlas-900" size={20} /> Zonas de Mayor Demanda
+                        <MapPin className="text-tenri-900" size={20} /> Zonas de Mayor Demanda
                     </h3>
                     <div className="space-y-6">
                         {data.top_zones.map((zona, idx) => (
                             <div key={idx} className="relative">
                                 <div className="flex justify-between text-sm mb-2">
                                     <span className="font-bold text-gray-700 flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-atlas-900"></span>
+                                        <span className="w-2 h-2 rounded-full bg-tenri-900"></span>
                                         {zona.comuna}
                                     </span>
-                                    <span className="font-bold text-atlas-900">{zona.envios} Envíos <span className="text-gray-400 font-normal">({zona.porcentaje}%)</span></span>
+                                    <span className="font-bold text-tenri-900">{zona.envios} Envíos <span className="text-gray-400 font-normal">({zona.porcentaje}%)</span></span>
                                 </div>
                                 <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                                     <div 
-                                        className="bg-atlas-900 h-2.5 rounded-full transition-all duration-1000 ease-out" 
+                                        className="bg-tenri-900 h-2.5 rounded-full transition-all duration-1000 ease-out" 
                                         style={{ width: `${zona.porcentaje}%` }}
                                     ></div>
                                 </div>

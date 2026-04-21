@@ -160,7 +160,7 @@ const MisTickets = () => {
         t.ticket_code?.toLowerCase().includes(busqueda.toLowerCase())
     );
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2"><Loader2 className="animate-spin text-atlas-900" /> <span className="text-atlas-900 font-medium">Cargando Centro de Soporte...</span></div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2"><Loader2 className="animate-spin text-tenri-900" /> <span className="text-tenri-900 font-medium">Cargando Centro de Soporte...</span></div>;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-4 h-[calc(100vh-10px)] flex flex-col overflow-hidden">
@@ -171,7 +171,7 @@ const MisTickets = () => {
                     <h1 className="text-2xl font-black text-gray-900 tracking-tight">Mis Solicitudes</h1>
                     <p className="text-gray-500 text-sm mt-1 font-medium">Gestiona y haz seguimiento a tus incidencias</p>
                 </div>
-                <button onClick={() => setCrearModalOpen(true)} className="bg-atlas-900 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg hover:bg-atlas-800 hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm">
+                <button onClick={() => setCrearModalOpen(true)} className="bg-tenri-900 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg hover:bg-tenri-800 hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm">
                     <Plus size={18} /> Nuevo Ticket
                 </button>
             </div>
@@ -188,7 +188,7 @@ const MisTickets = () => {
                                 placeholder="Buscar tickets..."
                                 value={busqueda}
                                 onChange={e => setBusqueda(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-atlas-200 focus:bg-white outline-none transition-all"
+                                className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-tenri-200 focus:bg-white outline-none transition-all"
                             />
                         </div>
 
@@ -200,12 +200,12 @@ const MisTickets = () => {
                                 </div>
                             ) : (
                                 filtrados.map(t => (
-                                    <div key={t.id} onClick={() => { setTicketActivo(t); setVistaMovil('chat'); }} className={`p-4 rounded-2xl cursor-pointer transition-all border group ${ticketActivo?.id === t.id ? 'bg-white border-atlas-300 shadow-md scale-[1.02]' : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-sm'}`}>
+                                    <div key={t.id} onClick={() => { setTicketActivo(t); setVistaMovil('chat'); }} className={`p-4 rounded-2xl cursor-pointer transition-all border group ${ticketActivo?.id === t.id ? 'bg-white border-tenri-300 shadow-md scale-[1.02]' : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-sm'}`}>
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">{t.ticket_code}</span>
                                             <span className={`w-2.5 h-2.5 rounded-full border border-white ${getStatusColor(t.status)}`}></span>
                                         </div>
-                                        <h3 className={`text-sm font-bold truncate leading-tight ${ticketActivo?.id === t.id ? 'text-atlas-900' : 'text-gray-800 group-hover:text-atlas-700'}`}>{t.subject}</h3>
+                                        <h3 className={`text-sm font-bold truncate leading-tight ${ticketActivo?.id === t.id ? 'text-tenri-900' : 'text-gray-800 group-hover:text-tenri-700'}`}>{t.subject}</h3>
                                         <div className="flex justify-between mt-2 items-center">
                                             <span className="text-[10px] font-bold uppercase text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md inline-block">{t.category}</span>
                                             <span className="text-[10px] text-gray-400 font-medium">{new Date(t.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
@@ -247,12 +247,12 @@ const MisTickets = () => {
                                     return (
                                         <div key={msg.id || idx} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
                                             <div className={`max-w-[90%] md:max-w-[75%] ${esMio ? 'order-1' : ''}`}>
-                                                <div className={`px-4 py-2.5 md:px-5 md:py-3 min-w-[140px] rounded-[1.5rem] shadow-sm relative ${esMio ? 'bg-atlas-900 text-white rounded-tr-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
+                                                <div className={`px-4 py-2.5 md:px-5 md:py-3 min-w-[140px] rounded-[1.5rem] shadow-sm relative ${esMio ? 'bg-tenri-900 text-white rounded-tr-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
 
                                                     {/* Etiqueta de Staff si es un Admin */}
                                                     {esAdmin && !esMio && (
-                                                        <div className="absolute -top-3 left-4 bg-atlas-500 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm whitespace-nowrap">
-                                                            <ShieldCheck size={10} /> Atlas Staff
+                                                        <div className="absolute -top-3 left-4 bg-tenri-500 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm whitespace-nowrap">
+                                                            <ShieldCheck size={10} /> Tenri Staff
                                                         </div>
                                                     )}
 
@@ -276,12 +276,12 @@ const MisTickets = () => {
 
                                                                     return (
                                                                         <a key={index} href={`${BASE_URL}${filePath}`} target="_blank" rel="noopener noreferrer" download={fileName} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all hover:scale-[1.02] ${esMio ? 'border-white/20 bg-black/10 hover:bg-black/20' : 'border-gray-100 bg-gray-50 hover:bg-gray-100'}`}>
-                                                                            <div className={`${esMio ? 'text-white' : 'text-atlas-500'}`}>
+                                                                            <div className={`${esMio ? 'text-white' : 'text-tenri-500'}`}>
                                                                                 {filePath.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? <ImageIcon size={20} /> : <FileText size={20} />}
                                                                             </div>
                                                                             <div className="flex-1 overflow-hidden">
                                                                                 <p className="text-xs font-bold truncate">{fileName}</p>
-                                                                                <p className={`text-[10px] ${esMio ? 'text-atlas-200' : 'text-gray-400'}`}>Descargar</p>
+                                                                                <p className={`text-[10px] ${esMio ? 'text-tenri-200' : 'text-gray-400'}`}>Descargar</p>
                                                                             </div>
                                                                         </a>
                                                                     );
@@ -319,7 +319,7 @@ const MisTickets = () => {
                                     <div className="flex gap-2 mb-3 overflow-x-auto custom-scrollbar pb-2">
                                         {adjuntos.map((file, i) => (
                                             <div key={i} className="relative bg-gray-50 text-gray-800 rounded-xl p-2.5 border border-gray-200 flex items-center gap-2 shrink-0 shadow-sm animate-in zoom-in-95">
-                                                <div className="bg-white p-1.5 rounded-lg shadow-sm text-atlas-500">{file.type.startsWith('image/') ? <ImageIcon size={16} /> : <FileText size={16} />}</div>
+                                                <div className="bg-white p-1.5 rounded-lg shadow-sm text-tenri-500">{file.type.startsWith('image/') ? <ImageIcon size={16} /> : <FileText size={16} />}</div>
                                                 <span className="text-xs font-bold truncate max-w-[120px]">{file.name}</span>
                                                 <button onClick={() => removeFile(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md transition-transform hover:scale-110"><X size={12} /></button>
                                             </div>
@@ -327,8 +327,8 @@ const MisTickets = () => {
                                     </div>
                                 )}
 
-                                <form onSubmit={enviarRespuesta} className="bg-gray-50 p-2 md:p-2.5 rounded-3xl border border-gray-200 flex items-end gap-3 focus-within:ring-4 focus-within:ring-atlas-100 focus-within:border-atlas-300 transition-all shadow-inner">
-                                    <button type="button" onClick={() => fileInputRef.current.click()} className="p-3 text-gray-400 hover:text-atlas-900 hover:bg-white rounded-full transition-all shrink-0">
+                                <form onSubmit={enviarRespuesta} className="bg-gray-50 p-2 md:p-2.5 rounded-3xl border border-gray-200 flex items-end gap-3 focus-within:ring-4 focus-within:ring-tenri-100 focus-within:border-tenri-300 transition-all shadow-inner">
+                                    <button type="button" onClick={() => fileInputRef.current.click()} className="p-3 text-gray-400 hover:text-tenri-900 hover:bg-white rounded-full transition-all shrink-0">
                                         <Paperclip size={22} />
                                     </button>
 
@@ -347,7 +347,7 @@ const MisTickets = () => {
                                         disabled={enviandoMensaje}
                                     />
 
-                                    <button type="submit" disabled={(!mensaje.trim() && adjuntos.length === 0) || enviandoMensaje} className="bg-atlas-900 text-white p-3.5 rounded-full shadow-lg hover:bg-atlas-800 hover:scale-105 transition-all shrink-0 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
+                                    <button type="submit" disabled={(!mensaje.trim() && adjuntos.length === 0) || enviandoMensaje} className="bg-tenri-900 text-white p-3.5 rounded-full shadow-lg hover:bg-tenri-800 hover:scale-105 transition-all shrink-0 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
                                         {enviandoMensaje ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} className="ml-0.5" />}
                                     </button>
                                 </form>
@@ -379,14 +379,14 @@ const MisTickets = () => {
 
                         <form onSubmit={handleCrearTicket} className="space-y-4">
                             <div className="relative group">
-                                <AlignLeft className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-900 transition-colors" size={18} />
-                                <input required className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium transition-all" placeholder="Asunto principal" value={nuevoForm.asunto} onChange={e => setNuevoForm({ ...nuevoForm, asunto: e.target.value })} />
+                                <AlignLeft className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tenri-900 transition-colors" size={18} />
+                                <input required className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-300 outline-none text-sm font-medium transition-all" placeholder="Asunto principal" value={nuevoForm.asunto} onChange={e => setNuevoForm({ ...nuevoForm, asunto: e.target.value })} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="relative group">
-                                    <Layout className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-900 transition-colors" size={18} />
-                                    <select className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium appearance-none cursor-pointer transition-all" value={nuevoForm.categoria} onChange={e => setNuevoForm({ ...nuevoForm, categoria: e.target.value })}>
+                                    <Layout className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tenri-900 transition-colors" size={18} />
+                                    <select className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-300 outline-none text-sm font-medium appearance-none cursor-pointer transition-all" value={nuevoForm.categoria} onChange={e => setNuevoForm({ ...nuevoForm, categoria: e.target.value })}>
                                         <option value="ERP">ERP</option>
                                         <option value="Web">Desarrollo Web</option>
                                         <option value="Soporte">Soporte Técnico</option>
@@ -394,8 +394,8 @@ const MisTickets = () => {
                                     </select>
                                 </div>
                                 <div className="relative group">
-                                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-atlas-900 transition-colors" size={18} />
-                                    <select className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium appearance-none cursor-pointer transition-all" value={nuevoForm.prioridad} onChange={e => setNuevoForm({ ...nuevoForm, prioridad: e.target.value })}>
+                                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tenri-900 transition-colors" size={18} />
+                                    <select className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-300 outline-none text-sm font-medium appearance-none cursor-pointer transition-all" value={nuevoForm.prioridad} onChange={e => setNuevoForm({ ...nuevoForm, prioridad: e.target.value })}>
                                         <option value="baja">Baja</option>
                                         <option value="media">Media</option>
                                         <option value="alta">Alta</option>
@@ -403,13 +403,13 @@ const MisTickets = () => {
                                 </div>
                             </div>
 
-                            <textarea required rows="5" className="w-full p-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-300 outline-none text-sm font-medium resize-none custom-scrollbar transition-all" placeholder="Describe detalladamente el problema o requerimiento..." value={nuevoForm.mensaje} onChange={e => setNuevoForm({ ...nuevoForm, mensaje: e.target.value })} />
+                            <textarea required rows="5" className="w-full p-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-300 outline-none text-sm font-medium resize-none custom-scrollbar transition-all" placeholder="Describe detalladamente el problema o requerimiento..." value={nuevoForm.mensaje} onChange={e => setNuevoForm({ ...nuevoForm, mensaje: e.target.value })} />
 
                             <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                                 <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg">
                                     <Clock size={14} /> Respuesta estimada {'<'} 24h
                                 </div>
-                                <button type="submit" className="bg-atlas-900 text-white px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-atlas-800 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
+                                <button type="submit" className="bg-tenri-900 text-white px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-tenri-800 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
                                     <Send size={16} /> Enviar Solicitud
                                 </button>
                             </div>

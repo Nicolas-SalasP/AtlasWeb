@@ -72,7 +72,7 @@ const UserProfile = () => {
             <Toaster position="top-right" />
             <div className="max-w-6xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6 flex flex-col md:flex-row items-center gap-6">
-                    <div className="w-20 h-20 rounded-full bg-atlas-900 text-white flex items-center justify-center text-3xl font-bold shadow-lg shrink-0">
+                    <div className="w-20 h-20 rounded-full bg-tenri-900 text-white flex items-center justify-center text-3xl font-bold shadow-lg shrink-0">
                         {user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <div className="text-center md:text-left flex-1">
@@ -93,7 +93,7 @@ const UserProfile = () => {
                         <div className="mt-4 md:mt-0">
                             <Link 
                                 to="/admin" 
-                                className="flex items-center gap-2 bg-atlas-900 text-white px-5 py-3 rounded-xl font-bold hover:bg-atlas-800 hover:scale-105 transition-all shadow-lg shadow-atlas-900/20 active:scale-95"
+                                className="flex items-center gap-2 bg-tenri-900 text-white px-5 py-3 rounded-xl font-bold hover:bg-tenri-800 hover:scale-105 transition-all shadow-lg shadow-tenri-900/20 active:scale-95"
                             >
                                 <LayoutDashboard size={20} />
                                 <span>Panel Admin</span>
@@ -109,7 +109,7 @@ const UserProfile = () => {
                                 <button 
                                     key={item.id}
                                     onClick={() => setActiveTab(item.id)}
-                                    className={`w-full flex items-center gap-3 px-4 py-4 text-sm font-bold transition-all border-l-4 ${activeTab === item.id ? 'bg-atlas-50 text-atlas-900 border-atlas-900' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}
+                                    className={`w-full flex items-center gap-3 px-4 py-4 text-sm font-bold transition-all border-l-4 ${activeTab === item.id ? 'bg-tenri-50 text-tenri-900 border-tenri-900' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}
                                 >
                                     <item.icon size={18} /> {item.label}
                                 </button>

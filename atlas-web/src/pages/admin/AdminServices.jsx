@@ -180,7 +180,7 @@ const AdminServices = () => {
         s.name.toLowerCase().includes(busqueda.toLowerCase())
     );
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Servicios...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Servicios...</div>;
 
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
@@ -199,7 +199,7 @@ const AdminServices = () => {
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Servicios</h1>
                     <p className="text-gray-500 mt-1 text-sm md:text-base">Administra los planes de suscripción</p>
                 </div>
-                <button onClick={() => abrirDrawer()} className="bg-atlas-900 text-white px-5 py-3 rounded-xl font-bold shadow-lg hover:bg-atlas-800 transition-all flex items-center gap-2 text-sm md:text-base w-full md:w-auto justify-center">
+                <button onClick={() => abrirDrawer()} className="bg-tenri-900 text-white px-5 py-3 rounded-xl font-bold shadow-lg hover:bg-tenri-800 transition-all flex items-center gap-2 text-sm md:text-base w-full md:w-auto justify-center">
                     <Plus size={20} /> Nuevo Plan
                 </button>
             </div>
@@ -209,7 +209,7 @@ const AdminServices = () => {
                 <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
                     <div className="relative w-full md:max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input type="text" placeholder="Buscar plan..." className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-atlas-200 outline-none text-sm" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+                        <input type="text" placeholder="Buscar plan..." className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-tenri-200 outline-none text-sm" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                     </div>
                 </div>
 
@@ -307,7 +307,7 @@ const AdminServices = () => {
                     {/* IMAGEN DEL SERVICIO */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center">
                         <label className="text-sm font-bold text-gray-900 mb-4 w-full">Icono / Imagen del Plan</label>
-                        <div onClick={() => fileInputRef.current.click()} className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-atlas-900 hover:bg-atlas-50 transition-all bg-gray-50 overflow-hidden relative group">
+                        <div onClick={() => fileInputRef.current.click()} className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-tenri-900 hover:bg-tenri-50 transition-all bg-gray-50 overflow-hidden relative group">
                             {form.previewUrl ? (
                                 <>
                                     <img src={form.previewUrl} className="w-full h-full object-cover" />
@@ -317,8 +317,8 @@ const AdminServices = () => {
                                 </>
                             ) : (
                                 <>
-                                    <UploadCloud size={32} className="text-gray-400 group-hover:text-atlas-900 mb-2" />
-                                    <span className="text-xs font-bold text-gray-400 group-hover:text-atlas-900">Subir Imagen</span>
+                                    <UploadCloud size={32} className="text-gray-400 group-hover:text-tenri-900 mb-2" />
+                                    <span className="text-xs font-bold text-gray-400 group-hover:text-tenri-900">Subir Imagen</span>
                                 </>
                             )}
                         </div>
@@ -330,20 +330,20 @@ const AdminServices = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Nombre</label>
-                                <input required type="text" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej: Plan Pro" />
+                                <input required type="text" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej: Plan Pro" />
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Precio (CLP)</label>
                                 <div className="relative">
                                     <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input required type="number" className="w-full pl-8 p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
+                                    <input required type="number" className="w-full pl-8 p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
                                 </div>
                             </div>
                         </div>
 
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Duración</label>
-                            <select className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none appearance-none" value={form.duration_days} onChange={e => setForm({ ...form, duration_days: e.target.value })}>
+                            <select className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none appearance-none" value={form.duration_days} onChange={e => setForm({ ...form, duration_days: e.target.value })}>
                                 <option value="30">Mensual (30 días)</option>
                                 <option value="365">Anual (365 días)</option>
                                 <option value="7">Semanal (7 días)</option>
@@ -352,7 +352,7 @@ const AdminServices = () => {
 
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Descripción Corta</label>
-                            <textarea rows="3" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none resize-none" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Breve resumen del servicio..." />
+                            <textarea rows="3" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none resize-none" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Breve resumen del servicio..." />
                         </div>
 
                         {/* LISTA DINÁMICA DE FEATURES */}
@@ -367,7 +367,7 @@ const AdminServices = () => {
                                                 type="text"
                                                 value={feature}
                                                 onChange={(e) => handleFeatureChange(index, e.target.value)}
-                                                className="w-full pl-9 pr-3 py-2 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none text-sm"
+                                                className="w-full pl-9 pr-3 py-2 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none text-sm"
                                                 placeholder="Ej: Soporte 24/7"
                                             />
                                         </div>
@@ -377,7 +377,7 @@ const AdminServices = () => {
                                     </div>
                                 ))}
                             </div>
-                            <button type="button" onClick={addFeatureField} className="mt-3 text-xs font-bold text-atlas-600 hover:text-atlas-800 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-atlas-50 transition-colors">
+                            <button type="button" onClick={addFeatureField} className="mt-3 text-xs font-bold text-tenri-600 hover:text-tenri-800 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-tenri-50 transition-colors">
                                 <PlusCircle size={16} /> Agregar otro beneficio
                             </button>
                         </div>
@@ -386,7 +386,7 @@ const AdminServices = () => {
 
                 <div className="p-6 border-t border-gray-100 bg-white flex justify-end gap-3 flex-shrink-0">
                     <button onClick={() => setDrawerOpen(false)} className="px-6 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
-                    <button onClick={guardarServicio} disabled={guardando} className="px-8 py-3 bg-atlas-900 text-white font-bold rounded-xl hover:bg-atlas-800 shadow-lg flex items-center gap-2">
+                    <button onClick={guardarServicio} disabled={guardando} className="px-8 py-3 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg flex items-center gap-2">
                         {guardando ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
                         Guardar
                     </button>

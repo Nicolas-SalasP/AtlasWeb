@@ -5,8 +5,8 @@ return [
     'allowed_methods' => ['*'],
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:5173'),
-        'https://atlasdigitaltech.cl',
-        'https://www.atlasdigitaltech.cl',
+        'https://tenri.cl',
+        'https://www.tenri.cl',
         'http://localhost:5173',
     ],
 

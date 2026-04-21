@@ -63,7 +63,7 @@ const MiSeguridad = () => {
                             type="password"
                             value={passData.current_password}
                             onChange={(e) => setPassData({ ...passData, current_password: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-atlas-500 transition-all"
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-tenri-500 transition-all"
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -73,7 +73,7 @@ const MiSeguridad = () => {
                                 type="password"
                                 value={passData.new_password}
                                 onChange={(e) => setPassData({ ...passData, new_password: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-atlas-500 transition-all"
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-tenri-500 transition-all"
                             />
                         </div>
                         <div>
@@ -82,12 +82,12 @@ const MiSeguridad = () => {
                                 type="password"
                                 value={passData.new_password_confirmation}
                                 onChange={(e) => setPassData({ ...passData, new_password_confirmation: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-atlas-500 transition-all"
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-tenri-500 transition-all"
                             />
                         </div>
                     </div>
                     <div className="pt-2">
-                        <button type="submit" disabled={loadingPass} className="bg-atlas-900 text-white px-6 py-2 rounded-lg font-bold shadow-md hover:bg-atlas-800 flex items-center gap-2 disabled:opacity-50 transition-colors">
+                        <button type="submit" disabled={loadingPass} className="bg-tenri-900 text-white px-6 py-2 rounded-lg font-bold shadow-md hover:bg-tenri-800 flex items-center gap-2 disabled:opacity-50 transition-colors">
                             {loadingPass ? <Loader2 className="animate-spin" size={18} /> : 'Actualizar Contraseña'}
                         </button>
                     </div>
@@ -123,7 +123,7 @@ const MiSeguridad = () => {
                                     <div>
                                         <p className="text-sm font-bold text-gray-900">{log.action}</p>
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs text-gray-500">
-                                            <span className="flex items-center gap-1 font-medium text-atlas-700">
+                                            <span className="flex items-center gap-1 font-medium text-tenri-700">
                                                 <Globe size={10} /> {log.location}
                                             </span>
                                             <span className="hidden sm:inline">•</span>

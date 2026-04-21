@@ -14,7 +14,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>Atlas Digital Tech</h2>
+            <h2>Tenri Spa</h2>
         </div>
         
         <p>Hola <strong>{{ $order->user->name }}</strong>,</p>
@@ -28,7 +28,7 @@
                 <p><strong>Tipo:</strong> {{ $bankDetails['bank_account_type'] ?? 'Cuenta Rut' }}</p>
                 <p><strong>Número:</strong> {{ $bankDetails['bank_account_number'] ?? 'N/A' }}</p>
                 <p><strong>RUT:</strong> {{ $bankDetails['bank_rut'] ?? 'N/A' }}</p>
-                <p><strong>Correo:</strong> {{ $bankDetails['bank_email'] ?? 'pagos@atlas.cl' }}</p>
+                <p><strong>Correo:</strong> {{ $bankDetails['bank_email'] ?? 'pagos@tenri.cl' }}</p>
             </div>
             <p>Una vez transferido, responde a este correo con el comprobante.</p>
         @else
@@ -51,7 +51,7 @@
         </div>
 
         <div class="footer">
-            <p>Gracias por confiar en Atlas Digital Tech.</p>
+            <p>Gracias por confiar en Tenri Spa.</p>
         </div>
     </div>
 </body>

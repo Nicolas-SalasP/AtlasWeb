@@ -98,7 +98,7 @@ const AdminConfig = () => {
         }
     };
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Configuración...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Configuración...</div>;
 
     return (
         <div className="h-[calc(100vh-80px)] overflow-y-auto p-6 md:p-10 custom-scrollbar relative pb-20">
@@ -120,7 +120,7 @@ const AdminConfig = () => {
                 <button
                     onClick={handleGuardar}
                     disabled={guardando}
-                    className="bg-atlas-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-atlas-800 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
+                    className="bg-tenri-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-tenri-800 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
                 >
                     {guardando ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
                     Guardar Cambios

@@ -9,7 +9,7 @@
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
         
         <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #1e3a8a; font-size: 24px; margin: 0;">Atlas Digital Tech</h1>
+            <h1 style="color: #1e3a8a; font-size: 24px; margin: 0;">Tenri Spa</h1>
         </div>
 
         <h2 style="color: #333333; font-size: 20px; text-align: center;">Verificación de Cambio de Correo</h2>
@@ -31,7 +31,7 @@
         <hr style="border: none; border-top: 1px solid #eeeeee; margin: 30px 0;">
 
         <p style="color: #999999; font-size: 12px; text-align: center; margin: 0;">
-            &copy; {{ date('Y') }} Atlas Digital Tech. Todos los derechos reservados.
+            &copy; {{ date('Y') }} Tenri Spa. Todos los derechos reservados.
         </p>
     </div>
 </body>

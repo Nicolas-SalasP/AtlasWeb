@@ -10,7 +10,7 @@ const MisTickets = ({ ticketsData, loading }) => {
     const { tickets, stats } = ticketsData || { tickets: [], stats: { total: 0, open: 0, closed: 0 } };
 
     if (loading) {
-        return <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-atlas-900" size={32} /></div>;
+        return <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-tenri-900" size={32} /></div>;
     }
 
     // Helpers de estilo
@@ -34,7 +34,7 @@ const MisTickets = ({ ticketsData, loading }) => {
                 <h2 className="text-xl font-bold text-gray-900">Soporte Técnico</h2>
                 <button 
                     onClick={() => navigate('/mis-tickets')}
-                    className="text-sm font-bold text-atlas-900 hover:text-atlas-700 flex items-center gap-1"
+                    className="text-sm font-bold text-tenri-900 hover:text-tenri-700 flex items-center gap-1"
                 >
                     Ir al Centro de Ayuda <ChevronRight size={16} />
                 </button>
@@ -74,7 +74,7 @@ const MisTickets = ({ ticketsData, loading }) => {
                         <p className="text-gray-500 text-sm">No tienes tickets de soporte recientes.</p>
                         <button 
                             onClick={() => navigate('/mis-tickets')}
-                            className="mt-4 px-4 py-2 bg-atlas-900 text-white rounded-lg text-sm font-bold hover:bg-atlas-800 transition-colors"
+                            className="mt-4 px-4 py-2 bg-tenri-900 text-white rounded-lg text-sm font-bold hover:bg-tenri-800 transition-colors"
                         >
                             Crear Nuevo Ticket
                         </button>
@@ -95,7 +95,7 @@ const MisTickets = ({ ticketsData, loading }) => {
                                         <span className="text-xs text-gray-400">#{ticket.id}</span>
                                         <span className="text-xs text-gray-400">• {new Date(ticket.created_at).toLocaleDateString()}</span>
                                     </div>
-                                    <h4 className="font-bold text-gray-900 truncate group-hover:text-atlas-700 transition-colors">
+                                    <h4 className="font-bold text-gray-900 truncate group-hover:text-tenri-700 transition-colors">
                                         {ticket.subject}
                                     </h4>
                                     <p className="text-xs text-gray-500 truncate mt-0.5">
@@ -103,7 +103,7 @@ const MisTickets = ({ ticketsData, loading }) => {
                                         Clic para ver la conversación completa
                                     </p>
                                 </div>
-                                <div className="text-gray-300 group-hover:text-atlas-900 transition-colors">
+                                <div className="text-gray-300 group-hover:text-tenri-900 transition-colors">
                                     <ChevronRight size={20} />
                                 </div>
                             </div>

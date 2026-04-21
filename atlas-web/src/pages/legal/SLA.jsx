@@ -13,7 +13,7 @@ const SLA = () => {
         
         <div className="prose prose-blue max-w-none text-gray-700 space-y-6">
           <p>
-            El presente Acuerdo de Nivel de Servicio (en adelante, el "SLA") es un anexo vinculante a los Términos y Condiciones de Uso del ERP Contable provisto por <strong>Atlas Digital Tech</strong> (en adelante, el "Proveedor"). Este documento establece los compromisos de disponibilidad de la plataforma, los tiempos de respuesta de soporte técnico y las compensaciones aplicables ante eventuales interrupciones.
+            El presente Acuerdo de Nivel de Servicio (en adelante, el "SLA") es un anexo vinculante a los Términos y Condiciones de Uso del ERP Contable provisto por <strong>Tenri Spa</strong> (en adelante, el "Proveedor"). Este documento establece los compromisos de disponibilidad de la plataforma, los tiempos de respuesta de soporte técnico y las compensaciones aplicables ante eventuales interrupciones.
           </p>
           <p>
             Este SLA entrará en vigencia exclusivamente una vez que la cuenta del Licenciatario haya superado formalmente la fase de "Marcha Blanca" (Beta) y se encuentre bajo una suscripción comercial activa y al día en sus pagos.
@@ -22,13 +22,13 @@ const SLA = () => {
           <h3 className="text-xl font-bold text-gray-900 mt-8">ARTÍCULO 1: COMPROMISO DE DISPONIBILIDAD (UPTIME) Y MEDICIÓN</h3>
           <ul className="list-none pl-0 space-y-3">
             <li>
-              <strong>1.1. Nivel de Servicio Objetivo:</strong> Atlas Digital Tech garantiza que la infraestructura central del ERP Contable y sus bases de datos estarán disponibles y operativas con un tiempo de actividad mensual garantizado del <strong>99.8%</strong> (en adelante, el "Uptime Garantizado"), calculado sobre una base de 24 horas al día, 7 días a la semana.
+              <strong>1.1. Nivel de Servicio Objetivo:</strong> Tenri Spa garantiza que la infraestructura central del ERP Contable y sus bases de datos estarán disponibles y operativas con un tiempo de actividad mensual garantizado del <strong>99.8%</strong> (en adelante, el "Uptime Garantizado"), calculado sobre una base de 24 horas al día, 7 días a la semana.
             </li>
             <li>
               <strong>1.2. Definición de Indisponibilidad:</strong> Se entenderá por "Indisponibilidad Constatada" a la pérdida total de conectividad externa o una degradación severa y generalizada que impida el acceso efectivo y el uso de los módulos críticos del Software para la totalidad de los usuarios de una cuenta, excluyendo problemas de red local o de hardware del Licenciatario.
             </li>
             <li>
-              <strong>1.3. Fuente Única de Medición:</strong> El cálculo del Uptime Mensual se basará única y exclusivamente en los registros de auditoría (logs) y las herramientas de monitoreo de disponibilidad interno configuradas por Atlas Digital Tech. Estas métricas constituirán la fuente oficial e irrefutable para resolver cualquier controversia sobre el nivel de servicio.
+              <strong>1.3. Fuente Única de Medición:</strong> El cálculo del Uptime Mensual se basará única y exclusivamente en los registros de auditoría (logs) y las herramientas de monitoreo de disponibilidad interno configuradas por Tenri Spa. Estas métricas constituirán la fuente oficial e irrefutable para resolver cualquier controversia sobre el nivel de servicio.
             </li>
           </ul>
 
@@ -45,8 +45,8 @@ const SLA = () => {
               <p className="font-bold text-gray-900 mb-1">🔴 Severidad 1 (Crítica): Caída total del sistema.</p>
               <p className="text-sm mb-2">El ERP es inaccesible o existe una interrupción absoluta que impide el inicio de sesión o la facturación.</p>
               <ul className="text-sm space-y-1 pl-5 list-disc">
-                <li><strong>Canal Principal:</strong> Ticket a soporte@atlasdigitaltech.cl.</li>
-                <li><strong>Canal Secundario de Emergencia:</strong> Contacto alternativo vía portal de estado corporativo (ej. status.atlasdigitaltech.cl) o formulario web de contingencia.</li>
+                <li><strong>Canal Principal:</strong> Ticket a soporte@tenri.cl.</li>
+                <li><strong>Canal Secundario de Emergencia:</strong> Contacto alternativo vía portal de estado corporativo (ej. status.tenri.cl) o formulario web de contingencia.</li>
                 <li><strong>Tiempo de Respuesta Objetivo:</strong> 2 horas hábiles.</li>
                 <li><strong>Tiempo de Resolución Objetivo:</strong> 6 horas hábiles.</li>
               </ul>

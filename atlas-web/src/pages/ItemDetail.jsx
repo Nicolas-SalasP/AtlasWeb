@@ -88,7 +88,7 @@ const ItemDetail = () => {
         toast.success(`Agregado: ${quantity} x ${item.name}`);
     };
 
-    if (loading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-atlas-900"></div></div>;
+    if (loading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tenri-900"></div></div>;
     if (!item) return null;
 
     const images = item.images || [];
@@ -102,13 +102,13 @@ const ItemDetail = () => {
             <div className="max-w-7xl mx-auto">
                 
                 <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-                    <button onClick={() => navigate('/catalogo')} className="hover:text-atlas-900 flex items-center gap-1 transition-colors">
+                    <button onClick={() => navigate('/catalogo')} className="hover:text-tenri-900 flex items-center gap-1 transition-colors">
                         <ArrowLeft size={16} /> Catálogo
                     </button>
                     <ChevronRight size={14} />
                     <span className="capitalize">{item.is_service ? 'Servicios' : item.category?.name || 'Producto'}</span>
                     <ChevronRight size={14} />
-                    <span className="font-semibold text-atlas-900 truncate max-w-[200px]">{item.name}</span>
+                    <span className="font-semibold text-tenri-900 truncate max-w-[200px]">{item.name}</span>
                 </nav>
 
                 <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
@@ -136,7 +136,7 @@ const ItemDetail = () => {
                             {!item.is_service && images.length > 1 && (
                                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide justify-center">
                                     {images.map((img, idx) => (
-                                        <button key={img.id} onClick={() => setSelectedImage(idx)} className={`w-20 h-20 rounded-2xl border-2 overflow-hidden flex-shrink-0 transition-all ${selectedImage === idx ? 'border-atlas-900 ring-2 ring-atlas-900/20 scale-105' : 'border-transparent bg-white hover:border-gray-300'}`}>
+                                        <button key={img.id} onClick={() => setSelectedImage(idx)} className={`w-20 h-20 rounded-2xl border-2 overflow-hidden flex-shrink-0 transition-all ${selectedImage === idx ? 'border-tenri-900 ring-2 ring-tenri-900/20 scale-105' : 'border-transparent bg-white hover:border-gray-300'}`}>
                                             <img src={`${BASE_URL}${img.url}`} className="w-full h-full object-cover" alt="thumbnail" />
                                         </button>
                                     ))}
@@ -158,7 +158,7 @@ const ItemDetail = () => {
                                     <div className="grid sm:grid-cols-2 gap-y-3 gap-x-6 bg-gray-50 rounded-2xl p-6 border border-gray-100">
                                         {detailsList.map((feat, i) => (
                                             <div key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                                                <div className="w-5 h-5 rounded-full bg-atlas-100 text-atlas-600 flex items-center justify-center flex-shrink-0 mt-0.5"><CheckCircle size={12} /></div>
+                                                <div className="w-5 h-5 rounded-full bg-tenri-100 text-tenri-600 flex items-center justify-center flex-shrink-0 mt-0.5"><CheckCircle size={12} /></div>
                                                 <span className="font-medium">{feat}</span>
                                             </div>
                                         ))}
@@ -174,7 +174,7 @@ const ItemDetail = () => {
                                         <div>
                                             <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Precio Unitario</p>
                                             <div className="flex items-baseline gap-2">
-                                                <span className="text-4xl font-black text-atlas-900 tracking-tight">${parseInt(item.price).toLocaleString()}</span>
+                                                <span className="text-4xl font-black text-tenri-900 tracking-tight">${parseInt(item.price).toLocaleString()}</span>
                                                 {item.is_service && <span className="text-lg text-gray-500 font-medium">/{item.duration_days} días</span>}
                                             </div>
                                         </div>
@@ -184,15 +184,15 @@ const ItemDetail = () => {
                                             <button 
                                                 onClick={handleDecrement}
                                                 disabled={quantity <= 1}
-                                                className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-gray-600 hover:text-atlas-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90"
+                                                className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-gray-600 hover:text-tenri-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90"
                                             >
                                                 <Minus size={20} />
                                             </button>
-                                            <span className="font-bold text-xl text-atlas-900 w-12 text-center">{quantity}</span>
+                                            <span className="font-bold text-xl text-tenri-900 w-12 text-center">{quantity}</span>
                                             <button 
                                                 onClick={handleIncrement}
                                                 disabled={!item.is_service && quantity >= item.stock_current}
-                                                className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-gray-600 hover:text-atlas-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90"
+                                                className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-gray-600 hover:text-tenri-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90"
                                             >
                                                 <Plus size={20} />
                                             </button>
@@ -203,7 +203,7 @@ const ItemDetail = () => {
                                             className={`flex-1 px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-xl transition-all hover:-translate-y-1 active:translate-y-0 ${
                                                 !item.is_service && item.stock_current <= 0
                                                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-atlas-900 text-white hover:bg-atlas-800 shadow-atlas-900/30'
+                                                    : 'bg-tenri-900 text-white hover:bg-tenri-800 shadow-tenri-900/30'
                                             }`}
                                         >
                                             <ShoppingCart size={24} />
@@ -213,7 +213,7 @@ const ItemDetail = () => {
                                 </div>
 
                                 <div className="flex gap-6 mt-8 justify-center sm:justify-start text-xs text-gray-400 font-medium">
-                                    <div className="flex items-center gap-2"><ShieldCheck size={16}/> Garantía Atlas</div>
+                                    <div className="flex items-center gap-2"><ShieldCheck size={16}/> Garantía Tenri</div>
                                     <div className="flex items-center gap-2"><Truck size={16}/> Despacho Todo Chile</div>
                                     <div className="flex items-center gap-2"><Clock size={16}/> Soporte 24/7</div>
                                 </div>

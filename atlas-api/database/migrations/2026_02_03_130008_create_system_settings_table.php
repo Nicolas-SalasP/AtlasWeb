@@ -16,8 +16,8 @@ return new class extends Migration {
         });
 
         DB::table('system_settings')->insert([
-            ['key' => 'store_name', 'value' => 'Atlas Digital Tech', 'type' => 'string'],
-            ['key' => 'contact_email', 'value' => 'contacto@atlas.cl', 'type' => 'string'],
+            ['key' => 'store_name', 'value' => 'Tenri Spa', 'type' => 'string'],
+            ['key' => 'contact_email', 'value' => 'contacto@tenri.cl', 'type' => 'string'],
             ['key' => 'contact_phone', 'value' => '+56 9 1234 5678', 'type' => 'string'],
             ['key' => 'webpay_enabled', 'value' => '1', 'type' => 'boolean'],
             ['key' => 'webpay_code', 'value' => '597012345678', 'type' => 'string'],

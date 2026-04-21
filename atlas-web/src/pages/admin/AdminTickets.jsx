@@ -203,14 +203,14 @@ const AdminTickets = () => {
         return coincideEstado && coincideBusqueda;
     });
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Centro de Soporte...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Centro de Soporte...</div>;
 
     return (
         <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row gap-6 p-4 md:p-6 bg-gray-100 overflow-hidden relative">
 
             {/* TOAST NOTIFICACIONES */}
             {toast.show && (
-                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-atlas-900 text-white' : 'bg-red-500 text-white'}`}>
+                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-tenri-900 text-white' : 'bg-red-500 text-white'}`}>
                     {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
                     <span className="font-bold text-sm">{toast.message}</span>
                 </div>
@@ -252,7 +252,7 @@ const AdminTickets = () => {
                                 placeholder="Buscar ticket o cliente..." 
                                 value={busqueda} 
                                 onChange={(e) => setBusqueda(e.target.value)} 
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-atlas-300 focus:bg-white outline-none text-sm font-medium transition-all" 
+                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-tenri-300 focus:bg-white outline-none text-sm font-medium transition-all" 
                             />
                         </div>
 
@@ -261,7 +261,7 @@ const AdminTickets = () => {
                                 <button 
                                     key={f} 
                                     onClick={() => setFiltroEstado(f)} 
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap border ${filtroEstado === f ? 'bg-atlas-900 text-white border-atlas-900 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300'}`}
+                                    className={`px-4 py-2 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap border ${filtroEstado === f ? 'bg-tenri-900 text-white border-tenri-900 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300'}`}
                                 >
                                     {f === 'todos' ? 'Todos' : f}
                                 </button>
@@ -281,11 +281,11 @@ const AdminTickets = () => {
                                 <div 
                                     key={t.id} 
                                     onClick={() => setTicketActivo(t)} 
-                                    className={`p-4 rounded-2xl cursor-pointer transition-all border group relative ${ticketActivo?.id === t.id ? 'bg-white border-atlas-400 shadow-lg shadow-atlas-200/20 scale-[1.02]' : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-md'}`}
+                                    className={`p-4 rounded-2xl cursor-pointer transition-all border group relative ${ticketActivo?.id === t.id ? 'bg-white border-tenri-400 shadow-lg shadow-tenri-200/20 scale-[1.02]' : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-md'}`}
                                 >
                                     <div className="flex gap-3">
                                         <div className="relative shrink-0">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm border-2 border-white shadow-sm ${ticketActivo?.id === t.id ? 'bg-atlas-100 text-atlas-900' : 'bg-gray-100 text-gray-600'}`}>
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm border-2 border-white shadow-sm ${ticketActivo?.id === t.id ? 'bg-tenri-100 text-tenri-900' : 'bg-gray-100 text-gray-600'}`}>
                                                 {t.user?.name?.charAt(0) || 'U'}
                                             </div>
                                             <span className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full ${getStatusColor(t.status)}`}></span>
@@ -329,7 +329,7 @@ const AdminTickets = () => {
                             <div className="flex items-center gap-4">
                                 <button onClick={() => setTicketActivo(null)} className="md:hidden p-2 text-gray-400 hover:text-gray-800 bg-gray-50 rounded-full"><ChevronLeft size={24} /></button>
                                 
-                                <div onClick={() => verPerfilCliente(ticketActivo.user)} className="w-12 h-12 rounded-full bg-atlas-900 text-white flex items-center justify-center font-bold text-xl shadow-md cursor-pointer hover:scale-105 transition-transform shrink-0">
+                                <div onClick={() => verPerfilCliente(ticketActivo.user)} className="w-12 h-12 rounded-full bg-tenri-900 text-white flex items-center justify-center font-bold text-xl shadow-md cursor-pointer hover:scale-105 transition-transform shrink-0">
                                     {ticketActivo.user?.name?.charAt(0)}
                                 </div>
                                 <div className="min-w-0">
@@ -338,7 +338,7 @@ const AdminTickets = () => {
                                         <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded hidden sm:block">{ticketActivo.ticket_code}</span>
                                     </div>
                                     <p className="text-xs md:text-sm text-gray-500 flex items-center gap-2">
-                                        <span onClick={() => verPerfilCliente(ticketActivo.user)} className="hover:text-atlas-900 font-bold cursor-pointer hover:underline truncate">{ticketActivo.user?.name}</span>
+                                        <span onClick={() => verPerfilCliente(ticketActivo.user)} className="hover:text-tenri-900 font-bold cursor-pointer hover:underline truncate">{ticketActivo.user?.name}</span>
                                         • <span className="capitalize">{ticketActivo.category}</span>
                                     </p>
                                 </div>
@@ -372,12 +372,12 @@ const AdminTickets = () => {
                                     <div key={msg.id || idx} className={`flex ${esAdmin ? 'justify-end' : 'justify-start'}`}>
                                         <div className={`max-w-[90%] md:max-w-[75%] ${esAdmin ? 'order-1' : ''}`}>
                                             {/* AGREGADO: min-w-[140px] para que la burbuja nunca sea más pequeña que la etiqueta */}
-                                            <div className={`px-4 py-2.5 md:px-5 md:py-3 min-w-[140px] rounded-[1.5rem] shadow-sm relative ${esAdmin ? 'bg-atlas-900 text-white rounded-tr-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
+                                            <div className={`px-4 py-2.5 md:px-5 md:py-3 min-w-[140px] rounded-[1.5rem] shadow-sm relative ${esAdmin ? 'bg-tenri-900 text-white rounded-tr-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
                                                 
                                                 {esAdmin && (
                                                     // AGREGADO: whitespace-nowrap para que el texto de Staff no haga saltos de línea
-                                                    <div className="absolute -top-3 right-4 bg-atlas-500 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm whitespace-nowrap">
-                                                        <ShieldCheck size={10} /> Atlas Staff
+                                                    <div className="absolute -top-3 right-4 bg-tenri-500 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm whitespace-nowrap">
+                                                        <ShieldCheck size={10} /> Tenri Staff
                                                     </div>
                                                 )}
 
@@ -400,12 +400,12 @@ const AdminTickets = () => {
 
                                                                 return (
                                                                     <a key={index} href={`${BASE_URL}${filePath}`} target="_blank" rel="noopener noreferrer" download={fileName} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all hover:scale-[1.02] ${esAdmin ? 'border-white/20 bg-black/10 hover:bg-black/20' : 'border-gray-100 bg-gray-50 hover:bg-gray-100'}`}>
-                                                                        <div className={`${esAdmin ? 'text-white' : 'text-atlas-500'}`}>
+                                                                        <div className={`${esAdmin ? 'text-white' : 'text-tenri-500'}`}>
                                                                             {filePath.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? <ImageIcon size={20} /> : <FileText size={20} />}
                                                                         </div>
                                                                         <div className="flex-1 overflow-hidden">
                                                                             <p className="text-xs font-bold truncate">{fileName}</p>
-                                                                            <p className={`text-[10px] ${esAdmin ? 'text-atlas-200' : 'text-gray-400'}`}>Descargar</p>
+                                                                            <p className={`text-[10px] ${esAdmin ? 'text-tenri-200' : 'text-gray-400'}`}>Descargar</p>
                                                                         </div>
                                                                     </a>
                                                                 );
@@ -436,7 +436,7 @@ const AdminTickets = () => {
                             {adjuntos.length > 0 && (
                                 <div className="flex gap-2 mb-3 overflow-x-auto custom-scrollbar pb-2">
                                     {adjuntos.map((file, i) => (
-                                        <div key={i} className="relative bg-atlas-50 text-atlas-900 rounded-xl p-2.5 border border-atlas-100 flex items-center gap-2 shrink-0 shadow-sm animate-in zoom-in-95">
+                                        <div key={i} className="relative bg-tenri-50 text-tenri-900 rounded-xl p-2.5 border border-tenri-100 flex items-center gap-2 shrink-0 shadow-sm animate-in zoom-in-95">
                                             <div className="bg-white p-1.5 rounded-lg shadow-sm">{file.type.startsWith('image/') ? <ImageIcon size={16} /> : <FileText size={16} />}</div>
                                             <span className="text-xs font-bold truncate max-w-[120px]">{file.name}</span>
                                             <button onClick={() => removeFile(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md transition-transform hover:scale-110"><X size={12} /></button>
@@ -445,8 +445,8 @@ const AdminTickets = () => {
                                 </div>
                             )}
 
-                            <form onSubmit={enviarMensaje} className="bg-gray-50 p-2 md:p-2.5 rounded-3xl border border-gray-200 flex items-end gap-3 focus-within:ring-4 focus-within:ring-atlas-100 focus-within:border-atlas-300 transition-all shadow-inner">
-                                <button type="button" onClick={() => fileInputRef.current.click()} className="p-3 text-gray-400 hover:text-atlas-900 hover:bg-white rounded-full transition-all shrink-0"><Paperclip size={22} /></button>
+                            <form onSubmit={enviarMensaje} className="bg-gray-50 p-2 md:p-2.5 rounded-3xl border border-gray-200 flex items-end gap-3 focus-within:ring-4 focus-within:ring-tenri-100 focus-within:border-tenri-300 transition-all shadow-inner">
+                                <button type="button" onClick={() => fileInputRef.current.click()} className="p-3 text-gray-400 hover:text-tenri-900 hover:bg-white rounded-full transition-all shrink-0"><Paperclip size={22} /></button>
                                 <input type="file" multiple className="hidden" ref={fileInputRef} onChange={handleFileChange} />
                                 
                                 <textarea 
@@ -462,7 +462,7 @@ const AdminTickets = () => {
                                     disabled={enviando} 
                                 />
                                 
-                                <button type="submit" disabled={(!nuevaRespuesta.trim() && adjuntos.length === 0) || enviando} className="bg-atlas-900 text-white p-3.5 rounded-full shadow-lg hover:bg-atlas-800 hover:scale-105 transition-all shrink-0 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
+                                <button type="submit" disabled={(!nuevaRespuesta.trim() && adjuntos.length === 0) || enviando} className="bg-tenri-900 text-white p-3.5 rounded-full shadow-lg hover:bg-tenri-800 hover:scale-105 transition-all shrink-0 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center">
                                     {enviando ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} className="ml-0.5" />}
                                 </button>
                             </form>
@@ -470,7 +470,7 @@ const AdminTickets = () => {
                     </>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-white to-gray-50">
-                        <div className="w-32 h-32 bg-atlas-50 text-atlas-200 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                        <div className="w-32 h-32 bg-tenri-50 text-tenri-200 rounded-full flex items-center justify-center mb-6 shadow-inner">
                             <MessageSquare size={64} />
                         </div>
                         <h2 className="text-2xl font-black text-gray-900 mb-2">Centro de Soporte</h2>
@@ -485,7 +485,7 @@ const AdminTickets = () => {
             <div className={`fixed inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 {usuarioDetalle && (
                     <div className="h-full flex flex-col relative">
-                        <div className="h-40 bg-atlas-900 relative flex-shrink-0 rounded-bl-[3rem]">
+                        <div className="h-40 bg-tenri-900 relative flex-shrink-0 rounded-bl-[3rem]">
                             <button onClick={() => setDrawerOpen(false)} className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 p-2 rounded-full backdrop-blur-md transition-colors"><X size={20} /></button>
                             <div className="absolute -bottom-12 left-8 flex items-end gap-4">
                                 <div className="w-24 h-24 bg-white rounded-[1.5rem] p-1.5 shadow-xl">
@@ -498,7 +498,7 @@ const AdminTickets = () => {
                             <div className="mb-8">
                                 <h2 className="text-2xl font-black text-gray-900 leading-none mb-1">{usuarioDetalle.name}</h2>
                                 <p className="text-sm text-gray-500 font-medium flex items-center gap-1">{usuarioDetalle.company_name || 'Cliente Particular'}</p>
-                                <span className={`inline-flex items-center gap-1 mt-3 px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${Number(usuarioDetalle.role_id) === 1 ? 'bg-atlas-900 text-white' : 'bg-blue-50 text-blue-600'}`}>
+                                <span className={`inline-flex items-center gap-1 mt-3 px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${Number(usuarioDetalle.role_id) === 1 ? 'bg-tenri-900 text-white' : 'bg-blue-50 text-blue-600'}`}>
                                     {Number(usuarioDetalle.role_id) === 1 ? <ShieldCheck size={12}/> : <User size={12}/>}
                                     {Number(usuarioDetalle.role_id) === 1 ? 'Administrador' : 'Cliente'}
                                 </span>
@@ -506,15 +506,15 @@ const AdminTickets = () => {
 
                             <div className="space-y-4">
                                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-md transition-all">
-                                    <div className="p-3 bg-white rounded-xl text-atlas-500 shadow-sm"><Mail size={20} /></div>
+                                    <div className="p-3 bg-white rounded-xl text-tenri-500 shadow-sm"><Mail size={20} /></div>
                                     <div className="overflow-hidden"><p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Correo Electrónico</p><p className="text-sm font-bold text-gray-800 truncate" title={usuarioDetalle.email}>{usuarioDetalle.email}</p></div>
                                 </div>
                                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-md transition-all">
-                                    <div className="p-3 bg-white rounded-xl text-atlas-500 shadow-sm"><Building size={20} /></div>
+                                    <div className="p-3 bg-white rounded-xl text-tenri-500 shadow-sm"><Building size={20} /></div>
                                     <div><p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Razón Social</p><p className="text-sm font-bold text-gray-800">{usuarioDetalle.company_name || 'No registrada'}</p></div>
                                 </div>
                                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-md transition-all">
-                                    <div className="p-3 bg-white rounded-xl text-atlas-500 shadow-sm"><Calendar size={20} /></div>
+                                    <div className="p-3 bg-white rounded-xl text-tenri-500 shadow-sm"><Calendar size={20} /></div>
                                     <div><p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Fecha de Registro</p><p className="text-sm font-bold text-gray-800">{new Date(usuarioDetalle.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric'})}</p></div>
                                 </div>
                             </div>
@@ -523,7 +523,7 @@ const AdminTickets = () => {
                         <div className="p-6 border-t border-gray-100 bg-white">
                             <button
                                 onClick={irAPerfilCompleto}
-                                className="w-full py-4 bg-atlas-900 text-white rounded-2xl font-bold hover:bg-atlas-800 hover:-translate-y-1 transition-all shadow-[0_10px_20px_-10px_rgba(0,0,0,0.3)] text-sm flex justify-center items-center gap-2"
+                                className="w-full py-4 bg-tenri-900 text-white rounded-2xl font-bold hover:bg-tenri-800 hover:-translate-y-1 transition-all shadow-[0_10px_20px_-10px_rgba(0,0,0,0.3)] text-sm flex justify-center items-center gap-2"
                             >
                                 <User size={18} /> Ver Perfil Detallado
                             </button>

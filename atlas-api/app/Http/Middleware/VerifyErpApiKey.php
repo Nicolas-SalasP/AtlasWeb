@@ -15,7 +15,7 @@ class VerifyErpApiKey
     // die(json_encode(["recibido" => $apiKey, "esperado" => env('ERP_INTEGRATION_KEY')]));
 
     if ($apiKey !== env('ERP_INTEGRATION_KEY')) {
-        return response()->json(['error' => 'No autorizado por AtlasWeb'], 401);
+        return response()->json(['error' => 'No autorizado por Tenri Spa'], 401);
     }
     return $next($request);
 }

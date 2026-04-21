@@ -59,7 +59,7 @@ const OrderClaimModal = ({ isOpen, onClose, claimableEmails, onSuccess }) => {
                 <div className="p-8">
                     {step === 1 && (
                         <>
-                            <div className="flex justify-center mb-4 text-atlas-600">
+                            <div className="flex justify-center mb-4 text-tenri-600">
                                 <AlertCircle size={48} />
                             </div>
                             <h3 className="text-xl font-bold text-center mb-2">Órdenes Encontradas</h3>
@@ -81,7 +81,7 @@ const OrderClaimModal = ({ isOpen, onClose, claimableEmails, onSuccess }) => {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="Ingresa el correo completo..."
-                                            className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-atlas-500 outline-none"
+                                            className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-tenri-500 outline-none"
                                         />
                                     </div>
                                 </div>
@@ -89,7 +89,7 @@ const OrderClaimModal = ({ isOpen, onClose, claimableEmails, onSuccess }) => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-atlas-900 text-white py-2.5 rounded-xl font-bold hover:bg-atlas-800 transition flex justify-center items-center gap-2"
+                                    className="w-full bg-tenri-900 text-white py-2.5 rounded-xl font-bold hover:bg-tenri-800 transition flex justify-center items-center gap-2"
                                 >
                                     {loading ? <Loader2 className="animate-spin" size={20} /> : 'Enviar Código'}
                                 </button>
@@ -99,7 +99,7 @@ const OrderClaimModal = ({ isOpen, onClose, claimableEmails, onSuccess }) => {
 
                     {step === 2 && (
                         <>
-                            <div className="flex justify-center mb-4 text-atlas-600">
+                            <div className="flex justify-center mb-4 text-tenri-600">
                                 <Key size={48} />
                             </div>
                             <h3 className="text-xl font-bold text-center mb-2">Ingresa tu Código</h3>
@@ -117,14 +117,14 @@ const OrderClaimModal = ({ isOpen, onClose, claimableEmails, onSuccess }) => {
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
                                         placeholder="123456"
-                                        className="w-full text-center text-2xl tracking-widest py-3 border rounded-xl focus:ring-2 focus:ring-atlas-500 outline-none font-bold"
+                                        className="w-full text-center text-2xl tracking-widest py-3 border rounded-xl focus:ring-2 focus:ring-tenri-500 outline-none font-bold"
                                     />
                                 </div>
                                 {error && <p className="text-red-500 text-xs text-center">{error}</p>}
                                 <button
                                     type="submit"
                                     disabled={loading || otp.length !== 6}
-                                    className="w-full bg-atlas-900 text-white py-2.5 rounded-xl font-bold hover:bg-atlas-800 transition flex justify-center items-center gap-2 disabled:bg-gray-300"
+                                    className="w-full bg-tenri-900 text-white py-2.5 rounded-xl font-bold hover:bg-tenri-800 transition flex justify-center items-center gap-2 disabled:bg-gray-300"
                                 >
                                     {loading ? <Loader2 className="animate-spin" size={20} /> : 'Vincular Órdenes'}
                                 </button>

@@ -25,7 +25,7 @@ class ProcessBankTransfers extends Command
 
     public function handle()
     {
-        $this->info("Iniciando lectura de correos en pagos@atlasdigitaltech.cl...");
+        $this->info("Iniciando lectura de correos en pagos@tenri.cl...");
 
         try {
             $client = Client::account('default');
@@ -128,7 +128,7 @@ class ProcessBankTransfers extends Command
         }
 
         // --- EXTRACCIÓN DE LA GLOSA / MENSAJE ---
-        // Buscamos si el correo dice "Mensaje: pago orden 25" o "Asunto: pedido atlas"
+        // Buscamos si el correo dice "Mensaje: pago orden 25" o "Asunto: pedido Tenri"
         if (preg_match('/(?:Mensaje|Asunto|Comentario|Glosa)\s*:\s*([^\n\r]+)/i', $body, $matches)) {
             $data['glosa'] = trim($matches[1]);
         } else {

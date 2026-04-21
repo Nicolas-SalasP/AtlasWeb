@@ -106,7 +106,7 @@ const MisDirecciones = () => {
                 {!showForm && (
                     <button 
                         onClick={() => setShowForm(true)}
-                        className="flex items-center gap-2 bg-atlas-900 text-white px-4 py-2 rounded-xl hover:bg-atlas-800 transition-all shadow-md text-sm font-bold active:scale-95"
+                        className="flex items-center gap-2 bg-tenri-900 text-white px-4 py-2 rounded-xl hover:bg-tenri-800 transition-all shadow-md text-sm font-bold active:scale-95"
                     >
                         <Plus size={18} /> Nueva Dirección
                     </button>
@@ -116,7 +116,7 @@ const MisDirecciones = () => {
             {showForm && (
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 shadow-sm animate-in zoom-in-95 duration-300">
                     <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <MapPin size={18} className="text-atlas-600"/> Agregar Nueva Dirección
+                        <MapPin size={18} className="text-tenri-600"/> Agregar Nueva Dirección
                     </h3>
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         
@@ -125,7 +125,7 @@ const MisDirecciones = () => {
                             <input 
                                 type="text" 
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atlas-500 outline-none bg-white transition-all"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tenri-500 outline-none bg-white transition-all"
                                 value={formData.alias}
                                 onChange={e => setFormData({...formData, alias: e.target.value})}
                                 placeholder="Ej: Casa, Oficina Centro, Depto Playa..."
@@ -137,7 +137,7 @@ const MisDirecciones = () => {
                             <input 
                                 type="text" 
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atlas-500 outline-none bg-white transition-all"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tenri-500 outline-none bg-white transition-all"
                                 value={formData.address}
                                 onChange={e => setFormData({...formData, address: e.target.value})}
                                 placeholder="Ej: Av. Providencia"
@@ -149,7 +149,7 @@ const MisDirecciones = () => {
                             <input 
                                 type="text" 
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atlas-500 outline-none bg-white transition-all"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tenri-500 outline-none bg-white transition-all"
                                 value={formData.number}
                                 onChange={e => setFormData({...formData, number: e.target.value})}
                                 placeholder="Ej: 1234"
@@ -160,7 +160,7 @@ const MisDirecciones = () => {
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Depto / Oficina (Opcional)</label>
                             <input 
                                 type="text" 
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atlas-500 outline-none bg-white transition-all"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tenri-500 outline-none bg-white transition-all"
                                 value={formData.depto}
                                 onChange={e => setFormData({...formData, depto: e.target.value})}
                                 placeholder="Ej: 402-B"
@@ -172,7 +172,7 @@ const MisDirecciones = () => {
                             <div className="relative">
                                 <select 
                                     required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atlas-500 outline-none appearance-none bg-white cursor-pointer transition-all"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tenri-500 outline-none appearance-none bg-white cursor-pointer transition-all"
                                     value={formData.region}
                                     onChange={e => {
                                         setFormData({...formData, region: e.target.value, commune: ''});
@@ -192,7 +192,7 @@ const MisDirecciones = () => {
                             <div className="relative">
                                 <select 
                                     required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atlas-500 outline-none appearance-none bg-white cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tenri-500 outline-none appearance-none bg-white cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-all"
                                     value={formData.commune}
                                     onChange={e => setFormData({...formData, commune: e.target.value})}
                                     disabled={!formData.region}
@@ -219,7 +219,7 @@ const MisDirecciones = () => {
                             <button 
                                 type="submit" 
                                 disabled={submitting}
-                                className="px-6 py-2 bg-atlas-900 text-white rounded-lg hover:bg-atlas-800 text-sm font-bold shadow-md flex items-center gap-2"
+                                className="px-6 py-2 bg-tenri-900 text-white rounded-lg hover:bg-tenri-800 text-sm font-bold shadow-md flex items-center gap-2"
                             >
                                 {submitting ? <Loader2 size={16} className="animate-spin"/> : 'Guardar Dirección'}
                             </button>
@@ -243,19 +243,19 @@ const MisDirecciones = () => {
                             key={addr.id} 
                             className={`p-5 rounded-xl border transition-all relative group ${
                                 addr.is_default 
-                                ? 'bg-white border-atlas-600 shadow-md ring-1 ring-atlas-600' 
-                                : 'bg-white border-gray-200 hover:border-atlas-300 hover:shadow-md'
+                                ? 'bg-white border-tenri-600 shadow-md ring-1 ring-tenri-600' 
+                                : 'bg-white border-gray-200 hover:border-tenri-300 hover:shadow-md'
                             }`}
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className={`p-2.5 rounded-lg ${addr.is_default ? 'bg-atlas-100 text-atlas-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    <div className={`p-2.5 rounded-lg ${addr.is_default ? 'bg-tenri-100 text-tenri-700' : 'bg-gray-100 text-gray-500'}`}>
                                         {getIcon(addr.alias)}
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-gray-900 text-lg">{addr.alias}</h4>
                                         {addr.is_default && (
-                                            <span className="inline-flex items-center gap-1 text-[10px] uppercase font-black text-atlas-700 bg-atlas-50 px-2 py-0.5 rounded-full border border-atlas-100">
+                                            <span className="inline-flex items-center gap-1 text-[10px] uppercase font-black text-tenri-700 bg-tenri-50 px-2 py-0.5 rounded-full border border-tenri-100">
                                                 <Star size={10} fill="currentColor" /> Principal
                                             </span>
                                         )}

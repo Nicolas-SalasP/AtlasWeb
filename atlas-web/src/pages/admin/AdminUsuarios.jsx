@@ -148,7 +148,7 @@ const AdminUsuarios = () => {
     // Fix: Asegurar de convertir a número para el conteo de total de admins
     const totalAdmins = usuarios.filter(u => Number(u.role_id) === 1).length;
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Directorio...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Directorio...</div>;
 
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
@@ -179,14 +179,14 @@ const AdminUsuarios = () => {
                             <input 
                                 type="text" 
                                 placeholder="Buscar por nombre, correo o empresa..." 
-                                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-atlas-300 outline-none text-sm md:text-base transition-all" 
+                                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none text-sm md:text-base transition-all" 
                                 value={busqueda} 
                                 onChange={(e) => setBusqueda(e.target.value)} 
                             />
                         </div>
                         <button 
                             onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                            className={`md:hidden p-3 rounded-xl border transition-colors ${mostrarFiltros ? 'bg-atlas-900 text-white border-atlas-900' : 'bg-white text-gray-600 border-gray-200'}`}
+                            className={`md:hidden p-3 rounded-xl border transition-colors ${mostrarFiltros ? 'bg-tenri-900 text-white border-tenri-900' : 'bg-white text-gray-600 border-gray-200'}`}
                         >
                             <Filter size={20} />
                         </button>
@@ -196,7 +196,7 @@ const AdminUsuarios = () => {
                         <select 
                             value={filtroRol} 
                             onChange={e => setFiltroRol(e.target.value)}
-                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer"
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer"
                         >
                             <option value="all">Todos los Roles</option>
                             <option value="1">Solo Administradores</option>
@@ -206,7 +206,7 @@ const AdminUsuarios = () => {
                         <select 
                             value={filtroTipo} 
                             onChange={e => setFiltroTipo(e.target.value)}
-                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer"
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer"
                         >
                             <option value="all">Todas las Entidades</option>
                             <option value="empresa">Empresas</option>
@@ -216,7 +216,7 @@ const AdminUsuarios = () => {
                         <select 
                             value={filtroEstado} 
                             onChange={e => setFiltroEstado(e.target.value)}
-                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer"
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer"
                         >
                             <option value="all">Cualquier Estado</option>
                             <option value="active">Cuentas Activas</option>
@@ -226,7 +226,7 @@ const AdminUsuarios = () => {
                         <select 
                             value={ordenTickets} 
                             onChange={e => setOrdenTickets(e.target.value)}
-                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-atlas-300 cursor-pointer flex items-center"
+                            className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer flex items-center"
                         >
                             <option value="default">Tickets: Por Defecto</option>
                             <option value="desc">Mayor cant. Tickets</option>
@@ -276,7 +276,7 @@ const AdminUsuarios = () => {
                                     <td className="px-6 py-4">
                                         {/* FIX: Parsear a Number para evitar bug de string vs int */}
                                         {Number(u.role_id) === 1 ?
-                                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-atlas-900 text-white"><Shield size={10} /> ADMIN</span> :
+                                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-tenri-900 text-white"><Shield size={10} /> ADMIN</span> :
                                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100"><User size={10} /> CLIENTE</span>
                                         }
                                     </td>
@@ -308,10 +308,10 @@ const AdminUsuarios = () => {
             <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setDrawerOpen(false)} />
             <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] lg:w-[700px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 {loadingDetalle || !usuarioDetalle ? (
-                    <div className="h-full flex items-center justify-center text-atlas-900 gap-2"><Loader2 className="animate-spin" /> Cargando...</div>
+                    <div className="h-full flex items-center justify-center text-tenri-900 gap-2"><Loader2 className="animate-spin" /> Cargando...</div>
                 ) : (
                     <>
-                        <div className="h-40 md:h-48 bg-atlas-900 relative flex-shrink-0">
+                        <div className="h-40 md:h-48 bg-tenri-900 relative flex-shrink-0">
                             <button onClick={() => setDrawerOpen(false)} className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 p-2 rounded-full backdrop-blur-md transition-colors"><X size={20} /></button>
                             <div className="absolute -bottom-10 left-6 md:left-8 flex items-end gap-4">
                                 <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-2xl p-1.5 shadow-lg">
@@ -319,14 +319,14 @@ const AdminUsuarios = () => {
                                 </div>
                                 <div className="mb-3">
                                     <h2 className="text-xl md:text-2xl font-bold text-white leading-none">{usuarioDetalle.name}</h2>
-                                    <p className="text-atlas-300 text-xs md:text-sm mt-1">{usuarioDetalle.email}</p>
+                                    <p className="text-tenri-300 text-xs md:text-sm mt-1">{usuarioDetalle.email}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div className="mt-14 px-6 md:px-8 border-b border-gray-100 flex gap-6 flex-shrink-0 overflow-x-auto custom-scrollbar">
                             {['perfil', 'tickets', 'compras'].map(tab => (
-                                <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-4 text-sm font-bold capitalize transition-colors border-b-2 whitespace-nowrap ${activeTab === tab ? 'border-atlas-900 text-atlas-900' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>{tab}</button>
+                                <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-4 text-sm font-bold capitalize transition-colors border-b-2 whitespace-nowrap ${activeTab === tab ? 'border-tenri-900 text-tenri-900' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>{tab}</button>
                             ))}
                         </div>
 
@@ -405,11 +405,11 @@ const AdminUsuarios = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
-                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none" value={usuarioEditar.name} onChange={e => setUsuarioEditar({ ...usuarioEditar, name: e.target.value })} required />
+                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-900 outline-none" value={usuarioEditar.name} onChange={e => setUsuarioEditar({ ...usuarioEditar, name: e.target.value })} required />
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Empresa</label>
-                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-atlas-900 outline-none" value={usuarioEditar.company_name} onChange={e => setUsuarioEditar({ ...usuarioEditar, company_name: e.target.value })} />
+                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-900 outline-none" value={usuarioEditar.company_name} onChange={e => setUsuarioEditar({ ...usuarioEditar, company_name: e.target.value })} />
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Rol</label>
@@ -438,7 +438,7 @@ const AdminUsuarios = () => {
                                                 <div className="relative flex items-center shrink-0">
                                                     <input 
                                                         type="checkbox" 
-                                                        className="peer w-5 h-5 cursor-pointer appearance-none rounded-md border border-gray-300 checked:bg-atlas-900 checked:border-atlas-900 transition-all"
+                                                        className="peer w-5 h-5 cursor-pointer appearance-none rounded-md border border-gray-300 checked:bg-tenri-900 checked:border-tenri-900 transition-all"
                                                         checked={permisosEdit[permiso.id] || false}
                                                         onChange={() => handleTogglePermiso(permiso.id)}
                                                     />
@@ -446,7 +446,7 @@ const AdminUsuarios = () => {
                                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                     </svg>
                                                 </div>
-                                                <span className={`text-sm leading-tight font-medium transition-colors ${permisosEdit[permiso.id] ? 'text-atlas-900 font-bold' : 'text-gray-600 group-hover:text-atlas-900'}`}>
+                                                <span className={`text-sm leading-tight font-medium transition-colors ${permisosEdit[permiso.id] ? 'text-tenri-900 font-bold' : 'text-gray-600 group-hover:text-tenri-900'}`}>
                                                     {permiso.label}
                                                 </span>
                                             </label>
@@ -460,7 +460,7 @@ const AdminUsuarios = () => {
 
                             <div className="flex gap-3 pt-4 border-t border-gray-100">
                                 <button type="button" onClick={() => setModalEditarOpen(false)} className="flex-1 py-3.5 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
-                                <button type="submit" className="flex-1 py-3.5 bg-atlas-900 text-white font-bold rounded-xl hover:bg-atlas-800 shadow-lg transition-all">Guardar Cambios</button>
+                                <button type="submit" className="flex-1 py-3.5 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg transition-all">Guardar Cambios</button>
                             </div>
                         </form>
                     </div>

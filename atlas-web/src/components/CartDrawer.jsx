@@ -58,7 +58,7 @@ const CartDrawer = () => {
                         <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center">
                             <ShoppingCart size={48} className="mb-4 opacity-20" />
                             <p>Tu carrito está vacío.</p>
-                            <button onClick={() => setIsCartOpen(false)} className="mt-4 text-atlas-900 font-bold text-sm underline">
+                            <button onClick={() => setIsCartOpen(false)} className="mt-4 text-tenri-900 font-bold text-sm underline">
                                 Ver Catálogo
                             </button>
                         </div>
@@ -81,7 +81,7 @@ const CartDrawer = () => {
                                         <p className="text-xs text-gray-500 mt-1">{item.category?.name || 'Producto'}</p>
                                     </div>
                                     <div className="flex justify-between items-end">
-                                        <span className="text-sm font-bold text-atlas-900">
+                                        <span className="text-sm font-bold text-tenri-900">
                                             ${parseInt(item.price).toLocaleString('es-CL')} 
                                             <span className="text-xs font-normal text-gray-400 ml-1">x{item.quantity}</span>
                                         </span>
@@ -105,13 +105,13 @@ const CartDrawer = () => {
                     <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-gray-500 font-medium">Total Estimado</span>
-                            <span className="text-2xl font-black text-atlas-900">
+                            <span className="text-2xl font-black text-tenri-900">
                                 ${getCartTotal().toLocaleString('es-CL')}
                             </span>
                         </div>
                         <button 
                             onClick={handleCheckout}
-                            className="w-full bg-atlas-900 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-atlas-800 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            className="w-full bg-tenri-900 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-tenri-800 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
                             Finalizar Compra <ArrowRight size={18} />
                         </button>

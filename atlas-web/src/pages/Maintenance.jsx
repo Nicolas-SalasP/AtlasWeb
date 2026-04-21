@@ -33,21 +33,21 @@ const Maintenance = () => {
         <div className="min-h-screen bg-gray-900 flex items-center justify-center p-6 relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-blue-600/30 to-purple-600/30 blur-[120px] animate-pulse-slow"></div>
-                <div className="absolute -bottom-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-atlas-900/30 to-blue-800/30 blur-[120px] animate-pulse-slow delay-700"></div>
+                <div className="absolute -bottom-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-tenri-900/30 to-blue-800/30 blur-[120px] animate-pulse-slow delay-700"></div>
             </div>
 
             <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-[1px]"></div>
             <div className="relative z-10 bg-white/90 backdrop-blur-xl p-10 md:p-14 rounded-[3rem] shadow-2xl shadow-blue-900/20 max-w-xl w-full text-center border border-white/50 animate-in zoom-in-95 duration-700">
                 <div className="relative mx-auto w-32 h-32 mb-8">
                     <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-20"></div>
-                    <div className="relative w-full h-full bg-gradient-to-tr from-atlas-900 to-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <div className="relative w-full h-full bg-gradient-to-tr from-tenri-900 to-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
                         <HardHat size={48} className="text-white relative z-10" />
                         <Cpu size={24} className="absolute top-4 left-4 text-blue-200 animate-bounce-slow" />
                         <Sparkles size={24} className="absolute bottom-4 right-4 text-yellow-300 animate-pulse" />
                     </div>
                 </div>
 
-                <h2 className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-2">Atlas Digital Tech</h2>
+                <h2 className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-2">Tenri</h2>
                 <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight leading-tight">
                     Estamos Actualizando <br /> la Plataforma
                 </h1>
@@ -66,7 +66,7 @@ const Maintenance = () => {
 
                     <Link
                         to="/login"
-                        className="group flex items-center gap-2 px-5 py-2 text-sm font-bold text-gray-500 hover:text-atlas-900 transition-colors rounded-full hover:bg-gray-100"
+                        className="group flex items-center gap-2 px-5 py-2 text-sm font-bold text-gray-500 hover:text-tenri-900 transition-colors rounded-full hover:bg-gray-100"
                     >
                         <Lock size={16} /> Acceso Admin <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </Link>
@@ -78,7 +78,7 @@ const Maintenance = () => {
             </div>
 
             <div className="absolute bottom-6 text-center text-white/40 text-sm">
-                © {new Date().getFullYear()} Atlas Digital Tech. Todos los derechos reservados.
+                © {new Date().getFullYear()} Tenri Spa. Todos los derechos reservados.
             </div>
 
             <style>{`

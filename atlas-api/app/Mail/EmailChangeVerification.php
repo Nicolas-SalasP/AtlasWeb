@@ -23,7 +23,7 @@ class EmailChangeVerification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Código de Verificación - Atlas Digital Tech',
+            subject: 'Código de Verificación - Tenri Spa',
         );
     }
 

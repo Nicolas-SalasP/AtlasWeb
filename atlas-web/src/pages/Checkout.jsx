@@ -244,7 +244,7 @@ const Checkout = () => {
                         <p className="text-gray-500">Orden #{orderId} generada.</p>
                     </div>
                     <PaymentSelector orderId={orderId} />
-                    <button onClick={() => window.location.href = '/catalogo'} className="mt-8 text-gray-400 hover:text-atlas-900 text-sm font-medium underline">
+                    <button onClick={() => window.location.href = '/catalogo'} className="mt-8 text-gray-400 hover:text-tenri-900 text-sm font-medium underline">
                         Cancelar y volver al catálogo
                     </button>
                 </div>
@@ -252,7 +252,7 @@ const Checkout = () => {
         );
     }
 
-    if (cart.length === 0) return <div className="min-h-screen pt-24 text-center flex flex-col items-center justify-center"><h2 className="text-2xl font-bold mb-4">Carrito Vacío</h2><button onClick={() => navigate('/catalogo')} className="text-atlas-900 underline">Ir al catálogo</button></div>;
+    if (cart.length === 0) return <div className="min-h-screen pt-24 text-center flex flex-col items-center justify-center"><h2 className="text-2xl font-bold mb-4">Carrito Vacío</h2><button onClick={() => navigate('/catalogo')} className="text-tenri-900 underline">Ir al catálogo</button></div>;
 
     return (
         <div className="bg-gray-50 min-h-screen pt-28 pb-20 relative">
@@ -284,7 +284,7 @@ const Checkout = () => {
                         <div className="p-4 sm:px-6 border-t border-gray-200 bg-white flex justify-end">
                             <button 
                                 onClick={() => setLegalModal({ open: false, type: '' })} 
-                                className="bg-atlas-900 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-atlas-800 transition-colors shadow-md"
+                                className="bg-tenri-900 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-tenri-800 transition-colors shadow-md"
                             >
                                 Entendido, cerrar
                             </button>
@@ -295,22 +295,22 @@ const Checkout = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 flex items-center gap-2">
-                    <Link to="/catalogo" className="text-gray-500 flex items-center gap-1 text-sm font-medium hover:text-atlas-900 transition-colors"><ArrowLeft size={16} /> Volver</Link>
+                    <Link to="/catalogo" className="text-gray-500 flex items-center gap-1 text-sm font-medium hover:text-tenri-900 transition-colors"><ArrowLeft size={16} /> Volver</Link>
                     <span className="text-gray-300">|</span>
-                    <h1 className="text-2xl font-bold text-atlas-900">Finalizar Compra</h1>
+                    <h1 className="text-2xl font-bold text-tenri-900">Finalizar Compra</h1>
                 </div>
 
                 <div className="grid lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-7 space-y-6">
                         <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-atlas-900 text-white flex items-center justify-center text-xs">1</span> Datos Personales</h2>
+                            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-tenri-900 text-white flex items-center justify-center text-xs">1</span> Datos Personales</h2>
                             <div className="grid md:grid-cols-2 gap-4">
                                 <Input label="Nombre" name="nombre" value={datos.nombre} onChange={handleChange} icon={<User size={14} />} />
                                 <Input label="Apellido" name="apellido" value={datos.apellido} onChange={handleChange} />
                                 <Input label="Email" name="email" type="email" value={datos.email} onChange={handleChange} icon={<Mail size={14} />} />
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono <span className="text-red-500">*</span></label>
-                                    <div className="relative flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-atlas-300">
+                                    <div className="relative flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-tenri-300">
                                         <div className="bg-gray-100 px-3 py-2 text-gray-500 font-bold select-none border-r border-gray-300 flex items-center">+56</div>
                                         <input type="text" name="telefono" value={datos.telefono} onChange={handleChange} placeholder="912345678" className="w-full px-4 py-2 outline-none" />
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Phone size={14} /></div>
@@ -318,27 +318,27 @@ const Checkout = () => {
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">RUT Personal <span className="text-red-500">*</span></label>
-                                    <input type="text" value={datos.rutPersonal} onChange={(e) => handleRutChange(e, 'rutPersonal')} placeholder="12.345.678-9" className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 outline-none" />
+                                    <input type="text" value={datos.rutPersonal} onChange={(e) => handleRutChange(e, 'rutPersonal')} placeholder="12.345.678-9" className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-tenri-300 outline-none" />
                                 </div>
                             </div>
                         </section>
 
                         <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-atlas-900 text-white flex items-center justify-center text-xs">2</span> Envío</h2>
+                            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-tenri-900 text-white flex items-center justify-center text-xs">2</span> Envío</h2>
 
                             {isAuthenticated && misDirecciones.length > 0 && (
                                 <div className="mb-6">
-                                    <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><MapPin size={16} className="text-atlas-500" /> Usar una dirección guardada:</h3>
+                                    <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><MapPin size={16} className="text-tenri-500" /> Usar una dirección guardada:</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {misDirecciones.map(addr => (
-                                            <button key={addr.id} type="button" onClick={() => seleccionarDireccion(addr)} className={`text-left p-3 rounded-xl border transition-all flex items-start gap-3 relative ${direccionSeleccionadaId === addr.id ? 'bg-atlas-50 border-atlas-500 ring-1 ring-atlas-500 shadow-sm' : 'bg-white border-gray-200 hover:border-atlas-300 hover:shadow-sm'}`}>
-                                                <div className={`p-2 rounded-full ${direccionSeleccionadaId === addr.id ? 'bg-atlas-200 text-atlas-800' : 'bg-gray-100 text-gray-500'}`}><MapPin size={16} /></div>
+                                            <button key={addr.id} type="button" onClick={() => seleccionarDireccion(addr)} className={`text-left p-3 rounded-xl border transition-all flex items-start gap-3 relative ${direccionSeleccionadaId === addr.id ? 'bg-tenri-50 border-tenri-500 ring-1 ring-tenri-500 shadow-sm' : 'bg-white border-gray-200 hover:border-tenri-300 hover:shadow-sm'}`}>
+                                                <div className={`p-2 rounded-full ${direccionSeleccionadaId === addr.id ? 'bg-tenri-200 text-tenri-800' : 'bg-gray-100 text-gray-500'}`}><MapPin size={16} /></div>
                                                 <div className="flex-1">
                                                     <div className="flex justify-between"><span className="font-bold text-gray-900 text-sm">{addr.alias}</span>{addr.is_default && <Star size={12} className="text-yellow-500 fill-yellow-500" />}</div>
                                                     <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{addr.address} #{addr.number}</p>
                                                     <p className="text-xs text-gray-400 mt-1">{addr.commune}, {addr.region}</p>
                                                 </div>
-                                                {direccionSeleccionadaId === addr.id && <div className="absolute top-2 right-2 text-atlas-600"><CheckCircle size={14} /></div>}
+                                                {direccionSeleccionadaId === addr.id && <div className="absolute top-2 right-2 text-tenri-600"><CheckCircle size={14} /></div>}
                                             </button>
                                         ))}
                                     </div>
@@ -352,13 +352,13 @@ const Checkout = () => {
                                 <Input label="Depto" name="depto" value={datos.depto} onChange={handleChange} required={false} />
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Región</label>
-                                    <select name="region" value={datos.region} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-atlas-300 outline-none">
+                                    <select name="region" value={datos.region} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-tenri-300 outline-none">
                                         {Object.keys(REGIONES_CHILE).map(r => <option key={r} value={r}>{r}</option>)}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Comuna</label>
-                                    <select name="comuna" value={datos.comuna} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-atlas-300 outline-none">
+                                    <select name="comuna" value={datos.comuna} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-tenri-300 outline-none">
                                         {comunasDisponibles.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </div>
@@ -370,7 +370,7 @@ const Checkout = () => {
                                         value={datos.notas} 
                                         onChange={handleChange} 
                                         placeholder="Ej: Dejar en portería, el timbre no funciona, llamar al llegar..."
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 outline-none transition-all resize-none h-24"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-tenri-300 outline-none transition-all resize-none h-24"
                                     ></textarea>
                                 </div>
 
@@ -390,16 +390,16 @@ const Checkout = () => {
                         </section>
 
                         <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-atlas-900 text-white flex items-center justify-center text-xs">3</span> Facturación</h2>
+                            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-tenri-900 text-white flex items-center justify-center text-xs">3</span> Facturación</h2>
                             <div className="flex gap-4 mb-6">
                                 {['boleta', 'factura'].map(tipo => (
-                                    <label key={tipo} className={`flex-1 border rounded-lg p-4 cursor-pointer transition-all ${datos.tipoDocumento === tipo ? 'border-atlas-500 bg-blue-50 ring-1 ring-atlas-500' : 'border-gray-200 hover:border-gray-300'}`}>
-                                        <div className="flex items-center gap-3"><input type="radio" name="tipoDocumento" value={tipo} checked={datos.tipoDocumento === tipo} onChange={handleChange} className="accent-atlas-900 w-4 h-4" /><span className="font-bold text-gray-700 capitalize">{tipo}</span></div>
+                                    <label key={tipo} className={`flex-1 border rounded-lg p-4 cursor-pointer transition-all ${datos.tipoDocumento === tipo ? 'border-tenri-500 bg-blue-50 ring-1 ring-tenri-500' : 'border-gray-200 hover:border-gray-300'}`}>
+                                        <div className="flex items-center gap-3"><input type="radio" name="tipoDocumento" value={tipo} checked={datos.tipoDocumento === tipo} onChange={handleChange} className="accent-tenri-900 w-4 h-4" /><span className="font-bold text-gray-700 capitalize">{tipo}</span></div>
                                     </label>
                                 ))}
                             </div>
                             {datos.tipoDocumento === 'factura' && (
-                                <div className="space-y-4 bg-gray-50 p-4 rounded-lg border-l-4 border-atlas-300 animate-in fade-in">
+                                <div className="space-y-4 bg-gray-50 p-4 rounded-lg border-l-4 border-tenri-300 animate-in fade-in">
                                     <div><label className="block text-sm font-medium text-gray-700 mb-1">RUT Empresa <span className="text-red-500">*</span></label><input type="text" value={datos.rutEmpresa} onChange={(e) => handleRutChange(e, 'rutEmpresa')} className="w-full px-4 py-2 rounded-lg border border-gray-300 outline-none" placeholder="76.xxx.xxx-x" /></div>
                                     <div className="grid md:grid-cols-2 gap-4"><Input label="Razón Social" name="razonSocial" value={datos.razonSocial} onChange={handleChange} /><Input label="Giro" name="giro" value={datos.giro} onChange={handleChange} /></div>
                                 </div>
@@ -420,14 +420,14 @@ const Checkout = () => {
                                 ))}
                             </div>
                             <div className="space-y-3 border-t border-gray-100 pt-4 text-sm text-gray-600">
-                                <div className="flex justify-between items-center"><span className="flex items-center gap-2"><Truck size={14} /> Envío ({datos.region})</span><span className="font-medium text-atlas-900">${costoEnvio.toLocaleString('es-CL')}</span></div>
+                                <div className="flex justify-between items-center"><span className="flex items-center gap-2"><Truck size={14} /> Envío ({datos.region})</span><span className="font-medium text-tenri-900">${costoEnvio.toLocaleString('es-CL')}</span></div>
                                 <div className="flex justify-between"><span>Neto</span><span>${neto.toLocaleString('es-CL')}</span></div>
                                 <div className="flex justify-between"><span>IVA (19%)</span><span>${iva.toLocaleString('es-CL')}</span></div>
                             </div>
                             
                             <div className="flex justify-between items-center border-t border-gray-200 mt-4 pt-4 mb-4">
                                 <span className="text-lg font-bold text-gray-900">Total</span>
-                                <span className="text-2xl font-bold text-atlas-900">${totalConEnvio.toLocaleString('es-CL')}</span>
+                                <span className="text-2xl font-bold text-tenri-900">${totalConEnvio.toLocaleString('es-CL')}</span>
                             </div>
 
                             {/* CHECKBOX DE TÉRMINOS Y CONDICIONES (COMPLIANCE B2B) */}
@@ -438,22 +438,22 @@ const Checkout = () => {
                                     name="accept_terms"
                                     checked={datos.accept_terms}
                                     onChange={handleChange}
-                                    className="mt-1 w-5 h-5 text-atlas-600 border-gray-300 rounded focus:ring-atlas-500 cursor-pointer"
+                                    className="mt-1 w-5 h-5 text-tenri-600 border-gray-300 rounded focus:ring-tenri-500 cursor-pointer"
                                 />
                                 <label htmlFor="accept_terms" className="text-xs text-gray-600 leading-relaxed">
                                     Al confirmar esta compra, declaro que he leído y acepto expresamente los{' '}
-                                    <button type="button" onClick={() => setLegalModal({ open: true, type: 'terminos' })} className="font-bold text-atlas-600 hover:text-atlas-900 underline">
+                                    <button type="button" onClick={() => setLegalModal({ open: true, type: 'terminos' })} className="font-bold text-tenri-600 hover:text-tenri-900 underline">
                                         Términos y Condiciones
                                     </button>
                                     , la{' '}
-                                    <button type="button" onClick={() => setLegalModal({ open: true, type: 'privacidad' })} className="font-bold text-atlas-600 hover:text-atlas-900 underline">
+                                    <button type="button" onClick={() => setLegalModal({ open: true, type: 'privacidad' })} className="font-bold text-tenri-600 hover:text-tenri-900 underline">
                                         Política de Privacidad
                                     </button>
                                     {' '}y el{' '}
-                                    <button type="button" onClick={() => setLegalModal({ open: true, type: 'sla' })} className="font-bold text-atlas-600 hover:text-atlas-900 underline">
+                                    <button type="button" onClick={() => setLegalModal({ open: true, type: 'sla' })} className="font-bold text-tenri-600 hover:text-tenri-900 underline">
                                         Acuerdo de Nivel de Servicio (SLA)
                                     </button>
-                                    {' '}de Atlas Digital Tech.
+                                    {' '}de Tenri Spa.
                                 </label>
                             </div>
 
@@ -463,7 +463,7 @@ const Checkout = () => {
                                 className={`w-full font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg
                                     ${procesando || !datos.accept_terms 
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                                        : 'bg-atlas-900 text-white hover:bg-atlas-800'
+                                        : 'bg-tenri-900 text-white hover:bg-tenri-800'
                                     }`}
                             >
                                 {procesando ? <Loader2 className="animate-spin" /> : 'Confirmar Datos y Pagar'}
@@ -488,7 +488,7 @@ const Checkout = () => {
                         <div className="p-6 text-center">
                             <h3 className="text-xl font-bold text-gray-900 mb-2">{notification.title}</h3>
                             <p className="text-gray-500 mb-6 text-sm">{notification.message}</p>
-                            <button onClick={() => setNotification({ ...notification, show: false })} className="w-full bg-atlas-900 text-white font-bold py-3 rounded-xl hover:bg-atlas-800 transition-colors">Entendido</button>
+                            <button onClick={() => setNotification({ ...notification, show: false })} className="w-full bg-tenri-900 text-white font-bold py-3 rounded-xl hover:bg-tenri-800 transition-colors">Entendido</button>
                         </div>
                     </div>
                 </div>
@@ -501,7 +501,7 @@ const Input = ({ label, name, type = "text", placeholder, value, onChange, requi
     <div className="w-full">
         <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
         <div className="relative">
-            <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className={`w-full ${icon ? 'pl-9' : 'px-4'} py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-atlas-300 outline-none transition-all`} />
+            <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className={`w-full ${icon ? 'pl-9' : 'px-4'} py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-tenri-300 outline-none transition-all`} />
             {icon && <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>}
         </div>
     </div>

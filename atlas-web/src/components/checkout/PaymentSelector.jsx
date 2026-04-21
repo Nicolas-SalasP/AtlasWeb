@@ -66,7 +66,7 @@ const PaymentSelector = ({ orderId }) => {
                 </p>
                 
                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-left space-y-3 text-sm text-gray-700 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-atlas-900"></div>
+                    <div className="absolute top-0 left-0 w-1 h-full bg-tenri-900"></div>
                     <div className="grid grid-cols-3 gap-y-2">
                         <span className="text-gray-400 font-medium">Banco:</span>
                         <span className="col-span-2 font-bold text-gray-900">{transferData.bank_name}</span>
@@ -75,7 +75,7 @@ const PaymentSelector = ({ orderId }) => {
                         <span className="col-span-2 font-bold text-gray-900">{transferData.bank_account_type}</span>
                         
                         <span className="text-gray-400 font-medium">Número:</span>
-                        <span className="col-span-2 font-mono text-lg font-bold text-atlas-900 tracking-wider">{transferData.bank_account_number}</span>
+                        <span className="col-span-2 font-mono text-lg font-bold text-tenri-900 tracking-wider">{transferData.bank_account_number}</span>
                         
                         <span className="text-gray-400 font-medium">RUT:</span>
                         <span className="col-span-2 font-bold text-gray-900">{transferData.bank_rut}</span>
@@ -114,7 +114,7 @@ const PaymentSelector = ({ orderId }) => {
                     onClick={() => !loading && setMethod('webpay')}
                     className={`relative cursor-pointer p-5 rounded-2xl border-2 transition-all flex items-center gap-4 group ${
                         method === 'webpay' 
-                        ? 'border-atlas-900 bg-gray-50 shadow-md' 
+                        ? 'border-tenri-900 bg-gray-50 shadow-md' 
                         : 'border-gray-100 hover:border-gray-200 hover:bg-white'
                     } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
@@ -125,8 +125,8 @@ const PaymentSelector = ({ orderId }) => {
                         <p className={`font-bold transition-colors ${method === 'webpay' ? 'text-gray-900' : 'text-gray-600'}`}>Webpay Plus</p>
                         <p className="text-xs text-gray-400">Tarjetas de Crédito, Débito y Prepago</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${method === 'webpay' ? 'border-atlas-900' : 'border-gray-300'}`}>
-                        {method === 'webpay' && <div className="w-2.5 h-2.5 rounded-full bg-atlas-900"/>}
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${method === 'webpay' ? 'border-tenri-900' : 'border-gray-300'}`}>
+                        {method === 'webpay' && <div className="w-2.5 h-2.5 rounded-full bg-tenri-900"/>}
                     </div>
                 </div>
 
@@ -135,7 +135,7 @@ const PaymentSelector = ({ orderId }) => {
                     onClick={() => !loading && setMethod('transfer')}
                     className={`relative cursor-pointer p-5 rounded-2xl border-2 transition-all flex items-center gap-4 group ${
                         method === 'transfer' 
-                        ? 'border-atlas-900 bg-gray-50 shadow-md' 
+                        ? 'border-tenri-900 bg-gray-50 shadow-md' 
                         : 'border-gray-100 hover:border-gray-200 hover:bg-white'
                     } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
@@ -146,8 +146,8 @@ const PaymentSelector = ({ orderId }) => {
                         <p className={`font-bold transition-colors ${method === 'transfer' ? 'text-gray-900' : 'text-gray-600'}`}>Transferencia Bancaria</p>
                         <p className="text-xs text-gray-400">Transferencia directa a cuenta empresa</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${method === 'transfer' ? 'border-atlas-900' : 'border-gray-300'}`}>
-                        {method === 'transfer' && <div className="w-2.5 h-2.5 rounded-full bg-atlas-900"/>}
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${method === 'transfer' ? 'border-tenri-900' : 'border-gray-300'}`}>
+                        {method === 'transfer' && <div className="w-2.5 h-2.5 rounded-full bg-tenri-900"/>}
                     </div>
                 </div>
             </div>
@@ -155,7 +155,7 @@ const PaymentSelector = ({ orderId }) => {
             <button
                 onClick={method === 'webpay' ? handleWebpay : handleTransfer}
                 disabled={loading}
-                className="w-full bg-atlas-900 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-atlas-800 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-tenri-900 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-tenri-800 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {loading ? (
                     <>

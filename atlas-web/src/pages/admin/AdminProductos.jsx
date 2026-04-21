@@ -210,7 +210,7 @@ const AdminProductos = () => {
         p.sku.toLowerCase().includes(busqueda.toLowerCase())
     );
 
-    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-atlas-900"><Loader2 className="animate-spin" /> Cargando Inventario...</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Inventario...</div>;
 
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
@@ -229,7 +229,7 @@ const AdminProductos = () => {
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Productos</h1>
                     <p className="text-gray-500 mt-1 text-sm md:text-base">Gestión de inventario y precios</p>
                 </div>
-                <button onClick={() => abrirDrawer()} className="bg-atlas-900 text-white px-5 py-3 rounded-xl font-bold shadow-lg hover:bg-atlas-800 transition-all flex items-center gap-2 text-sm md:text-base w-full md:w-auto justify-center">
+                <button onClick={() => abrirDrawer()} className="bg-tenri-900 text-white px-5 py-3 rounded-xl font-bold shadow-lg hover:bg-tenri-800 transition-all flex items-center gap-2 text-sm md:text-base w-full md:w-auto justify-center">
                     <Plus size={20} /> Nuevo Producto
                 </button>
             </div>
@@ -239,7 +239,7 @@ const AdminProductos = () => {
                 <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
                     <div className="relative w-full md:max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input type="text" placeholder="Buscar por nombre o SKU..." className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-atlas-200 outline-none text-sm" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+                        <input type="text" placeholder="Buscar por nombre o SKU..." className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-tenri-200 outline-none text-sm" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                     </div>
                 </div>
 
@@ -336,13 +336,13 @@ const AdminProductos = () => {
                                 <p className="text-xs text-gray-400 mb-2 font-bold uppercase">Guardadas</p>
                                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                                     {imagenesExistentes.map((img) => (
-                                        <div key={img.id} className={`group relative aspect-square rounded-xl overflow-hidden border-2 ${img.is_cover ? 'border-atlas-900' : 'border-gray-100'}`}>
+                                        <div key={img.id} className={`group relative aspect-square rounded-xl overflow-hidden border-2 ${img.is_cover ? 'border-tenri-900' : 'border-gray-100'}`}>
                                             <img src={`${BASE_URL}${img.url}`} className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                                 <button type="button" onClick={() => marcarPortada(img.id)} className={`p-1.5 rounded-full ${img.is_cover ? 'bg-yellow-400 text-white' : 'bg-white text-gray-500 hover:text-yellow-500'}`} title="Portada"><Star size={14} fill={img.is_cover ? "currentColor" : "none"} /></button>
                                                 <button type="button" onClick={() => eliminarImagenExistente(img.id)} className="p-1.5 bg-white text-red-500 rounded-full hover:bg-red-50" title="Eliminar"><Trash2 size={14} /></button>
                                             </div>
-                                            {img.is_cover == 1 && <div className="absolute top-1 left-1 bg-atlas-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">PORTADA</div>}
+                                            {img.is_cover == 1 && <div className="absolute top-1 left-1 bg-tenri-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">PORTADA</div>}
                                         </div>
                                     ))}
                                 </div>
@@ -353,7 +353,7 @@ const AdminProductos = () => {
                         <div>
                             <p className="text-xs text-gray-400 mb-2 font-bold uppercase">Subir Nuevas</p>
                             <div className="flex gap-3 overflow-x-auto pb-2">
-                                <div onClick={() => fileInputRef.current.click()} className="w-20 h-20 md:w-24 md:h-24 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:border-atlas-900 hover:text-atlas-900 hover:bg-atlas-50 transition-all flex-shrink-0 bg-gray-50">
+                                <div onClick={() => fileInputRef.current.click()} className="w-20 h-20 md:w-24 md:h-24 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:border-tenri-900 hover:text-tenri-900 hover:bg-tenri-50 transition-all flex-shrink-0 bg-gray-50">
                                     <UploadCloud size={24} />
                                     <span className="text-[10px] mt-1 font-bold">Seleccionar</span>
                                 </div>
@@ -374,11 +374,11 @@ const AdminProductos = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Nombre</label>
-                                <input required type="text" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                                <input required type="text" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">SKU</label>
-                                <input required type="text" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} />
+                                <input required type="text" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} />
                             </div>
                         </div>
 
@@ -387,14 +387,14 @@ const AdminProductos = () => {
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Precio Venta</label>
                                 <div className="relative">
                                     <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input required type="number" className="w-full pl-8 p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
+                                    <input required type="number" className="w-full pl-8 p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
                                 </div>
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Costo (Opcional)</label>
                                 <div className="relative">
                                     <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input type="number" className="w-full pl-8 p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none" value={form.cost_price} onChange={e => setForm({ ...form, cost_price: e.target.value })} />
+                                    <input type="number" className="w-full pl-8 p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.cost_price} onChange={e => setForm({ ...form, cost_price: e.target.value })} />
                                 </div>
                             </div>
                         </div>
@@ -402,11 +402,11 @@ const AdminProductos = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Stock Actual</label>
-                                <input required type="number" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none" value={form.stock_current} onChange={e => setForm({ ...form, stock_current: e.target.value })} />
+                                <input required type="number" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.stock_current} onChange={e => setForm({ ...form, stock_current: e.target.value })} />
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Categoría</label>
-                                <select required className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none appearance-none" value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })}>
+                                <select required className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none appearance-none" value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })}>
                                     <option value="">Seleccionar...</option>
                                     {categorias.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
@@ -422,12 +422,12 @@ const AdminProductos = () => {
                                 {form.specs.map((spec, index) => (
                                     <div key={index} className="flex gap-2 items-center">
                                         <div className="relative flex-1">
-                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-atlas-400 rounded-full"></div>
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-tenri-400 rounded-full"></div>
                                             <input
                                                 type="text"
                                                 value={spec}
                                                 onChange={(e) => handleSpecChange(index, e.target.value)}
-                                                className="w-full pl-7 pr-3 py-2 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none text-sm"
+                                                className="w-full pl-7 pr-3 py-2 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none text-sm"
                                                 placeholder="Ej: Procesador Intel Core i7"
                                             />
                                         </div>
@@ -437,18 +437,18 @@ const AdminProductos = () => {
                                     </div>
                                 ))}
                             </div>
-                            <button type="button" onClick={addSpecField} className="mt-4 text-xs font-bold text-atlas-600 hover:text-atlas-800 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-atlas-50 transition-colors">
+                            <button type="button" onClick={addSpecField} className="mt-4 text-xs font-bold text-tenri-600 hover:text-tenri-800 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-tenri-50 transition-colors">
                                 <PlusCircle size={16} /> Agregar característica
                             </button>
                         </div>
 
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Descripción</label>
-                            <textarea rows="4" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-atlas-900 outline-none resize-none" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                            <textarea rows="4" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none resize-none" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
                         </div>
 
                         <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-200 cursor-pointer" onClick={() => setForm({ ...form, is_visible: !form.is_visible })}>
-                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${form.is_visible ? 'bg-atlas-900 border-atlas-900' : 'border-gray-300'}`}>
+                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${form.is_visible ? 'bg-tenri-900 border-tenri-900' : 'border-gray-300'}`}>
                                 {form.is_visible && <CheckCircle size={14} className="text-white" />}
                             </div>
                             <label className="text-sm font-medium text-gray-700 cursor-pointer">Producto Visible en Tienda</label>
@@ -459,7 +459,7 @@ const AdminProductos = () => {
 
                 <div className="p-6 border-t border-gray-100 bg-white flex justify-end gap-3 flex-shrink-0">
                     <button onClick={() => setDrawerOpen(false)} className="px-6 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
-                    <button onClick={guardarProducto} disabled={guardando} className="px-8 py-3 bg-atlas-900 text-white font-bold rounded-xl hover:bg-atlas-800 shadow-lg flex items-center gap-2">
+                    <button onClick={guardarProducto} disabled={guardando} className="px-8 py-3 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg flex items-center gap-2">
                         {guardando ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
                         Guardar
                     </button>

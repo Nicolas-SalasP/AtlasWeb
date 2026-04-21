@@ -10,7 +10,7 @@ const MisSuscripciones = ({ subscription, loading }) => {
 
     if (loading) {
         return (
-            <div className="p-12 flex justify-center text-atlas-900">
+            <div className="p-12 flex justify-center text-tenri-900">
                 <Loader2 className="animate-spin" size={32} />
             </div>
         );
@@ -41,7 +41,7 @@ const MisSuscripciones = ({ subscription, loading }) => {
                             </div>
                             
                             <div className="text-right">
-                                <p className="text-2xl font-black text-atlas-900">{formatPrice(subscription.amount || 25000)}<span className="text-sm font-medium text-gray-400">/mes</span></p>
+                                <p className="text-2xl font-black text-tenri-900">{formatPrice(subscription.amount || 25000)}<span className="text-sm font-medium text-gray-400">/mes</span></p>
                                 <p className="text-xs text-gray-500 mt-1 flex items-center justify-end gap-1">
                                     <Calendar size={12} /> Próx. cobro: {subscription.next_billing_date ? new Date(subscription.next_billing_date).toLocaleDateString() : 'N/A'}
                                 </p>
@@ -63,12 +63,12 @@ const MisSuscripciones = ({ subscription, loading }) => {
 
                         {/* Botones de Acción */}
                         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-50 hover:text-atlas-900 transition-colors text-sm">
+                            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-50 hover:text-tenri-900 transition-colors text-sm">
                                 <CreditCard size={16} /> Cambiar Método de Pago
                             </button>
                             <button 
                                 onClick={() => navigate('/catalogo')} // Opcional: Ir a ver más servicios
-                                className="flex items-center justify-center gap-2 px-4 py-2 bg-atlas-50 text-atlas-900 border border-transparent rounded-lg font-bold hover:bg-atlas-100 transition-colors text-sm"
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-tenri-50 text-tenri-900 border border-transparent rounded-lg font-bold hover:bg-tenri-100 transition-colors text-sm"
                             >
                                 Ver otros planes
                             </button>
@@ -85,8 +85,8 @@ const MisSuscripciones = ({ subscription, loading }) => {
             <h2 className="text-xl font-bold text-gray-900 mb-6">Mis Servicios</h2>
             
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-2xl mx-auto">
-                <div className="w-20 h-20 bg-atlas-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <ShoppingBag size={32} className="text-atlas-900" />
+                <div className="w-20 h-20 bg-tenri-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <ShoppingBag size={32} className="text-tenri-900" />
                 </div>
                 
                 <h3 className="text-xl font-bold text-gray-900 mb-2">No tienes suscripciones activas</h3>
@@ -96,7 +96,7 @@ const MisSuscripciones = ({ subscription, loading }) => {
                 
                 <button 
                     onClick={() => navigate('/catalogo')}
-                    className="bg-atlas-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-atlas-800 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2 mx-auto"
+                    className="bg-tenri-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-tenri-800 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2 mx-auto"
                 >
                     Ir a la Tienda <ArrowRight size={18} />
                 </button>
