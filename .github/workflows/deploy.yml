@@ -51,14 +51,14 @@ jobs:
           # Comprimimos para que la subida tarde segundos en vez de horas
           zip -r ../backend.zip . -x "node_modules/*" -x "tests/*"
 
-      - name: 🚀 Subir Backend comprimido a atlas_project via FTP
+      - name: 🚀 Subir Backend comprimido a tenri_backend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /atlas_project/
+          server-dir: /tenri_backend/
           exclude: |
             **/*
             !backend.zip
@@ -66,7 +66,7 @@ jobs:
       # ==========================================
       # 3. EJECUTAR COMANDOS EN EL SERVIDOR (SSH)
       # ==========================================
-      - name: 🛠️ Descomprimir y Ejecutar Artisan en cPanel
+      - name: 🛠️ Descomprimir y Configurar Laravel en cPanel
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -75,9 +75,21 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: 2200 
           script: |
-            cd ~/atlas_project
+            # Entrar a la carpeta del backend
+            cd ~/tenri_backend
+            
+            # Descomprimir el código fresco y limpiar el zip
             unzip -o backend.zip
             rm backend.zip
+            
+            # Recrear el enlace simbólico de la API hacia tu dominio específico
+            rm -rf ~/domains/tenri.cl/public_html/api
+            
+            # Creamos el enlace nuevo apuntando a la carpeta public del backend
+            ln -s ~/tenri_backend/public ~/domains/tenri.cl/public_html/api
+            
+            # Comandos de optimización
             php artisan migrate --force
             php artisan optimize:clear
             php artisan config:cache
+            php artisan storage:link
