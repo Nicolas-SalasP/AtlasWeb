@@ -66,6 +66,7 @@ const Contacto = () => {
             
             setIsSuccess(true);
             setFormData({ nombre: '', email: '', countryCode: '+56', telefono: '', asunto: 'consulta', mensaje: '' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (error) {
             toast.error('Hubo un error al enviar el mensaje. Intenta de nuevo.');
         } finally {
