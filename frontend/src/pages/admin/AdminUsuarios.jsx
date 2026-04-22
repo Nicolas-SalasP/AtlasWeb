@@ -7,6 +7,7 @@ import {
     Eye, Edit, Trash2, X, ShoppingBag, Phone, CheckCircle, XCircle,
     Filter, ArrowDownUp
 } from 'lucide-react';
+import AlertModal from '../../components/AlertModal'; 
 
 const PERMISOS_DISPONIBLES = [
     { id: 'all', label: '👑 Acceso Total (Super Admin)' },
@@ -23,23 +24,19 @@ const AdminUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
-    
-    // --- NUEVOS ESTADOS DE FILTROS ---
     const [filtroRol, setFiltroRol] = useState("all");
     const [filtroEstado, setFiltroEstado] = useState("all");
-    const [filtroTipo, setFiltroTipo] = useState("all"); // Empresa vs Particular
-    const [ordenTickets, setOrdenTickets] = useState("default"); // desc, asc
-    const [mostrarFiltros, setMostrarFiltros] = useState(false); // Para móviles
-
-    // Estados de UI
+    const [filtroTipo, setFiltroTipo] = useState("all");
+    const [ordenTickets, setOrdenTickets] = useState("default");
+    const [mostrarFiltros, setMostrarFiltros] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [usuarioDetalle, setUsuarioDetalle] = useState(null);
     const [loadingDetalle, setLoadingDetalle] = useState(false);
     const [activeTab, setActiveTab] = useState('perfil');
-    
     const [modalEditarOpen, setModalEditarOpen] = useState(false);
     const [usuarioEditar, setUsuarioEditar] = useState(null);
     const [permisosEdit, setPermisosEdit] = useState({});
+    const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
 
     useEffect(() => {
         cargarUsuarios();
@@ -119,11 +116,15 @@ const AdminUsuarios = () => {
             setModalEditarOpen(false);
         } catch (error) {
             console.error("Error actualizando:", error);
-            alert("Error al actualizar usuario.");
+            const errorMsg = error.response?.data?.message || "Error al actualizar usuario. Verifica tu conexión.";
+            setErrorModal({
+                show: true,
+                title: 'Acceso Denegado',
+                message: errorMsg
+            });
         }
     };
 
-    // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
     let usuariosFiltrados = usuarios.filter(u => {
         const coincideBusqueda = u.name.toLowerCase().includes(busqueda.toLowerCase()) ||
                                  u.email.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -145,7 +146,6 @@ const AdminUsuarios = () => {
     }
 
     const totalClientes = usuarios.length;
-    // Fix: Asegurar de convertir a número para el conteo de total de admins
     const totalAdmins = usuarios.filter(u => Number(u.role_id) === 1).length;
 
     if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Directorio...</div>;
@@ -170,8 +170,6 @@ const AdminUsuarios = () => {
             </div>
 
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden flex flex-col flex-1">
-                
-                {/* --- BARRA DE BÚSQUEDA Y FILTROS --- */}
                 <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex flex-col gap-4 flex-shrink-0 transition-all">
                     <div className="flex gap-2">
                         <div className="relative flex-1">
@@ -235,7 +233,6 @@ const AdminUsuarios = () => {
                     </div>
                 </div>
 
-                {/* --- TABLA --- */}
                 <div className="overflow-auto flex-1 custom-scrollbar">
                     <table className="w-full min-w-[800px]">
                         <thead className="bg-gray-50 border-b border-gray-100 text-left sticky top-0 z-10">
@@ -274,7 +271,6 @@ const AdminUsuarios = () => {
                                         {u.company_name ? <span className="flex items-center gap-2 font-medium"><Building size={14} className="text-gray-400" /> {u.company_name}</span> : <span className="italic text-gray-400">Particular</span>}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {/* FIX: Parsear a Number para evitar bug de string vs int */}
                                         {Number(u.role_id) === 1 ?
                                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-tenri-900 text-white"><Shield size={10} /> ADMIN</span> :
                                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100"><User size={10} /> CLIENTE</span>
@@ -304,7 +300,6 @@ const AdminUsuarios = () => {
                 </div>
             </div>
 
-            {/* DRAWER DETALLE (Sin Cambios Estructurales) */}
             <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setDrawerOpen(false)} />
             <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] lg:w-[700px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 {loadingDetalle || !usuarioDetalle ? (
@@ -392,7 +387,6 @@ const AdminUsuarios = () => {
                 )}
             </div>
 
-            {/* MODAL EDITAR USUARIO */}
             {modalEditarOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-2xl p-6 md:p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -466,6 +460,14 @@ const AdminUsuarios = () => {
                     </div>
                 </div>
             )}
+
+            <AlertModal 
+                isOpen={errorModal.show}
+                onClose={() => setErrorModal({ ...errorModal, show: false })}
+                title={errorModal.title}
+                message={errorModal.message}
+                variant="error"
+            />
 
         </div>
     );
