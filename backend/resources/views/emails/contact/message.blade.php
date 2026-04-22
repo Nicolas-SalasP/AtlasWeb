@@ -1,58 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>Nuevo Mensaje de Contacto</title>
-</head>
-<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F3F4F6; padding: 30px; margin: 0;">
-
-    <table max-width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; margin: 0 auto; width: 100%; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto Tenri SpA</title>
+    <style>
+        /* Tipografía y fondo exterior */
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F3F4F6; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #F3F4F6; padding: 40px 0; }
+        .main { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
-        <tr>
-            <td style="background-color: #1A3626; padding: 30px; text-align: center;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px;">TENRI</h1>
-                <p style="color: #88C0A0; margin: 5px 0 0 0; font-size: 14px;">Nuevo requerimiento desde el sitio web</p>
-            </td>
-        </tr>
+        /* Encabezado Verde Oscuro Original (#1A3626) */
+        .header { background-color: #1A3626; padding: 40px 20px 30px 20px; text-align: center; }
+        /* Imagen responsiva fijada directamente al TD */
+        .header img { display: block; margin: 0 auto; max-width: 100%; width: 180px; height: auto; }
+        .header-subtitle { color: #88C0A0; margin: 15px 0 0 0; font-size: 14px; }
+        
+        /* Contenido y Textos */
+        .content { padding: 40px 30px; color: #4b5563; line-height: 1.6; font-size: 15px; }
+        .content h1 { color: #1A3626; font-size: 20px; margin-top: 0; margin-bottom: 20px; font-weight: bold; }
+        
+        /* Tabla de Datos (Estilo Limpio) */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .data-table td { padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+        .label { font-weight: bold; color: #4b5563; width: 30%; }
+        .value { color: #111827; }
+        .value a { color: #4A8B63; text-decoration: none; }
+        
+        /* Caja de Mensaje Crema Original (#F5F0E6) */
+        .message-title { color: #1A3626; font-size: 16px; margin-top: 30px; margin-bottom: 10px; font-weight: bold; }
+        .message-box { background-color: #F5F0E6; padding: 20px; border-radius: 8px; color: #374151; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+        
+        /* Footer */
+        .footer { background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #F3F4F6; }
+        .footer a { color: #4A8B63; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <center class="wrapper">
+        <table class="main" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="header">
+                    <img src="https://tenri.cl/assets/email/logo-main.png" alt="TENRI">
+                    <p class="header-subtitle">Respaldo de requerimiento desde el sitio web</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="content">
+                    <h1>Detalles del Contacto</h1>
+                    <p style="margin-top: 0;">Hola <strong>{{ $data['nombre'] }}</strong>, hemos recibido tu consulta. Un especialista de nuestro equipo se pondrá en contacto contigo pronto.</p>
+                    
+                    <table class="data-table">
+                        <tr>
+                            <td class="label">Asunto:</td>
+                            <td class="value" style="text-transform: capitalize;">{{ $data['asunto'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Correo:</td>
+                            <td class="value"><a href="mailto:{{ $data['email'] }}">{{ $data['email'] }}</a></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Teléfono:</td>
+                            <td class="value">{{ !empty($data['telefono']) ? $data['telefono'] : 'No proporcionado' }}</td>
+                        </tr>
+                    </table>
 
-        <tr>
-            <td style="padding: 40px 30px;">
-                <h2 style="color: #1A3626; font-size: 20px; margin-top: 0; margin-bottom: 20px;">Detalles del Contacto</h2>
-                
-                <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 15px; color: #4b5563; line-height: 1.6;">
-                    <tr>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;" width="30%"><strong>Nombre:</strong></td>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #111827;">{{ $data['nombre'] }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;"><strong>Correo:</strong></td>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #4A8B63;">
-                            <a href="mailto:{{ $data['email'] }}" style="color: #4A8B63; text-decoration: none;">{{ $data['email'] }}</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;"><strong>Teléfono:</strong></td>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #111827;">{{ $data['telefono'] ?? 'No proporcionado' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;"><strong>Asunto:</strong></td>
-                        <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #111827; text-transform: capitalize;">{{ $data['asunto'] }}</td>
-                    </tr>
-                </table>
-
-                <h3 style="color: #1A3626; font-size: 16px; margin-top: 30px; margin-bottom: 10px;">Mensaje:</h3>
-                <div style="background-color: #F5F0E6; padding: 20px; border-radius: 8px; color: #374151; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">{{ $data['mensaje'] }}</div>
-            </td>
-        </tr>
-
-        <tr>
-            <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #f3f4f6;">
-                <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                    Este mensaje fue enviado desde el formulario de contacto de la página web de TENRI.<br>
-                    No respondas directamente a este correo, haz clic en el correo del cliente arriba.
-                </p>
-            </td>
-        </tr>
-    </table>
+                    <div class="message-title">Mensaje enviado:</div>
+                    <div class="message-box">{{ $data['mensaje'] }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="footer">
+                    <p style="margin-top: 0; margin-bottom: 8px; line-height: 1.5;">Este mensaje fue enviado desde el formulario de contacto de <strong>TENRI</strong>.<br>Hemos enviado una copia a nuestro equipo y a tu correo como respaldo.</p>
+                    <p style="margin: 0;">© {{ date('Y') }} Tenri SpA | <a href="https://tenri.cl">www.tenri.cl</a></p>
+                </td>
+            </tr>
+        </table>
+    </center>
 </body>
 </html>

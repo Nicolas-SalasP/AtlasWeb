@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\ContactMessage;
 
 class ContactController extends Controller
@@ -19,7 +20,9 @@ class ContactController extends Controller
         ]);
 
         try {
-            Mail::to('contacto@tenri.cl')->send(new ContactMessage($validated));
+            Mail::to('no-reply@tenri.cl')
+                ->cc($validated['email'])
+                ->send(new ContactMessage($validated));
 
             return response()->json([
                 'success' => true,
@@ -27,9 +30,10 @@ class ContactController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
+            Log::error('Error de Correo: ' . $e->getMessage()); 
             return response()->json([
                 'success' => false,
-                'message' => 'No se pudo enviar el mensaje. Intente más tarde.'
+                'message' => 'Error real: ' . $e->getMessage() 
             ], 500);
         }
     }
