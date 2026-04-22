@@ -73,6 +73,8 @@ class OrderController extends Controller
             'customer_data' => 'required|array',
             'customer_data.region' => 'required|string',
             'terms_accepted' => 'required|accepted',
+            'shipping_address' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
         ], [
             'terms_accepted.accepted' => 'Debes aceptar los términos y condiciones para procesar la compra.'
         ]);
@@ -165,9 +167,9 @@ class OrderController extends Controller
                 'subtotal' => $subtotalOrden,
                 'shipping_cost' => $shipping,
                 'total' => $total,
-                'shipping_address' => $request->shipping_address,
+                'shipping_address' => strip_tags($request->shipping_address),
                 'customer_data' => $request->customer_data,
-                'notes' => $request->notes,
+                'notes' => strip_tags($request->notes),
                 'terms_accepted_at' => now(),
                 'terms_accepted_ip' => $request->ip(),
             ]);
