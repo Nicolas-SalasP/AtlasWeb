@@ -27,7 +27,7 @@ const Maintenance = lazy(() => import('./pages/Maintenance'));
 const MisTickets = lazy(() => import('./pages/MisTickets'));
 const UserProfile = lazy(() => import('./pages/UserProfile')); 
 const Contacto = lazy(() => import('./pages/Contacto'));
-
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 // Admin Imports
 const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -102,6 +102,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/registro" element={<Registro />} />
               <Route path="/recuperar" element={<Recuperar />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/terminos-y-condiciones" element={<Terminos />} />
               <Route path="/politica-privacidad" element={<Privacidad />} />
               <Route path="/acuerdo-nivel-servicio" element={<SLA />} />
