@@ -4,14 +4,49 @@ import api from '../../api/axiosConfig';
 import { User, Mail, Phone, Save, Loader2, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import OrderClaimModal from './OrderClaimModal';
+import { countryCodes, formatPhoneNumber } from '../../utils/phoneCodes';
+import { useAuth } from '../../context/AuthContext';
 
-const MiPerfil = ({ user, onOpenEmailModal }) => {
+const MiPerfil = ({ onOpenEmailModal }) => {
+    const { user, setUser, checkAuth } = useAuth(); 
     const location = useLocation();
+    const initialFullPhone = user?.phone || '';
+    let initialCode = '+56';
+    let initialNumber = initialFullPhone;
+
+    const matchedCode = countryCodes.find(c => initialFullPhone.startsWith(c.code));
+    if (matchedCode) {
+        initialCode = matchedCode.code;
+        initialNumber = initialFullPhone.slice(matchedCode.code.length).trim();
+    }
+
     const [formData, setFormData] = useState({ 
         name: user?.name || '', 
         email: user?.email || '', 
-        phone: user?.phone || '' 
+        countryCode: initialCode,
+        telefono: initialNumber
     });
+    useEffect(() => {
+        if (user) {
+            const fullPhone = user.phone || '';
+            let code = '+56';
+            let num = fullPhone;
+
+            const matched = countryCodes.find(c => fullPhone.startsWith(c.code));
+            if (matched) {
+                code = matched.code;
+                num = fullPhone.slice(matched.code.length).trim();
+            }
+
+            setFormData({
+                name: user.name || '',
+                email: user.email || '',
+                countryCode: code,
+                telefono: num
+            });
+        }
+    }, [user?.phone, user?.name, user?.email]);
+    
     const [loading, setLoading] = useState(false);
     const [showClaimModal, setShowClaimModal] = useState(false);
     const [pendingClaims, setPendingClaims] = useState(() => {
@@ -32,11 +67,33 @@ const MiPerfil = ({ user, onOpenEmailModal }) => {
         toast.success('Aviso ocultado. Si tienes compras previas seguirán seguras.');
     };
 
+    const handlePhoneChange = (e) => {
+        const selectedCountry = countryCodes.find(c => c.code === formData.countryCode);
+        const formatted = formatPhoneNumber(e.target.value, selectedCountry?.mask);
+        setFormData({ ...formData, telefono: formatted });
+    };
+
+    const handleCountryCodeChange = (e) => {
+        setFormData({ ...formData, countryCode: e.target.value, telefono: '' });
+    };
+
     const handleUpdate = async (e) => {
         e.preventDefault();
         setLoading(true);
+        const payload = {
+            name: formData.name,
+            phone: formData.telefono ? `${formData.countryCode} ${formData.telefono}` : ''
+        };
+
         try {
-            await api.put('/profile/update', formData);
+            const response = await api.put('/profile/update', payload);
+
+            if (setUser) {
+                setUser(response.data.user);
+            } else if (checkAuth) {
+                await checkAuth(); 
+            }
+
             toast.success('Perfil actualizado correctamente');
         } catch (error) {
             toast.error('Error al actualizar perfil');
@@ -54,7 +111,6 @@ const MiPerfil = ({ user, onOpenEmailModal }) => {
                 claimableEmails={location.state?.claimableEmails || pendingClaims || []}
                 onSuccess={(updatedOrdersCount) => {
                     toast.success(`¡Excelente! Se vincularon ${updatedOrdersCount} órdenes a tu cuenta.`);
-                    // handleDismissClaims(); 
                 }}
             />
 
@@ -104,15 +160,26 @@ const MiPerfil = ({ user, onOpenEmailModal }) => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                        <div className="relative">
-                            <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input 
-                                type="text" 
-                                value={formData.phone} 
-                                onChange={(e) => setFormData({...formData, phone: e.target.value})} 
-                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-tenri-500 outline-none" 
-                                placeholder="+56 9 ..." 
-                            />
+                        <div className="flex relative">
+                            <select 
+                                value={formData.countryCode}
+                                onChange={handleCountryCodeChange}
+                                className="w-24 pl-2 pr-1 py-2 bg-gray-50 border border-gray-200 border-r-0 rounded-l-lg focus:bg-white outline-none cursor-pointer text-sm font-medium"
+                            >
+                                {countryCodes.map(c => (
+                                    <option key={c.code} value={c.code}>{c.code}</option>
+                                ))}
+                            </select>
+                            <div className="relative flex-1">
+                                <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input 
+                                    type="tel" 
+                                    value={formData.telefono} 
+                                    onChange={handlePhoneChange} 
+                                    className="w-full pl-9 pr-4 py-2 rounded-r-lg border border-gray-200 focus:bg-white focus:ring-2 focus:ring-tenri-500 outline-none transition-all" 
+                                    placeholder="9 0000 0000" 
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
