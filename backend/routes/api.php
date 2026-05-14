@@ -4,6 +4,7 @@ use App\Domain\User\Models\User;
 use App\Http\Controllers\Api\Admin\AdminBankReceiptController;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\Admin\AdminProductController;
+use App\Http\Controllers\Api\Admin\AdminServiceController;
 use App\Http\Controllers\Api\Admin\AdminTicketController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\AddressController;
@@ -13,11 +14,11 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
+use App\Http\Controllers\Api\PublicServiceController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\BillingProfileController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::get('/products', [PublicProductController::class, 'index']);
 Route::get('/products/{id}', [PublicProductController::class, 'show'])->whereNumber('id');
-Route::get('/services/catalog', [ServiceController::class, 'indexPublic']);
+Route::get('/services/catalog', [PublicServiceController::class, 'indexPublic']);
 
 Route::get('/categories', [PublicCategoryController::class, 'index']);
 
@@ -129,7 +130,11 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::middleware(['admin:manage_services'])->group(function () {
-            Route::apiResource('/services', ServiceController::class);
+            Route::get('/services', [AdminServiceController::class, 'index']);
+            Route::get('/services/{id}', [AdminServiceController::class, 'show'])->whereNumber('id');
+            Route::post('/services', [AdminServiceController::class, 'store']);
+            Route::put('/services/{id}', [AdminServiceController::class, 'update'])->whereNumber('id');
+            Route::delete('/services/{id}', [AdminServiceController::class, 'destroy'])->whereNumber('id');
         });
 
         Route::middleware(['admin:view_tickets'])->group(function () {
