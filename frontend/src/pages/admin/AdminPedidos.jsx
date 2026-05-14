@@ -1,348 +1,242 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../api/axiosConfig';
 import {
     Search, ShoppingBag, User, ChevronRight,
     Package, X, Loader2, Edit2, Save,
     MapPin, Phone, Mail, FileText, CheckCircle, AlertCircle, Truck, ExternalLink,
-    Inbox, Link as LinkIcon, FileCode, RefreshCw, Filter
+    Inbox, Link as LinkIcon, FileCode, RefreshCw, History
 } from 'lucide-react';
-import AlertModal from '../../components/AlertModal';
-import ConfirmModal from '../../components/ConfirmModal';
-
-// ============================================================================
-// CONSTANTES Y HELPERS
-// ============================================================================
-
-const ESTADOS_ORDEN = [
-    { value: 'pending',   label: 'Pendiente (Pago)' },
-    { value: 'paid',      label: 'Pagado' },
-    { value: 'preparing', label: 'En Preparación' },
-    { value: 'shipped',   label: 'Enviado' },
-    { value: 'delivered', label: 'Entregado' },
-    { value: 'cancelled', label: 'Anulado' },
-    { value: 'refunded',  label: 'Reembolsado' },
-];
 
 const PROVEEDORES_ENVIO = [
-    { value: 'propio',      label: 'Reparto Propio / Interno' },
-    { value: 'bluexpress',  label: 'BlueExpress' },
-    { value: 'starken',     label: 'Starken' },
+    { value: 'propio', label: 'Reparto Propio / Interno' },
+    { value: 'bluexpress', label: 'BlueExpress' },
+    { value: 'starken', label: 'Starken' },
     { value: 'chilexpress', label: 'Chilexpress' },
-    { value: 'correos',     label: 'Correos de Chile' },
+    { value: 'correos', label: 'Correos de Chile' }
 ];
 
-/**
- * Máquina de estados. Debe estar sincronizada con Order::ALLOWED_TRANSITIONS del backend.
- * Si el backend rechaza una transición, igual lo mostramos como error, pero filtrar acá
- * mejora la UX evitando que el admin intente algo imposible.
- */
-const ALLOWED_TRANSITIONS = {
-    pending:   ['paid', 'cancelled'],
-    paid:      ['preparing', 'cancelled', 'refunded'],
-    preparing: ['shipped', 'cancelled', 'refunded'],
-    shipped:   ['delivered', 'refunded'],
-    delivered: ['refunded'],
-    cancelled: [],
-    refunded:  [],
+const FLUJO_ESTADOS = ['pending', 'paid', 'preparing', 'shipped', 'delivered'];
+
+const STATUS_COLORS = {
+    pending: 'bg-amber-100 text-amber-700 border-amber-200',
+    paid: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    preparing: 'bg-blue-100 text-blue-700 border-blue-200',
+    shipped: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    delivered: 'bg-gray-100 text-gray-700 border-gray-300',
+    cancelled: 'bg-red-100 text-red-700 border-red-200',
+    refunded: 'bg-rose-100 text-rose-700 border-rose-200'
 };
 
-const FLUJO_FORWARD = ['pending', 'paid', 'preparing', 'shipped', 'delivered'];
-const ESTADOS_DESTRUCTIVOS = ['cancelled', 'refunded'];
+const getStatusColor = (status) => STATUS_COLORS[status] || 'bg-gray-100 text-gray-600';
 
-const getStatusColor = (status) => {
-    const colors = {
-        pending:   'bg-amber-100 text-amber-700 border-amber-200',
-        paid:      'bg-emerald-100 text-emerald-700 border-emerald-200',
-        preparing: 'bg-blue-100 text-blue-700 border-blue-200',
-        shipped:   'bg-indigo-100 text-indigo-700 border-indigo-200',
-        delivered: 'bg-gray-100 text-gray-700 border-gray-300',
-        cancelled: 'bg-red-100 text-red-700 border-red-200',
-        refunded:  'bg-rose-100 text-rose-700 border-rose-200',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-600';
-};
-
-const getTrackingLink = (provider, code) => {
-    if (!code) return '#';
-    switch (provider) {
-        case 'bluexpress':  return `https://www.blue.cl/seguimiento/?codigo=${code}`;
-        case 'starken':     return `https://www.starken.cl/seguimiento?codigo=${code}`;
-        case 'chilexpress': return `https://www.chilexpress.cl/Views/ChilexpressCL/Resultado-busqueda.aspx?DATA=${code}`;
-        case 'correos':     return `https://www.correos.cl/web/guest/seguimiento-en-linea?objEnvio=${code}`;
-        default:            return '#';
+const getInitial = (...candidates) => {
+    for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.length > 0) {
+            return candidate.charAt(0).toUpperCase();
+        }
     }
+    return '?';
 };
-
-/** Normaliza la respuesta del backend: acepta tanto un array como un paginator de Laravel. */
-const unwrapList = (payload) => {
-    if (Array.isArray(payload)) return payload;
-    if (payload && Array.isArray(payload.data)) return payload.data;
-    return [];
-};
-
-// ============================================================================
-// COMPONENTE
-// ============================================================================
 
 const AdminPedidos = () => {
-    // --- ESTADOS PRINCIPALES ---
-    const [activeTab, setActiveTab] = useState('pedidos'); // 'pedidos' | 'comprobantes'
+    const [activeTab, setActiveTab] = useState('pedidos');
     const [loading, setLoading] = useState(true);
     const [procesando, setProcesando] = useState(false);
-    const [busqueda, setBusqueda] = useState('');
-    const [filtroEstado, setFiltroEstado] = useState(''); // '' = todos
+    const [busqueda, setBusqueda] = useState("");
 
-    // --- ESTADOS DE PEDIDOS ---
     const [pedidos, setPedidos] = useState([]);
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
     const [editandoNotas, setEditandoNotas] = useState(false);
-    const [notasTemp, setNotasTemp] = useState('');
+    const [notasTemp, setNotasTemp] = useState("");
     const [editandoTracking, setEditandoTracking] = useState(false);
     const [trackingData, setTrackingData] = useState({ provider: '', number: '' });
+    const [estadosPermitidos, setEstadosPermitidos] = useState(null);
 
-    // --- ESTADOS DE COMPROBANTES ---
     const [comprobantes, setComprobantes] = useState([]);
     const [comprobanteSeleccionado, setComprobanteSeleccionado] = useState(null);
-    const [ordenAsociarId, setOrdenAsociarId] = useState('');
+    const [ordenAsociarId, setOrdenAsociarId] = useState("");
 
-    // --- FEEDBACK / MODALES ---
-    const [alerta, setAlerta] = useState({ open: false, type: 'info', title: '', message: '' });
-    const [confirmacion, setConfirmacion] = useState({
-        open: false,
-        title: '',
-        message: '',
-        confirmLabel: 'Confirmar',
-        tone: 'warning',
-        onConfirm: () => {},
-    });
-
-    const showAlerta = (type, title, message) =>
-        setAlerta({ open: true, type, title, message });
-
-    const closeAlerta = () =>
-        setAlerta(prev => ({ ...prev, open: false }));
-
-    const closeConfirmacion = () =>
-        setConfirmacion(prev => ({ ...prev, open: false }));
-
-    // ========================================================================
-    // CARGA DE DATOS
-    // ========================================================================
+    const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
 
     useEffect(() => {
         cargarDatos();
     }, []);
 
+    const showToast = (type, message) => {
+        setToast({ show: true, type, message });
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3500);
+    };
+
     const cargarDatos = async () => {
         setLoading(true);
         try {
             const [resPedidos, resComprobantes] = await Promise.all([
-                api.get('/admin/orders', { params: { per_page: 100 } }),
-                api.get('/admin/bank-receipts/unmatched').catch(() => ({ data: [] })),
+                api.get('/admin/orders'),
+                api.get('/admin/bank-receipts/unmatched').catch(() => ({ data: [] }))
             ]);
-            setPedidos(unwrapList(resPedidos.data));
-            setComprobantes(unwrapList(resComprobantes.data));
+            setPedidos(resPedidos.data);
+            setComprobantes(resComprobantes.data);
         } catch (error) {
-            console.error('Error cargando datos:', error);
-            showAlerta('error', 'Error de carga', 'No se pudieron cargar los pedidos. Reintenta en unos segundos.');
+            console.error("Error cargando datos:", error);
+            showToast('error', 'No se pudieron cargar los datos.');
         } finally {
             setLoading(false);
         }
     };
 
-    // ========================================================================
-    // LÓGICA DE PEDIDOS
-    // ========================================================================
+    const abrirDetallePedido = async (pedido) => {
+        setNotasTemp(pedido.notes || "");
+        setTrackingData({
+            provider: pedido.shipping_provider || '',
+            number: pedido.tracking_number || ''
+        });
+        setEditandoNotas(false);
+        setEditandoTracking(false);
+        setEstadosPermitidos(null);
+        setPedidoSeleccionado(pedido);
 
-    /** Aplica una actualización en backend y sincroniza el estado local. */
-    const aplicarUpdate = async (payload, mensajeExito = null) => {
+        try {
+            const { data } = await api.get(`/admin/orders/${pedido.id}`);
+            setPedidoSeleccionado(data);
+        } catch (error) {
+            console.error("Error cargando detalle de pedido:", error);
+        }
+    };
+
+    const aplicarPedidoActualizado = (order) => {
+        setPedidoSeleccionado(order);
+        setPedidos(prev => prev.map(p => p.id === order.id ? { ...p, ...order } : p));
+    };
+
+    const handleUpdateError = (error, defaultMessage) => {
+        const status = error.response?.status;
+        const body = error.response?.data;
+
+        if (status === 422 && Array.isArray(body?.allowed)) {
+            setEstadosPermitidos(body.allowed);
+            showToast('error', body.message || 'Transición no permitida.');
+            return;
+        }
+
+        console.error(defaultMessage, error);
+        showToast('error', body?.message || defaultMessage);
+    };
+
+    const cambiarEstado = async (nuevoEstado) => {
         setProcesando(true);
         try {
-            const { data } = await api.put(`/admin/orders/${pedidoSeleccionado.id}`, payload);
-            // El backend devuelve la orden CON relaciones cargadas:
-            // { message, order: { ..., user, items: [{ product }] } }
-            setPedidoSeleccionado(data.order);
-            setPedidos(prev => prev.map(p => (p.id === data.order.id ? data.order : p)));
-            if (mensajeExito) {
-                showAlerta('success', '¡Listo!', mensajeExito);
-            }
-            return true;
+            const { data } = await api.put(`/admin/orders/${pedidoSeleccionado.id}`, { status: nuevoEstado });
+            aplicarPedidoActualizado(data.order);
+            setEstadosPermitidos(null);
+            showToast('success', 'Estado actualizado.');
         } catch (error) {
-            console.error('Error actualizando orden:', error);
-            const msg = error.response?.data?.message
-                || 'No se pudo actualizar la orden. Inténtalo nuevamente.';
-            showAlerta('error', 'No se pudo actualizar', msg);
-            return false;
+            handleUpdateError(error, 'No se pudo actualizar el estado.');
         } finally {
             setProcesando(false);
         }
     };
 
-    const cambiarEstado = (nuevoEstado) => {
-        if (!pedidoSeleccionado) return;
-
-        // Acciones destructivas: pedimos confirmación primero.
-        if (ESTADOS_DESTRUCTIVOS.includes(nuevoEstado)) {
-            const label = ESTADOS_ORDEN.find(e => e.value === nuevoEstado)?.label || nuevoEstado;
-            const advertencia = nuevoEstado === 'cancelled'
-                ? 'Esta acción restaurará el stock de los productos y dejará la orden en estado anulado de forma definitiva.'
-                : 'Esta acción restaurará el stock y marcará la orden como reembolsada. No podrá revertirse.';
-            setConfirmacion({
-                open: true,
-                tone: 'danger',
-                title: `¿${label.toLowerCase()} esta orden?`,
-                message: `${advertencia}\n\nOrden: ${pedidoSeleccionado.order_number}`,
-                confirmLabel: label,
-                onConfirm: async () => {
-                    closeConfirmacion();
-                    await aplicarUpdate({ status: nuevoEstado }, `Orden marcada como "${label.toLowerCase()}".`);
-                },
-            });
-            return;
-        }
-
-        // Cambios "hacia adelante" del flujo: sin confirmación.
-        aplicarUpdate({ status: nuevoEstado });
-    };
-
     const guardarNotas = async () => {
-        const ok = await aplicarUpdate({ notes: notasTemp });
-        if (ok) setEditandoNotas(false);
+        setProcesando(true);
+        try {
+            const { data } = await api.put(`/admin/orders/${pedidoSeleccionado.id}`, { notes: notasTemp });
+            aplicarPedidoActualizado(data.order);
+            setEditandoNotas(false);
+            showToast('success', 'Notas guardadas.');
+        } catch (error) {
+            handleUpdateError(error, 'No se pudieron guardar las notas.');
+        } finally {
+            setProcesando(false);
+        }
     };
 
     const guardarTracking = async () => {
-        if (!trackingData.provider) {
-            showAlerta('error', 'Falta el courier', 'Selecciona una empresa de envío antes de guardar.');
-            return;
+        setProcesando(true);
+        try {
+            const { data } = await api.put(`/admin/orders/${pedidoSeleccionado.id}`, {
+                shipping_provider: trackingData.provider || null,
+                tracking_number: trackingData.number || null
+            });
+            aplicarPedidoActualizado(data.order);
+            setEditandoTracking(false);
+            showToast('success', 'Tracking actualizado.');
+        } catch (error) {
+            handleUpdateError(error, 'No se pudo guardar la información de envío.');
+        } finally {
+            setProcesando(false);
         }
-        const ok = await aplicarUpdate(
-            {
-                shipping_provider: trackingData.provider,
-                tracking_number: trackingData.number,
-            },
-            'Información de tracking actualizada.'
-        );
-        if (ok) setEditandoTracking(false);
     };
-
-    const abrirDetallePedido = (pedido) => {
-        setPedidoSeleccionado(pedido);
-        setNotasTemp(pedido.notes || '');
-        setTrackingData({
-            provider: pedido.shipping_provider || '',
-            number: pedido.tracking_number || '',
-        });
-        setEditandoNotas(false);
-        setEditandoTracking(false);
-    };
-
-    // ========================================================================
-    // LÓGICA DE COMPROBANTES
-    // ========================================================================
 
     const abrirDetalleComprobante = (comp) => {
         setComprobanteSeleccionado(comp);
-        setOrdenAsociarId('');
+        setOrdenAsociarId("");
     };
 
     const asociarComprobanteManual = async () => {
         if (!ordenAsociarId) {
-            showAlerta('error', 'Falta seleccionar', 'Elige primero una orden a la cual asociar el comprobante.');
+            showToast('error', 'Selecciona una orden primero.');
             return;
         }
         setProcesando(true);
         try {
             await api.post(`/admin/bank-receipts/${comprobanteSeleccionado.id}/match`, {
-                order_id: ordenAsociarId,
+                order_id: ordenAsociarId
             });
-            showAlerta('success', '¡Asociación exitosa!', 'El comprobante quedó vinculado y la orden marcada como pagada.');
+            showToast('success', 'Comprobante asociado exitosamente.');
             setComprobanteSeleccionado(null);
             cargarDatos();
         } catch (error) {
-            console.error('Error asociando comprobante:', error);
-            showAlerta(
-                'error',
-                'No se pudo asociar',
-                error.response?.data?.message || 'Ocurrió un error al asociar el comprobante.'
-            );
+            const msg = error.response?.data?.message || 'Ocurrió un error al asociar.';
+            console.error("Error asociando comprobante:", error);
+            showToast('error', msg);
         } finally {
             setProcesando(false);
         }
     };
 
-    // ========================================================================
-    // FILTROS Y DERIVADOS
-    // ========================================================================
-
-    const filtradosPedidos = useMemo(() => {
+    const filtradosPedidos = pedidos.filter(p => {
         const query = busqueda.toLowerCase();
-        return pedidos.filter(p => {
-            if (filtroEstado && p.status !== filtroEstado) return false;
-            if (!query) return true;
-            const orderNum = p.order_number?.toLowerCase() || '';
-            const userName = p.user?.name?.toLowerCase() || p.customer_data?.nombre?.toLowerCase() || '';
-            const email = p.customer_data?.email?.toLowerCase() || p.user?.email?.toLowerCase() || '';
-            return orderNum.includes(query) || userName.includes(query) || email.includes(query);
-        });
-    }, [pedidos, busqueda, filtroEstado]);
+        const orderNum = p.order_number?.toLowerCase() || "";
+        const userName = p.user?.name?.toLowerCase() || p.customer_data?.nombre?.toLowerCase() || "";
+        return orderNum.includes(query) || userName.includes(query);
+    });
 
-    const filtradosComprobantes = useMemo(() => {
+    const filtradosComprobantes = comprobantes.filter(c => {
         const query = busqueda.toLowerCase();
-        return comprobantes.filter(c =>
-            (c.transaction_number || '').includes(query) ||
-            (c.sender_name || '').toLowerCase().includes(query) ||
-            (c.glosa || '').toLowerCase().includes(query)
-        );
-    }, [comprobantes, busqueda]);
+        return (c.transaction_number || "").includes(query) ||
+            (c.sender_name || "").toLowerCase().includes(query) ||
+            (c.glosa || "").toLowerCase().includes(query);
+    });
 
-    const ordenesPendientesTransferencia = useMemo(() =>
-        pedidos.filter(p => p.status === 'pending' && p.payment_method === 'transfer'),
-        [pedidos]
-    );
+    const ordenesPendientesTransferencia = pedidos.filter(p => p.status === 'pending' && p.payment_method === 'transfer');
 
-    /**
-     * Devuelve la sugerencia de "siguiente paso natural" del flujo (avance hacia adelante).
-     * Lo usamos para el botón destacado.
-     */
-    const nextForwardState = useMemo(() => {
-        if (!pedidoSeleccionado) return null;
-        const idx = FLUJO_FORWARD.indexOf(pedidoSeleccionado.status);
-        if (idx >= 0 && idx < FLUJO_FORWARD.length - 1) {
-            const value = FLUJO_FORWARD[idx + 1];
-            const label = ESTADOS_ORDEN.find(e => e.value === value)?.label;
-            return { value, label };
+    const getNextStateInfo = (currentStatus) => {
+        const currentIndex = FLUJO_ESTADOS.indexOf(currentStatus);
+        if (currentIndex >= 0 && currentIndex < FLUJO_ESTADOS.length - 1) {
+            const nextValue = FLUJO_ESTADOS[currentIndex + 1];
+            const sample = pedidos.find(p => p.status === nextValue);
+            const nextLabel = sample?.status_label || nextValue;
+            return { value: nextValue, label: nextLabel };
         }
         return null;
-    }, [pedidoSeleccionado]);
+    };
 
-    /**
-     * Estados que el admin puede elegir en el dropdown:
-     * el actual (informativo, deshabilitado) + los destinos permitidos por la máquina.
-     */
-    const estadosDisponiblesParaDropdown = useMemo(() => {
-        if (!pedidoSeleccionado) return [];
-        const permitidos = ALLOWED_TRANSITIONS[pedidoSeleccionado.status] || [];
-        return ESTADOS_ORDEN.filter(e =>
-            e.value === pedidoSeleccionado.status || permitidos.includes(e.value)
-        );
-    }, [pedidoSeleccionado]);
+    if (loading) return <div className="h-screen flex items-center justify-center gap-2 text-tenri-900"><Loader2 className="animate-spin" /> Cargando Módulo...</div>;
 
-    // ========================================================================
-    // RENDER
-    // ========================================================================
-
-    if (loading) {
-        return (
-            <div className="h-screen flex items-center justify-center gap-2 text-tenri-900">
-                <Loader2 className="animate-spin" /> Cargando Módulo...
-            </div>
-        );
-    }
+    const nextState = pedidoSeleccionado ? getNextStateInfo(pedidoSeleccionado.status) : null;
+    const statusLogs = pedidoSeleccionado?.status_logs || [];
 
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
 
-            {/* ENCABEZADO Y TABS */}
+            {/* TOAST */}
+            {toast.show && (
+                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-tenri-900 text-white' : 'bg-red-500 text-white'}`}>
+                    {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                    <span className="font-bold text-sm">{toast.message}</span>
+                </div>
+            )}
+
             <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Centro de Operaciones</h1>
@@ -369,48 +263,24 @@ const AdminPedidos = () => {
                 </div>
             </div>
 
-            {/* CAJA PRINCIPAL */}
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-100 flex flex-col flex-1 overflow-hidden">
-                <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
-                    <div className="relative flex-1 max-w-md">
+                <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
+                    <div className="relative w-full max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         <input
                             type="text"
-                            placeholder={activeTab === 'pedidos' ? 'Buscar por orden, cliente o email...' : 'Buscar por transacción, nombre o glosa...'}
+                            placeholder={activeTab === 'pedidos' ? "Buscar por Orden o Cliente..." : "Buscar por Transacción, Nombre o Glosa..."}
                             className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-tenri-200 outline-none text-sm md:text-base"
                             value={busqueda}
                             onChange={e => setBusqueda(e.target.value)}
                         />
                     </div>
-
-                    {activeTab === 'pedidos' && (
-                        <div className="relative">
-                            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                            <select
-                                value={filtroEstado}
-                                onChange={e => setFiltroEstado(e.target.value)}
-                                className="appearance-none pl-9 pr-8 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-tenri-200 outline-none cursor-pointer"
-                            >
-                                <option value="">Todos los estados</option>
-                                {ESTADOS_ORDEN.map(e => (
-                                    <option key={e.value} value={e.value}>{e.label}</option>
-                                ))}
-                            </select>
-                            <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none rotate-90" />
-                        </div>
-                    )}
-
-                    <button
-                        onClick={cargarDatos}
-                        className="p-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors"
-                        title="Actualizar datos"
-                    >
+                    <button onClick={cargarDatos} className="p-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors ml-4" title="Actualizar datos">
                         <RefreshCw size={20} />
                     </button>
                 </div>
 
                 <div className="overflow-auto flex-1 custom-scrollbar">
-                    {/* TABLA DE PEDIDOS */}
                     {activeTab === 'pedidos' && (
                         <table className="w-full min-w-[700px]">
                             <thead className="bg-gray-50 text-left sticky top-0 z-10 border-b border-gray-100">
@@ -433,10 +303,10 @@ const AdminPedidos = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                                                    {p.user ? p.user.name.charAt(0) : 'I'}
+                                                    {getInitial(p.user?.name, p.customer_data?.nombre, 'Invitado')}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-900">{p.user ? p.user.name : (p.customer_data?.nombre || 'Invitado')}</p>
+                                                    <p className="text-sm font-bold text-gray-900">{p.user?.name || p.customer_data?.nombre || 'Invitado'}</p>
                                                     <p className="text-[10px] md:text-xs text-gray-500 truncate max-w-[150px] md:max-w-none">{p.customer_data?.email || p.user?.email}</p>
                                                 </div>
                                             </div>
@@ -444,7 +314,7 @@ const AdminPedidos = () => {
                                         <td className="px-6 py-4 text-sm text-gray-500">{new Date(p.created_at).toLocaleDateString()}</td>
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(p.status)}`}>
-                                                {ESTADOS_ORDEN.find(e => e.value === p.status)?.label || p.status}
+                                                {p.status_label || p.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right font-black text-gray-900">${parseInt(p.total).toLocaleString('es-CL')}</td>
@@ -455,7 +325,6 @@ const AdminPedidos = () => {
                         </table>
                     )}
 
-                    {/* TABLA DE COMPROBANTES */}
                     {activeTab === 'comprobantes' && (
                         <table className="w-full min-w-[800px]">
                             <thead className="bg-gray-50 text-left sticky top-0 z-10 border-b border-gray-100">
@@ -497,9 +366,7 @@ const AdminPedidos = () => {
                 </div>
             </div>
 
-            {/* =========================================================
-                 DRAWER DETALLE DE PEDIDO
-                ========================================================= */}
+            {/* DRAWER DETALLE DE PEDIDO */}
             <div className={`fixed inset-y-0 right-0 w-full md:w-3/4 lg:w-[800px] xl:w-[900px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${pedidoSeleccionado ? 'translate-x-0' : 'translate-x-full'}`}>
                 {pedidoSeleccionado && (
                     <>
@@ -523,20 +390,20 @@ const AdminPedidos = () => {
                                     <div className="flex items-center gap-2">
                                         <span className={`w-3 h-3 rounded-full shadow-inner ${getStatusColor(pedidoSeleccionado.status).split(' ')[0]}`}></span>
                                         <span className="font-bold text-gray-900 text-lg">
-                                            {ESTADOS_ORDEN.find(e => e.value === pedidoSeleccionado.status)?.label || pedidoSeleccionado.status}
+                                            {pedidoSeleccionado.status_label || pedidoSeleccionado.status}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                    {nextForwardState ? (
+                                    {nextState ? (
                                         <button
-                                            onClick={() => cambiarEstado(nextForwardState.value)}
+                                            onClick={() => cambiarEstado(nextState.value)}
                                             disabled={procesando}
                                             className="bg-tenri-900 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-tenri-800 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 disabled:opacity-70"
                                         >
                                             {procesando ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
-                                            Avanzar a {nextForwardState.label}
+                                            Avanzar a {nextState.label}
                                         </button>
                                     ) : (
                                         <div className="bg-gray-100 text-gray-500 px-5 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border border-gray-200">
@@ -546,25 +413,29 @@ const AdminPedidos = () => {
 
                                     <div className="relative">
                                         <select
-                                            value={pedidoSeleccionado.status}
-                                            onChange={(e) => {
-                                                if (e.target.value !== pedidoSeleccionado.status) {
-                                                    cambiarEstado(e.target.value);
-                                                }
-                                            }}
-                                            disabled={procesando || estadosDisponiblesParaDropdown.length <= 1}
-                                            className="w-full sm:w-auto appearance-none text-xs font-bold text-gray-500 bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-3 outline-none cursor-pointer hover:bg-gray-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                            value=""
+                                            onChange={(e) => e.target.value && cambiarEstado(e.target.value)}
+                                            disabled={procesando}
+                                            className="w-full sm:w-auto appearance-none text-xs font-bold text-gray-500 bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-3 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
                                         >
-                                            {estadosDisponiblesParaDropdown.map(est => (
-                                                <option key={est.value} value={est.value}>
-                                                    {est.value === pedidoSeleccionado.status ? `(actual) ${est.label}` : est.label}
-                                                </option>
-                                            ))}
+                                            <option value="">Otras opciones...</option>
+                                            <option value="cancelled">Anular</option>
+                                            <option value="refunded">Reembolsar</option>
                                         </select>
                                         <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none rotate-90" />
                                     </div>
                                 </div>
                             </div>
+
+                            {estadosPermitidos && (
+                                <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl mb-6 flex items-start gap-3">
+                                    <AlertCircle className="text-amber-600 shrink-0 mt-0.5" size={18} />
+                                    <div className="text-sm text-amber-800">
+                                        <p className="font-bold mb-1">Transición no permitida.</p>
+                                        <p>Desde el estado actual, solo puedes ir a: <span className="font-bold">{estadosPermitidos.join(', ')}</span>.</p>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* DATOS DEL CLIENTE Y ENVÍO */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -576,8 +447,8 @@ const AdminPedidos = () => {
                                         </span>
                                     </div>
                                     <div className="space-y-3 text-sm text-gray-600 flex-1">
-                                        <p className="font-bold text-gray-800 text-base">{pedidoSeleccionado.customer_data?.nombre || pedidoSeleccionado.user?.name}</p>
-                                        <p className="flex items-center gap-3"><Mail size={16} className="text-gray-400" /> {pedidoSeleccionado.customer_data?.email || pedidoSeleccionado.user?.email}</p>
+                                        <p className="font-bold text-gray-800 text-base">{pedidoSeleccionado.customer_data?.nombre || pedidoSeleccionado.user?.name || 'Invitado'}</p>
+                                        <p className="flex items-center gap-3"><Mail size={16} className="text-gray-400" /> {pedidoSeleccionado.customer_data?.email || pedidoSeleccionado.user?.email || 'Sin email'}</p>
                                         <p className="flex items-center gap-3"><Phone size={16} className="text-gray-400" /> {pedidoSeleccionado.customer_data?.phone || 'Sin teléfono'}</p>
                                         <p className="flex items-center gap-3"><FileText size={16} className="text-gray-400" /> RUT: {pedidoSeleccionado.customer_data?.rut || 'No ingresado'}</p>
                                     </div>
@@ -592,7 +463,7 @@ const AdminPedidos = () => {
                                 </div>
                             </div>
 
-                            {/* TRACKING / DESPACHO */}
+                            {/* TRACKING */}
                             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                                     <h3 className="font-bold text-gray-900 flex items-center gap-2"><Truck size={18} className="text-tenri-500" /> Tracking de Envío</h3>
@@ -626,9 +497,9 @@ const AdminPedidos = () => {
                                             {pedidoSeleccionado.tracking_number ? (
                                                 <div className="flex items-center gap-3">
                                                     <p className="font-mono font-bold text-tenri-900">{pedidoSeleccionado.tracking_number}</p>
-                                                    {pedidoSeleccionado.shipping_provider !== 'propio' && (
+                                                    {pedidoSeleccionado.tracking_url && (
                                                         <a
-                                                            href={getTrackingLink(pedidoSeleccionado.shipping_provider, pedidoSeleccionado.tracking_number)}
+                                                            href={pedidoSeleccionado.tracking_url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="text-[10px] bg-tenri-100 text-tenri-700 px-2 py-1 rounded flex items-center gap-1 hover:bg-tenri-200 transition-colors"
@@ -674,14 +545,14 @@ const AdminPedidos = () => {
                             {/* NOTAS */}
                             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                                    <h3 className="font-bold text-gray-900 flex items-center gap-2"><FileText size={18} className="text-tenri-500" /> Notas y Bitácora</h3>
+                                    <h3 className="font-bold text-gray-900 flex items-center gap-2"><FileText size={18} className="text-tenri-500" /> Notas del Pedido</h3>
                                     {!editandoNotas ? (
                                         <button onClick={() => setEditandoNotas(true)} className="text-xs font-bold text-tenri-600 flex items-center gap-1 hover:text-tenri-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
                                             <Edit2 size={14} /> Editar Notas
                                         </button>
                                     ) : (
                                         <div className="flex items-center gap-2 w-full sm:w-auto">
-                                            <button onClick={() => { setEditandoNotas(false); setNotasTemp(pedidoSeleccionado.notes || ''); }} className="flex-1 sm:flex-none text-xs font-bold text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">Cancelar</button>
+                                            <button onClick={() => { setEditandoNotas(false); setNotasTemp(pedidoSeleccionado.notes || ""); }} className="flex-1 sm:flex-none text-xs font-bold text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">Cancelar</button>
                                             <button onClick={guardarNotas} disabled={procesando} className="flex-1 sm:flex-none text-xs font-bold text-white bg-tenri-900 flex items-center justify-center gap-1 hover:bg-tenri-800 px-4 py-1.5 rounded-lg transition-colors">
                                                 {procesando ? <Loader2 size={14} className="animate-spin" /> : <><Save size={14} /> Guardar</>}
                                             </button>
@@ -707,7 +578,37 @@ const AdminPedidos = () => {
                                 )}
                             </div>
 
-                            {/* PRODUCTOS Y TOTALES */}
+                            {/* HISTORIAL DE CAMBIOS DE ESTADO */}
+                            {statusLogs.length > 0 && (
+                                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
+                                    <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-4">
+                                        <History size={18} className="text-tenri-500" /> Historial de Cambios
+                                    </h3>
+                                    <div className="relative pl-6 border-l-2 border-gray-100 space-y-4">
+                                        {statusLogs.map((log) => (
+                                            <div key={log.id} className="relative">
+                                                <span className="absolute -left-[1.85rem] top-1.5 w-3 h-3 bg-white border-2 border-tenri-400 rounded-full"></span>
+                                                <div className="text-xs">
+                                                    <p className="font-bold text-gray-900">
+                                                        {log.from_status ? (
+                                                            <>De <span className="font-mono text-gray-500">{log.from_status}</span> → </>
+                                                        ) : null}
+                                                        <span className="font-mono text-tenri-900">{log.to_status}</span>
+                                                    </p>
+                                                    <p className="text-gray-500 mt-1">
+                                                        {log.actor_name || log.user?.name || 'Sistema'} · {new Date(log.created_at).toLocaleString()}
+                                                    </p>
+                                                    {log.reason && (
+                                                        <p className="text-gray-600 italic mt-1">{log.reason}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* LISTA DE PRODUCTOS Y TOTALES */}
                             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                                 <h3 className="font-bold text-gray-900 mb-5 flex items-center gap-2"><Package size={18} className="text-tenri-500" /> Detalle de Productos</h3>
                                 <div className="space-y-3 mb-6">
@@ -748,21 +649,22 @@ const AdminPedidos = () => {
             </div>
             {pedidoSeleccionado && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity" onClick={() => setPedidoSeleccionado(null)} />}
 
-            {/* =========================================================
-                 DRAWER DETALLE DE COMPROBANTE STANDBY
-                ========================================================= */}
+            {/* DRAWER COMPROBANTE STANDBY */}
             <div className={`fixed inset-y-0 right-0 w-full md:w-[500px] lg:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${comprobanteSeleccionado ? 'translate-x-0' : 'translate-x-full'}`}>
                 {comprobanteSeleccionado && (
                     <>
                         <div className="h-20 bg-amber-500 flex items-center justify-between px-6 text-white flex-shrink-0">
                             <div>
-                                <h2 className="text-xl font-bold flex items-center gap-2">Revisión Manual</h2>
+                                <h2 className="text-xl font-bold flex items-center gap-2">
+                                    Revisión Manual
+                                </h2>
                                 <p className="text-amber-100 text-sm mt-1">Comprobante #{comprobanteSeleccionado.transaction_number || 'S/N'}</p>
                             </div>
                             <button onClick={() => setComprobanteSeleccionado(null)} className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"><X size={20} /></button>
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 custom-scrollbar">
+
                             <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl mb-6 flex items-start gap-3">
                                 <AlertCircle className="text-amber-600 shrink-0" size={20} />
                                 <p className="text-sm text-amber-800">
@@ -836,24 +738,6 @@ const AdminPedidos = () => {
             </div>
             {comprobanteSeleccionado && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity" onClick={() => setComprobanteSeleccionado(null)} />}
 
-            {/* ============= MODALES GLOBALES ============= */}
-            <AlertModal
-                isOpen={alerta.open}
-                onClose={closeAlerta}
-                type={alerta.type}
-                title={alerta.title}
-                message={alerta.message}
-            />
-            <ConfirmModal
-                isOpen={confirmacion.open}
-                onClose={closeConfirmacion}
-                onConfirm={confirmacion.onConfirm}
-                title={confirmacion.title}
-                message={confirmacion.message}
-                confirmLabel={confirmacion.confirmLabel}
-                tone={confirmacion.tone}
-                loading={procesando}
-            />
         </div>
     );
 };
