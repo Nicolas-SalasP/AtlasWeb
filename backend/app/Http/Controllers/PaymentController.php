@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Order;
+use App\Domain\Order\Models\Order;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderPlaced;

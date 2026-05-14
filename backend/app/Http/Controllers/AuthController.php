@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use App\Models\AccessLog;
 use App\Models\User;
-use App\Models\Order;
+use App\Domain\Order\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;

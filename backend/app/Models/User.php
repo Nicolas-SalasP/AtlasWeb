@@ -28,8 +28,17 @@ class User extends Authenticatable
         'terms_accepted_ip'
     ];
 
+    /**
+     * Campos que NUNCA deben aparecer en respuestas JSON.
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'google_id',
+    ];
+
     protected $casts = [
-        'permissions' => 'array', 
+        'permissions' => 'array',
         'is_active' => 'boolean',
         'password' => 'hashed',
         'terms_accepted_at' => 'datetime',

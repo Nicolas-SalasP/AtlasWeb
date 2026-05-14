@@ -1,58 +1,94 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Domain\Order\Enums\OrderStatus;
+use App\Domain\Order\Exceptions\InvalidOrderTransitionException;
+use App\Domain\Order\Models\Order;
+use App\Domain\Order\Services\OrderService;
+use App\Http\Resources\Order\OrderResource;
 use App\Models\BankReceipt;
-use App\Models\Order;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class BankReceiptController extends Controller
 {
-    // Devuelve todos los comprobantes que no tienen orden
-    public function getUnmatched()
+    public function __construct(private readonly OrderService $orderService)
     {
-        return response()->json(BankReceipt::where('status', 'unmatched')->orderBy('created_at', 'desc')->get());
     }
 
-    // Vincula manualmente el comprobante a la orden
-    public function manualMatch(Request $request, $id)
+    public function getUnmatched(): JsonResponse
     {
-        $request->validate(['order_id' => 'required|exists:orders,id']);
-        
-        $receipt = BankReceipt::findOrFail($id);
-        $order = Order::findOrFail($request->order_id);
+        return response()->json(
+            BankReceipt::where('status', 'unmatched')
+                ->orderByDesc('created_at')
+                ->get()
+        );
+    }
+
+    public function manualMatch(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+        ]);
+
+        $receipt = BankReceipt::find($id);
+        if (!$receipt) {
+            return response()->json(['message' => 'Comprobante no encontrado'], 404);
+        }
 
         if ($receipt->status === 'matched') {
-            return response()->json(['message' => 'Rechazado: Este comprobante ya ha sido vinculado a una orden anteriormente.'], 422);
+            return response()->json([
+                'message' => 'Rechazado: Este comprobante ya ha sido vinculado a una orden anteriormente.',
+            ], 422);
         }
-        if (in_array($order->status, ['paid', 'cancelled', 'refunded'])) {
-            return response()->json(['message' => "No se puede vincular: La orden ya se encuentra en estado '{$order->status}'."], 422);
+
+        $order = Order::find($request->input('order_id'));
+        if (!$order) {
+            return response()->json(['message' => 'Orden no encontrada'], 404);
         }
+
+        if (in_array($order->status, [OrderStatus::Paid, OrderStatus::Cancelled, OrderStatus::Refunded], true)) {
+            return response()->json([
+                'message' => "No se puede vincular: La orden ya se encuentra en estado '{$order->status->value}'.",
+            ], 422);
+        }
+
+        $actor = $request->user();
+        $reason = "Asociación manual. Transacción: {$receipt->transaction_number}. Glosa: " . ($receipt->glosa ?? 'Sin glosa');
 
         try {
+            $updatedOrder = DB::transaction(function () use ($receipt, $order, $actor, $reason) {
+                $receipt->update([
+                    'order_id' => $order->id,
+                    'status'   => 'matched',
+                ]);
 
-            $receipt->update([
-                'order_id' => $order->id,
-                'status' => 'matched'
-            ]);
+                return $this->orderService->markAsPaidFromBankTransfer(
+                    order: $order,
+                    transferReference: (string) $receipt->transaction_number,
+                    transferDate: $receipt->transfer_date,
+                    actorUserId: $actor?->id,
+                    actorName: $actor?->name,
+                    auditReason: $reason,
+                );
+            });
+        } catch (InvalidOrderTransitionException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (Throwable $e) {
+            Log::error('Error crítico vinculando comprobante bancario: ' . $e->getMessage());
 
-            $order->status = 'paid';
-            $order->transfer_reference = $receipt->transaction_number;
-            $order->transfer_date = $receipt->transfer_date;
-            
-            $nota = "✅ Pago asociado MANUALMENTE.\nTransacción: {$receipt->transaction_number}\nGlosa: " . ($receipt->glosa ?? 'Sin glosa');
-            $order->notes = $order->notes ? $order->notes . "\n\n" . $nota : $nota;
-            $order->save();
-
-            DB::commit();
-
-            return response()->json(['message' => 'Comprobante asociado exitosamente']);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error crítico vinculando comprobante bancario: " . $e->getMessage());
-            return response()->json(['message' => 'Ocurrió un error interno al intentar procesar la vinculación.'], 500);
+            return response()->json([
+                'message' => 'Ocurrió un error interno al intentar procesar la vinculación.',
+            ], 500);
         }
+
+        return response()->json([
+            'message' => 'Comprobante asociado exitosamente',
+            'order'   => (new OrderResource($updatedOrder))->toArray($request),
+        ]);
     }
 }

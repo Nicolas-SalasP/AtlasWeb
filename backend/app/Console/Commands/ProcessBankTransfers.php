@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Webklex\IMAP\Facades\Client;
-use App\Models\Order;
+use App\Domain\Order\Models\Order;
 use App\Models\BankReceipt;
 use Carbon\Carbon;
 

@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Models;
+namespace App\Domain\Order\Models;
 
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderItem extends Model
 {
     use HasFactory;
-    public $timestamps = false;
 
     protected $fillable = [
         'order_id',
@@ -19,21 +20,22 @@ class OrderItem extends Model
         'quantity',
         'unit_price',
         'total_line',
-        'item_status'
+        'item_status',
     ];
 
-    public function order()
+    protected $casts = [
+        'quantity'   => 'integer',
+        'unit_price' => 'integer',
+        'total_line' => 'integer',
+    ];
+
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
-    }
-
-    public function service()
-    {
-        return $this->belongsTo(Service::class);
     }
 }

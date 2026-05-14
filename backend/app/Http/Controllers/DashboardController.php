@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
+use App\Domain\Order\Models\Order;
 use App\Models\Product;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
