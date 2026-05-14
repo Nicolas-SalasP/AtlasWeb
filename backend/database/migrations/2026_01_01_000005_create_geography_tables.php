@@ -27,17 +27,16 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('region_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('shipping_cost', 10, 0)->default(0); 
-            $table->boolean('is_servicable')->default(true); 
+            $table->decimal('shipping_cost', 10, 0)->default(0);
+            $table->boolean('is_servicable')->default(true);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('geography_tables');
+        Schema::dropIfExists('communes');
+        Schema::dropIfExists('regions');
+        Schema::dropIfExists('countries');
     }
 };

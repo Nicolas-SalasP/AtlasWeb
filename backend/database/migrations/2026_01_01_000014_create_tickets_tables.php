@@ -7,19 +7,29 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        // Tickets
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->string('ticket_code')->unique();
             $table->foreignId('user_id')->constrained();
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->string('subject');
             $table->enum('category', ['ERP', 'Web', 'Facturacion', 'Soporte']);
             $table->enum('priority', ['baja', 'media', 'alta', 'critica']);
-            $table->enum('status', ['nuevo', 'abierto', 'esperando_cliente', 'resuelto', 'cerrado'])->default('nuevo');
+            $table->enum('status', [
+                'nuevo',
+                'abierto',
+                'esperando_cliente',
+                'resuelto',
+                'cerrado',
+            ])->default('nuevo');
             $table->timestamps();
+
+            $table->index('status');
+            $table->index(['status', 'created_at']);
+            $table->index(['user_id', 'status']);
+            $table->index('assigned_to');
         });
 
-        // Mensajes
         Schema::create('ticket_messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ticket_id')->constrained()->cascadeOnDelete();
@@ -27,14 +37,14 @@ return new class extends Migration {
             $table->text('message');
             $table->json('attachments')->nullable();
             $table->timestamps();
+
+            $table->index(['ticket_id', 'created_at']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('support_tickets_tables');
+        Schema::dropIfExists('ticket_messages');
+        Schema::dropIfExists('tickets');
     }
 };

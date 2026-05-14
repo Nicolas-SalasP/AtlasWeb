@@ -9,21 +9,18 @@ return new class extends Migration {
     {
         Schema::create('billing_profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-
-            // Datos del SII para Facturación
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('rut', 20);
             $table->string('business_name');
             $table->string('business_line');
             $table->string('address');
             $table->string('city')->nullable();
             $table->string('email_dte')->nullable();
-
-            // Control de UI
             $table->boolean('is_default')->default(false);
-
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['user_id', 'is_default']);
         });
     }
 
