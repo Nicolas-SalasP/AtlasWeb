@@ -49,6 +49,24 @@ class OrderService
         return $query->paginate($perPage);
     }
 
+    public function listForUser(int $userId): Collection
+    {
+        return Order::with('items.product')
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function listAll(array $filters = []): Collection
+    {
+        $query = Order::with(['user', 'items.product'])
+            ->orderByDesc('created_at');
+
+        $this->applyFilters($query, $filters);
+
+        return $query->get();
+    }
+
     public function findFor(int $orderId, User $viewer): Order
     {
         $order = Order::with(['user', 'items.product', 'statusLogs.user'])->find($orderId);

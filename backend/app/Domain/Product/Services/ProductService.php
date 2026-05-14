@@ -34,6 +34,16 @@ class ProductService
         return $query->paginate($perPage);
     }
 
+    public function listAdmin(array $filters = []): Collection
+    {
+        $query = Product::with(['category', 'images'])
+            ->orderByDesc('created_at');
+
+        $this->applyAdminFilters($query, $filters);
+
+        return $query->get();
+    }
+
     public function listVisible(): Collection
     {
         return Product::with(['images', 'category'])

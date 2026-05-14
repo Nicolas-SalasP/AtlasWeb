@@ -30,17 +30,24 @@ class AdminProductController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->query('per_page', 25);
-        $perPage = max(1, min($perPage, 100));
-
+        $perPage = (int) $request->query('per_page', 0);
         $filters = $request->only(['q', 'category_id', 'is_visible', 'low_stock']);
 
-        $paginator = $this->productService->paginateAdmin($filters, $perPage);
-        $paginator->setCollection(
-            $paginator->getCollection()->map(fn ($product) => (new ProductResource($product))->toArray($request))
-        );
+        if ($perPage > 0) {
+            $perPage = max(1, min($perPage, 100));
+            $paginator = $this->productService->paginateAdmin($filters, $perPage);
+            $paginator->setCollection(
+                $paginator->getCollection()->map(fn ($product) => (new ProductResource($product))->toArray($request))
+            );
 
-        return response()->json($paginator);
+            return response()->json($paginator);
+        }
+
+        $products = $this->productService->listAdmin($filters);
+
+        return response()->json(
+            ProductResource::collection($products)->toArray($request)
+        );
     }
 
     public function show(Request $request, int $id): JsonResponse

@@ -25,6 +25,8 @@ class TicketResource extends JsonResource
             'status_label'   => $ticket->status?->label(),
             'user_id'        => $ticket->user_id,
             'assigned_to'    => $ticket->assigned_to,
+            'messages_count' => $ticket->messages_count
+                ?? ($ticket->relationLoaded('messages') ? $ticket->messages->count() : 0),
             'created_at'     => $ticket->created_at?->toIso8601String(),
             'updated_at'     => $ticket->updated_at?->toIso8601String(),
             'user'           => $this->whenLoaded('user', fn () => $ticket->user ? [

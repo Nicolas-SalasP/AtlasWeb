@@ -23,7 +23,6 @@ class UserResource extends JsonResource
             'role_id'            => (int) $user->role_id,
             'is_active'          => (bool) $user->is_active,
             'permissions'        => $user->permissions,
-            'company_name'       => $user->company_name ?? null,
             'tickets_count'      => $user->tickets_count ?? null,
             'terms_accepted_at'  => $user->terms_accepted_at?->toIso8601String(),
             'created_at'         => $user->created_at?->toIso8601String(),
