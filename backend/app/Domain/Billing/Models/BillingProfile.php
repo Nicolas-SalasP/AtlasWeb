@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Domain\Billing\Models;
 
+use App\Domain\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BillingProfile extends Model
@@ -18,14 +20,14 @@ class BillingProfile extends Model
         'address',
         'city',
         'email_dte',
-        'is_default'
+        'is_default',
     ];
 
     protected $casts = [
         'is_default' => 'boolean',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

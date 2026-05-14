@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Admin\AdminTicketController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BillingProfileController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
@@ -16,7 +17,6 @@ use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\Api\PublicServiceController;
 use App\Http\Controllers\Api\TicketController;
-use App\Http\Controllers\BillingProfileController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
@@ -100,8 +100,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/billing-profiles', [BillingProfileController::class, 'index']);
     Route::post('/billing-profiles', [BillingProfileController::class, 'store']);
-    Route::put('/billing-profiles/{id}', [BillingProfileController::class, 'update']);
-    Route::delete('/billing-profiles/{id}', [BillingProfileController::class, 'destroy']);
+    Route::put('/billing-profiles/{id}', [BillingProfileController::class, 'update'])->whereNumber('id');
+    Route::delete('/billing-profiles/{id}', [BillingProfileController::class, 'destroy'])->whereNumber('id');
 
     Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('admin');
