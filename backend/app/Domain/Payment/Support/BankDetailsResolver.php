@@ -2,7 +2,8 @@
 
 namespace App\Domain\Payment\Support;
 
-use App\Models\SystemSetting;
+use App\Domain\System\Enums\SettingKey;
+use App\Domain\System\Services\SettingService;
 
 final class BankDetailsResolver
 {
@@ -14,12 +15,21 @@ final class BankDetailsResolver
         'bank_email'          => 'pagos@tuempresa.cl',
     ];
 
+    private const KEY_MAP = [
+        'bank_name'           => SettingKey::BankName,
+        'bank_account_type'   => SettingKey::BankAccountType,
+        'bank_account_number' => SettingKey::BankAccountNumber,
+        'bank_rut'            => SettingKey::BankRut,
+        'bank_email'          => SettingKey::BankEmail,
+    ];
+
     public static function resolve(): array
     {
+        $settings = app(SettingService::class);
         $details = [];
 
         foreach (self::DEFAULTS as $key => $default) {
-            $value = SystemSetting::where('key', $key)->value('value');
+            $value = $settings->getRaw(self::KEY_MAP[$key]);
             $details[$key] = $value !== null && $value !== '' ? $value : $default;
         }
 

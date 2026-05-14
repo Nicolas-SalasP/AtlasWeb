@@ -2,24 +2,25 @@
 
 use App\Domain\User\Models\User;
 use App\Http\Controllers\Api\Admin\AdminBankReceiptController;
+use App\Http\Controllers\Api\Admin\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\Admin\AdminProductController;
 use App\Http\Controllers\Api\Admin\AdminServiceController;
+use App\Http\Controllers\Api\Admin\AdminSettingController;
 use App\Http\Controllers\Api\Admin\AdminTicketController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingProfileController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\Api\PublicServiceController;
+use App\Http\Controllers\Api\SystemStatusController;
 use App\Http\Controllers\Api\TicketController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\SettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -32,15 +33,14 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/products', [PublicProductController::class, 'index']);
 Route::get('/products/{id}', [PublicProductController::class, 'show'])->whereNumber('id');
 Route::get('/services/catalog', [PublicServiceController::class, 'indexPublic']);
-
 Route::get('/categories', [PublicCategoryController::class, 'index']);
 
-Route::get('/system-status', [SettingController::class, 'publicStatus']);
+Route::get('/system-status', [SystemStatusController::class, 'publicStatus']);
 
 Route::post('/orders', [OrderController::class, 'store']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 
-Route::post('/contacto', [ContactController::class, 'submit']);
+Route::post('/contacto', [ContactController::class, 'submit'])->middleware('throttle:5,1');
 
 Route::middleware(['erp.api.key'])->post('/internal/erp/validate-login', function (Request $request) {
     $user = User::where('email', $request->email)->first();
@@ -104,12 +104,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/billing-profiles/{id}', [BillingProfileController::class, 'destroy'])->whereNumber('id');
 
     Route::prefix('admin')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('admin');
-        Route::get('/notifications-summary', [DashboardController::class, 'getNotificationsSummary'])->middleware('admin');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->middleware('admin');
+        Route::get('/notifications-summary', [AdminDashboardController::class, 'notifications'])->middleware('admin');
 
         Route::middleware(['admin:manage_settings'])->group(function () {
-            Route::get('/settings', [SettingController::class, 'index']);
-            Route::post('/settings', [SettingController::class, 'update']);
+            Route::get('/settings', [AdminSettingController::class, 'index']);
+            Route::post('/settings', [AdminSettingController::class, 'update']);
         });
 
         Route::middleware(['admin:view_users'])->group(function () {

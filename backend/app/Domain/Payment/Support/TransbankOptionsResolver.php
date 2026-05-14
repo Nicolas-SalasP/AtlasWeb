@@ -2,7 +2,8 @@
 
 namespace App\Domain\Payment\Support;
 
-use App\Models\SystemSetting;
+use App\Domain\System\Enums\SettingKey;
+use App\Domain\System\Services\SettingService;
 use Transbank\Webpay\Options;
 
 final class TransbankOptionsResolver
@@ -12,7 +13,9 @@ final class TransbankOptionsResolver
 
     public static function resolve(): Options
     {
-        $dbEnv = SystemSetting::where('key', 'webpay_env')->value('value');
+        $settings = app(SettingService::class);
+
+        $dbEnv = $settings->getRaw(SettingKey::WebpayEnv);
         $environment = $dbEnv === 'production'
             ? Options::ENVIRONMENT_PRODUCTION
             : Options::ENVIRONMENT_INTEGRATION;
@@ -27,8 +30,8 @@ final class TransbankOptionsResolver
                 env('WEBPAY_INTEGRATION_KEY', self::DEFAULT_INTEGRATION_KEY)
             );
         } else {
-            $commerceCode = SystemSetting::where('key', 'webpay_code')->value('value');
-            $apiKey = SystemSetting::where('key', 'webpay_api_key')->value('value');
+            $commerceCode = $settings->getRaw(SettingKey::WebpayCode);
+            $apiKey = $settings->getRaw(SettingKey::WebpayApiKey);
         }
 
         return new Options($commerceCode, $apiKey, $environment);
@@ -36,7 +39,8 @@ final class TransbankOptionsResolver
 
     public static function isEnabled(): bool
     {
-        $value = SystemSetting::where('key', 'webpay_enabled')->value('value');
+        $settings = app(SettingService::class);
+        $value = $settings->getRaw(SettingKey::WebpayEnabled);
 
         return $value === null || $value === '1';
     }
