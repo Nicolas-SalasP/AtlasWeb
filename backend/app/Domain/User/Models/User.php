@@ -1,12 +1,17 @@
 <?php
 
-namespace App\Models;
+namespace App\Domain\User\Models;
 
+use App\Domain\Order\Models\Order;
+use App\Models\BillingProfile;
+use App\Models\Ticket;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
@@ -25,12 +30,9 @@ class User extends Authenticatable
         'phone',
         'address',
         'terms_accepted_at',
-        'terms_accepted_ip'
+        'terms_accepted_ip',
     ];
 
-    /**
-     * Campos que NUNCA deben aparecer en respuestas JSON.
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -38,34 +40,39 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'permissions' => 'array',
-        'is_active' => 'boolean',
-        'password' => 'hashed',
+        'permissions'       => 'array',
+        'is_active'         => 'boolean',
+        'password'          => 'hashed',
         'terms_accepted_at' => 'datetime',
     ];
 
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
 
-    public function tickets()
+    public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class);
     }
 
-    public function orders()
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    public function addresses()
+    public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
     }
 
-    public function billingProfiles()
+    public function billingProfiles(): HasMany
     {
         return $this->hasMany(BillingProfile::class);
+    }
+
+    public function accessLogs(): HasMany
+    {
+        return $this->hasMany(AccessLog::class)->orderByDesc('created_at');
     }
 }

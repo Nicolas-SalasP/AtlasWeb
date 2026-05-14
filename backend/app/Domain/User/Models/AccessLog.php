@@ -1,16 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Domain\User\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AccessLog extends Model
 {
     public $timestamps = false;
-
-    protected $casts = [
-        'created_at' => 'datetime',
-    ];
 
     protected $fillable = [
         'user_id',
@@ -19,10 +16,14 @@ class AccessLog extends Model
         'region',
         'action',
         'user_agent',
-        'created_at'
+        'created_at',
     ];
 
-    public function user()
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

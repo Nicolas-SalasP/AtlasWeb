@@ -14,9 +14,10 @@ use App\Domain\Order\Models\OrderStatusLog;
 use App\Domain\Order\Support\ChileShippingRates;
 use App\Domain\Order\Support\OrderStateMachine;
 use App\Domain\Product\Services\ProductService;
-use App\Models\User;
+use App\Domain\User\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -62,6 +63,63 @@ class OrderService
         }
 
         return $order;
+    }
+
+    public function findUnclaimedByRut(string $rut): Collection
+    {
+        if ($rut === '') {
+            return new Collection();
+        }
+
+        return Order::where('rut', $rut)
+            ->whereNull('user_id')
+            ->get();
+    }
+
+    public function findUnclaimedByRutAndEmail(string $rut, string $email): Collection
+    {
+        if ($rut === '' || $email === '') {
+            return new Collection();
+        }
+
+        $needle = strtolower($email);
+
+        return Order::where('rut', $rut)
+            ->whereNull('user_id')
+            ->get()
+            ->filter(function (Order $order) use ($needle) {
+                $orderEmail = $order->customer_data['email'] ?? null;
+                if (!is_string($orderEmail)) {
+                    return false;
+                }
+
+                return strtolower($orderEmail) === $needle;
+            })
+            ->values();
+    }
+
+    public function linkUnclaimedOrders(int $userId, string $rut, string $email): int
+    {
+        if ($rut === '' || $email === '') {
+            return 0;
+        }
+
+        $matches = $this->findUnclaimedByRutAndEmail($rut, $email);
+
+        if ($matches->isEmpty()) {
+            return 0;
+        }
+
+        return DB::transaction(function () use ($matches, $userId) {
+            $count = 0;
+
+            foreach ($matches as $order) {
+                $order->update(['user_id' => $userId]);
+                $count++;
+            }
+
+            return $count;
+        });
     }
 
     public function create(CreateOrderData $data): Order

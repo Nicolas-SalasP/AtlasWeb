@@ -1,23 +1,23 @@
 <?php
 
-use App\Http\Controllers\AddressController;
+use App\Domain\User\Models\User;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\Admin\AdminProductController;
+use App\Http\Controllers\Api\Admin\AdminUserController;
+use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankReceiptController;
 use App\Http\Controllers\BillingProfileController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TicketController;
-use App\Http\Controllers\UserController;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -82,11 +82,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/addresses', [AddressController::class, 'index']);
     Route::post('/addresses', [AddressController::class, 'store']);
-    Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
-    Route::put('/addresses/{id}/default', [AddressController::class, 'setDefault']);
+    Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->whereNumber('id');
+    Route::put('/addresses/{id}/default', [AddressController::class, 'setDefault'])->whereNumber('id');
 
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->whereNumber('id');
 
     Route::get('/tickets', [TicketController::class, 'index']);
     Route::get('/tickets/{id}', [TicketController::class, 'show']);
@@ -111,9 +111,9 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::middleware(['admin:view_users'])->group(function () {
-            Route::get('/users', [UserController::class, 'index']);
-            Route::get('/users/{id}', [UserController::class, 'show']);
-            Route::put('/users/{id}', [UserController::class, 'update']);
+            Route::get('/users', [AdminUserController::class, 'index']);
+            Route::get('/users/{id}', [AdminUserController::class, 'show'])->whereNumber('id');
+            Route::put('/users/{id}', [AdminUserController::class, 'update'])->whereNumber('id');
         });
 
         Route::middleware(['admin:manage_products'])->group(function () {
