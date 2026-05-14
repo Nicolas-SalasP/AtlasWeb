@@ -13,8 +13,10 @@ use App\Domain\Order\Models\Order;
 use App\Domain\Order\Models\OrderStatusLog;
 use App\Domain\Order\Support\ChileShippingRates;
 use App\Domain\Order\Support\OrderStateMachine;
+use App\Domain\Payment\Enums\PaymentMethod;
 use App\Domain\Product\Services\ProductService;
 use App\Domain\User\Models\User;
+use DateTimeInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -63,6 +65,22 @@ class OrderService
         }
 
         return $order;
+    }
+
+    public function findByIdOrFail(int $orderId): Order
+    {
+        $order = Order::find($orderId);
+
+        if (!$order) {
+            throw new OrderNotFoundException($orderId);
+        }
+
+        return $order;
+    }
+
+    public function findByTransactionToken(string $token): ?Order
+    {
+        return Order::where('transaction_token', $token)->first();
     }
 
     public function findUnclaimedByRut(string $rut): Collection
@@ -119,6 +137,40 @@ class OrderService
             }
 
             return $count;
+        });
+    }
+
+    public function pendingTransfersByAmount(int $amount): Collection
+    {
+        return Order::with('user')
+            ->where('status', OrderStatus::Pending)
+            ->where('payment_method', PaymentMethod::Transfer->value)
+            ->where('total', $amount)
+            ->get();
+    }
+
+    public function attachPaymentMethod(int $orderId, PaymentMethod $method, ?string $transactionToken = null): Order
+    {
+        return DB::transaction(function () use ($orderId, $method, $transactionToken) {
+            $order = Order::lockForUpdate()->find($orderId);
+
+            if (!$order) {
+                throw new OrderNotFoundException($orderId);
+            }
+
+            if ($order->status->isTerminal() || $order->status === OrderStatus::Paid) {
+                throw new InvalidOrderTransitionException($order->status, $order->status);
+            }
+
+            $order->payment_method = $method->value;
+
+            if ($transactionToken !== null) {
+                $order->transaction_token = $transactionToken;
+            }
+
+            $order->save();
+
+            return $order->fresh(['user', 'items.product']);
         });
     }
 
@@ -279,7 +331,7 @@ class OrderService
     public function markAsPaidFromBankTransfer(
         Order $order,
         string $transferReference,
-        \DateTimeInterface $transferDate,
+        DateTimeInterface $transferDate,
         ?int $actorUserId = null,
         ?string $actorName = null,
         ?string $auditReason = null,
@@ -310,6 +362,66 @@ class OrderService
                 'actor_name'  => $actorName,
                 'reason'      => $auditReason,
             ]);
+
+            return $order->load(['user', 'items.product', 'statusLogs.user']);
+        });
+    }
+
+    public function markAsPaidFromWebpay(Order $order, array $payload, ?int $actorUserId = null): Order
+    {
+        return DB::transaction(function () use ($order, $payload, $actorUserId) {
+            $order = Order::lockForUpdate()->findOrFail($order->id);
+
+            if ($order->status === OrderStatus::Paid) {
+                return $order->load(['user', 'items.product', 'statusLogs.user']);
+            }
+
+            $oldStatus = $order->status;
+
+            if (!OrderStateMachine::canTransition($oldStatus, OrderStatus::Paid)) {
+                throw new InvalidOrderTransitionException($oldStatus, OrderStatus::Paid);
+            }
+
+            $order->status = OrderStatus::Paid;
+            $order->payment_data = $payload;
+            $order->save();
+
+            OrderStatusLog::create([
+                'order_id'    => $order->id,
+                'user_id'     => $actorUserId,
+                'from_status' => $oldStatus,
+                'to_status'   => OrderStatus::Paid,
+                'actor_name'  => null,
+                'reason'      => 'Pago confirmado vía Webpay',
+            ]);
+
+            return $order->load(['user', 'items.product', 'statusLogs.user']);
+        });
+    }
+
+    public function failWebpayPayment(Order $order, array $payload): Order
+    {
+        return DB::transaction(function () use ($order, $payload) {
+            $order = Order::lockForUpdate()->findOrFail($order->id);
+            $oldStatus = $order->status;
+
+            $order->payment_data = $payload;
+
+            if (OrderStateMachine::canTransition($oldStatus, OrderStatus::Cancelled)) {
+                $order->status = OrderStatus::Cancelled;
+                $order->save();
+
+                OrderStatusLog::create([
+                    'order_id'    => $order->id,
+                    'user_id'     => null,
+                    'from_status' => $oldStatus,
+                    'to_status'   => OrderStatus::Cancelled,
+                    'actor_name'  => null,
+                    'reason'      => 'Pago Webpay rechazado o cancelado por el cliente',
+                ]);
+            } else {
+                $order->save();
+            }
 
             return $order->load(['user', 'items.product', 'statusLogs.user']);
         });

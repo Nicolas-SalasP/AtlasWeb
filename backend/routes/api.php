@@ -1,20 +1,20 @@
 <?php
 
 use App\Domain\User\Models\User;
+use App\Http\Controllers\Api\Admin\AdminBankReceiptController;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\Admin\AdminProductController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
-use App\Http\Controllers\BankReceiptController;
 use App\Http\Controllers\BillingProfileController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TicketController;
@@ -141,8 +141,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->whereNumber('id');
             Route::put('/orders/{id}', [AdminOrderController::class, 'update'])->whereNumber('id');
 
-            Route::get('/bank-receipts/unmatched', [BankReceiptController::class, 'getUnmatched']);
-            Route::post('/bank-receipts/{id}/match', [BankReceiptController::class, 'manualMatch'])->whereNumber('id');
+            Route::get('/bank-receipts/unmatched', [AdminBankReceiptController::class, 'unmatched']);
+            Route::post('/bank-receipts/{id}/match', [AdminBankReceiptController::class, 'manualMatch'])->whereNumber('id');
         });
     });
 });
