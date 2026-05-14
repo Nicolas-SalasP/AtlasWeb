@@ -4,6 +4,7 @@ use App\Domain\User\Models\User;
 use App\Http\Controllers\Api\Admin\AdminBankReceiptController;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\Admin\AdminProductController;
+use App\Http\Controllers\Api\Admin\AdminTicketController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
@@ -12,12 +13,12 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
+use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\BillingProfileController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -89,9 +90,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{id}', [OrderController::class, 'show'])->whereNumber('id');
 
     Route::get('/tickets', [TicketController::class, 'index']);
-    Route::get('/tickets/{id}', [TicketController::class, 'show']);
+    Route::get('/tickets/{id}', [TicketController::class, 'show'])->whereNumber('id');
     Route::post('/tickets', [TicketController::class, 'store']);
-    Route::post('/tickets/{id}/reply', [TicketController::class, 'reply']);
+    Route::post('/tickets/{id}/reply', [TicketController::class, 'reply'])->whereNumber('id');
 
     Route::post('/payment/transfer', [PaymentController::class, 'payWithTransfer']);
     Route::post('/payment/webpay', [PaymentController::class, 'initWebpay']);
@@ -132,8 +133,9 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::middleware(['admin:view_tickets'])->group(function () {
-            Route::get('/tickets', [TicketController::class, 'indexAll']);
-            Route::put('/tickets/{id}/status', [TicketController::class, 'updateStatus']);
+            Route::get('/tickets', [AdminTicketController::class, 'index']);
+            Route::put('/tickets/{id}/status', [AdminTicketController::class, 'updateStatus'])->whereNumber('id');
+            Route::put('/tickets/{id}/assign', [AdminTicketController::class, 'assign'])->whereNumber('id');
         });
 
         Route::middleware(['admin:view_orders'])->group(function () {

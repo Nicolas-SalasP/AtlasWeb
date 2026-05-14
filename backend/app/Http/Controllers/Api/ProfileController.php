@@ -18,7 +18,7 @@ use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Requests\Profile\VerifyEmailChangeRequest;
 use App\Http\Resources\User\AccessLogResource;
 use App\Http\Resources\User\UserResource;
-use App\Models\Ticket;
+use App\Domain\Ticket\Models\Ticket;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
