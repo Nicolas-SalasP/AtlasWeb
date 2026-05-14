@@ -57,6 +57,7 @@ return new class extends Migration {
             $table->decimal('unit_price', 12, 0);
             $table->decimal('total_line', 12, 0);
             $table->string('item_status')->default('sold');
+            $table->timestamps();
 
             $table->index('order_id');
             $table->index('product_id');
