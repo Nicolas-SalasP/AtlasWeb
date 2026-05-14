@@ -98,7 +98,12 @@ class OrderService
                     continue;
                 }
 
-                $product = $this->productService->reserveStock((int) $rawId, $quantity);
+                $product = $this->productService->reserveStock(
+                    productId: (int) $rawId,
+                    quantity: $quantity,
+                    actorUserId: $data->userId,
+                    reason: 'Reserva por creación de orden',
+                );
 
                 $lineTotal = (int) $product->price * $quantity;
                 $itemsToInsert[] = [
@@ -163,11 +168,18 @@ class OrderService
                 }
 
                 if ($data->status->reversesStock() && !$oldStatus->reversesStock()) {
+                    $reason = $data->status === OrderStatus::Cancelled
+                        ? 'Restauración por anulación de orden'
+                        : 'Restauración por reembolso de orden';
+
                     foreach ($order->items as $item) {
                         if ($item->product_id) {
                             $this->productService->restoreStock(
-                                (int) $item->product_id,
-                                (int) $item->quantity
+                                productId: (int) $item->product_id,
+                                quantity: (int) $item->quantity,
+                                orderId: (int) $order->id,
+                                actorUserId: $data->actorUserId,
+                                reason: $reason,
                             );
                         }
                     }

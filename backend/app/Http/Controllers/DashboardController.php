@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Order\Models\Order;
-use App\Models\Product;
+use App\Domain\Product\Models\Product;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

@@ -2,15 +2,16 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
+use App\Http\Controllers\Api\Admin\AdminProductController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PublicCategoryController;
+use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankReceiptController;
 use App\Http\Controllers\BillingProfileController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
@@ -26,10 +27,11 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:3,1');
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-Route::get('/products', [ProductController::class, 'indexPublic']);
+Route::get('/products', [PublicProductController::class, 'index']);
+Route::get('/products/{id}', [PublicProductController::class, 'show'])->whereNumber('id');
 Route::get('/services/catalog', [ServiceController::class, 'indexPublic']);
 
-Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories', [PublicCategoryController::class, 'index']);
 
 Route::get('/system-status', [SettingController::class, 'publicStatus']);
 
@@ -115,12 +117,14 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::middleware(['admin:manage_products'])->group(function () {
-            Route::get('/products', [ProductController::class, 'index']);
-            Route::post('/products', [ProductController::class, 'store']);
-            Route::put('/products/{id}', [ProductController::class, 'update']);
-            Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-            Route::delete('/product-images/{id}', [ProductController::class, 'destroyImage']);
-            Route::post('/product-images/{id}/cover', [ProductController::class, 'setCover']);
+            Route::get('/products', [AdminProductController::class, 'index']);
+            Route::get('/products/{id}', [AdminProductController::class, 'show'])->whereNumber('id');
+            Route::post('/products', [AdminProductController::class, 'store']);
+            Route::put('/products/{id}', [AdminProductController::class, 'update'])->whereNumber('id');
+            Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->whereNumber('id');
+            Route::delete('/products/{id}/force', [AdminProductController::class, 'forceDestroy'])->whereNumber('id');
+            Route::delete('/product-images/{id}', [AdminProductController::class, 'destroyImage'])->whereNumber('id');
+            Route::post('/product-images/{id}/cover', [AdminProductController::class, 'setCover'])->whereNumber('id');
         });
 
         Route::middleware(['admin:manage_services'])->group(function () {
@@ -134,11 +138,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::middleware(['admin:view_orders'])->group(function () {
             Route::get('/orders', [AdminOrderController::class, 'index']);
-            Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
-            Route::put('/orders/{id}', [AdminOrderController::class, 'update']);
+            Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->whereNumber('id');
+            Route::put('/orders/{id}', [AdminOrderController::class, 'update'])->whereNumber('id');
 
             Route::get('/bank-receipts/unmatched', [BankReceiptController::class, 'getUnmatched']);
-            Route::post('/bank-receipts/{id}/match', [BankReceiptController::class, 'manualMatch']);
+            Route::post('/bank-receipts/{id}/match', [BankReceiptController::class, 'manualMatch'])->whereNumber('id');
         });
     });
 });
