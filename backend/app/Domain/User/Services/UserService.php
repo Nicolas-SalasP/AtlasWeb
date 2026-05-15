@@ -22,10 +22,7 @@ class UserService
             ])
             ->orderByDesc('created_at')
             ->get()
-            ->each(function (User $user) {
-                $defaultProfile = $user->billingProfiles->first();
-                $user->setAttribute('company_name', $defaultProfile?->business_name);
-            });
+            ->each(fn (User $user) => $this->attachCompanyName($user));
     }
 
     public function paginateForAdmin(array $filters = [], int $perPage = 25): LengthAwarePaginator
@@ -41,10 +38,7 @@ class UserService
 
         $paginator = $query->paginate($perPage);
 
-        $paginator->getCollection()->each(function (User $user) {
-            $defaultProfile = $user->billingProfiles->first();
-            $user->setAttribute('company_name', $defaultProfile?->business_name);
-        });
+        $paginator->getCollection()->each(fn (User $user) => $this->attachCompanyName($user));
 
         return $paginator;
     }
@@ -55,13 +49,22 @@ class UserService
             'role',
             'tickets' => fn ($q) => $q->orderByDesc('created_at'),
             'orders'  => fn ($q) => $q->orderByDesc('created_at'),
+            'billingProfiles' => fn ($q) => $q->where('is_default', true),
         ])->find($id);
 
         if (!$user) {
             throw new UserNotFoundException($id);
         }
 
+        $this->attachCompanyName($user);
+
         return $user;
+    }
+
+    private function attachCompanyName(User $user): void
+    {
+        $defaultProfile = $user->billingProfiles->first();
+        $user->setAttribute('company_name', $defaultProfile?->business_name);
     }
 
     public function updateAsAdmin(User $actor, int $targetId, UpdateUserData $data): User

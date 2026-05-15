@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import {
-    Search, User, Mail, Building, Calendar,
+    Search, User, Building, Calendar,
     Shield, Ticket, Loader2, Users,
-    Eye, Edit, Trash2, X, ShoppingBag, Phone, CheckCircle, XCircle,
-    Filter, ArrowDownUp
+    Eye, Edit, X, ShoppingBag, Phone, CheckCircle, XCircle,
+    Filter, AlertCircle
 } from 'lucide-react';
-import AlertModal from '../../components/AlertModal'; 
+import AlertModal from '../../components/AlertModal';
 
 const PERMISOS_DISPONIBLES = [
     { id: 'all', label: '👑 Acceso Total (Super Admin)' },
@@ -18,6 +18,13 @@ const PERMISOS_DISPONIBLES = [
     { id: 'view_tickets', label: '🎧 Responder Soporte' },
     { id: 'manage_settings', label: '⚙️ Configuración del Sistema' }
 ];
+
+const getInitial = (name) => {
+    if (typeof name === 'string' && name.length > 0) {
+        return name.charAt(0).toUpperCase();
+    }
+    return '?';
+};
 
 const AdminUsuarios = () => {
     const location = useLocation();
@@ -36,7 +43,9 @@ const AdminUsuarios = () => {
     const [modalEditarOpen, setModalEditarOpen] = useState(false);
     const [usuarioEditar, setUsuarioEditar] = useState(null);
     const [permisosEdit, setPermisosEdit] = useState({});
+    const [guardandoEdit, setGuardandoEdit] = useState(false);
     const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
+    const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
 
     useEffect(() => {
         cargarUsuarios();
@@ -49,12 +58,18 @@ const AdminUsuarios = () => {
         }
     }, [location]);
 
+    const showToast = (type, message) => {
+        setToast({ show: true, type, message });
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
+    };
+
     const cargarUsuarios = async () => {
         try {
             const response = await api.get('/admin/users');
             setUsuarios(response.data);
         } catch (error) {
             console.error("Error:", error);
+            showToast('error', 'Error al cargar usuarios');
         } finally {
             setLoading(false);
         }
@@ -69,22 +84,24 @@ const AdminUsuarios = () => {
             setUsuarioDetalle(response.data);
         } catch (error) {
             console.error("Error cargando detalle:", error);
+            showToast('error', 'No se pudo cargar el detalle');
         } finally {
             setLoadingDetalle(false);
         }
     };
 
     const abrirEditar = (usuario) => {
-        setUsuarioEditar({
-            ...usuario,
-            company_name: usuario.company_name || ''
-        });
+        setUsuarioEditar({ ...usuario });
 
         let parsedPerms = {};
         if (usuario.permissions) {
-            parsedPerms = typeof usuario.permissions === 'string' 
-                ? JSON.parse(usuario.permissions) 
-                : usuario.permissions;
+            try {
+                parsedPerms = typeof usuario.permissions === 'string'
+                    ? JSON.parse(usuario.permissions)
+                    : usuario.permissions;
+            } catch (e) {
+                parsedPerms = {};
+            }
         }
         setPermisosEdit(parsedPerms || {});
 
@@ -101,39 +118,65 @@ const AdminUsuarios = () => {
 
     const guardarEdicion = async (e) => {
         e.preventDefault();
+        setGuardandoEdit(true);
         try {
-            const response = await api.put(`/admin/users/${usuarioEditar.id}`, {
+            const payload = {
                 name: usuarioEditar.name,
                 email: usuarioEditar.email,
                 role_id: parseInt(usuarioEditar.role_id),
-                is_active: usuarioEditar.is_active,
-                company_name: usuarioEditar.company_name,
-                phone: usuarioEditar.phone,
-                permissions: permisosEdit
-            });
+                is_active: Boolean(usuarioEditar.is_active),
+                phone: usuarioEditar.phone || null,
+                permissions: permisosEdit,
+            };
+
+            const response = await api.put(`/admin/users/${usuarioEditar.id}`, payload);
 
             setUsuarios(usuarios.map(u => u.id === usuarioEditar.id ? response.data : u));
             setModalEditarOpen(false);
+            showToast('success', 'Usuario actualizado');
         } catch (error) {
             console.error("Error actualizando:", error);
-            const errorMsg = error.response?.data?.message || "Error al actualizar usuario. Verifica tu conexión.";
-            setErrorModal({
-                show: true,
-                title: 'Acceso Denegado',
-                message: errorMsg
-            });
+            const status = error.response?.status;
+            const body = error.response?.data;
+
+            if (status === 403) {
+                setErrorModal({
+                    show: true,
+                    title: 'Acceso Denegado',
+                    message: body?.message || 'No tienes permiso para realizar esta acción.'
+                });
+            } else if (status === 422) {
+                const validationErrors = body?.errors
+                    ? Object.values(body.errors).flat().join(' ')
+                    : (body?.message || 'Datos inválidos.');
+                setErrorModal({
+                    show: true,
+                    title: 'Datos inválidos',
+                    message: validationErrors
+                });
+            } else {
+                setErrorModal({
+                    show: true,
+                    title: 'Error al guardar',
+                    message: body?.message || 'Error al actualizar usuario. Verifica tu conexión.'
+                });
+            }
+        } finally {
+            setGuardandoEdit(false);
         }
     };
 
     let usuariosFiltrados = usuarios.filter(u => {
-        const coincideBusqueda = u.name.toLowerCase().includes(busqueda.toLowerCase()) ||
-                                 u.email.toLowerCase().includes(busqueda.toLowerCase()) ||
-                                 (u.company_name && u.company_name.toLowerCase().includes(busqueda.toLowerCase()));
-        
+        const query = busqueda.toLowerCase();
+        const coincideBusqueda =
+            (u.name || '').toLowerCase().includes(query) ||
+            (u.email || '').toLowerCase().includes(query) ||
+            (u.company_name && u.company_name.toLowerCase().includes(query));
+
         const coincideRol = filtroRol === "all" || Number(u.role_id) === Number(filtroRol);
-        const coincideEstado = filtroEstado === "all" || 
+        const coincideEstado = filtroEstado === "all" ||
                                (filtroEstado === "active" ? u.is_active : !u.is_active);
-        const coincideTipo = filtroTipo === "all" || 
+        const coincideTipo = filtroTipo === "all" ||
                              (filtroTipo === "empresa" ? !!u.company_name : !u.company_name);
 
         return coincideBusqueda && coincideRol && coincideEstado && coincideTipo;
@@ -152,6 +195,14 @@ const AdminUsuarios = () => {
 
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
+
+            {toast.show && (
+                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-tenri-900 text-white' : 'bg-red-500 text-white'}`}>
+                    {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                    <span className="font-bold text-sm">{toast.message}</span>
+                </div>
+            )}
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-4 flex-shrink-0">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Directorio</h1>
@@ -174,15 +225,15 @@ const AdminUsuarios = () => {
                     <div className="flex gap-2">
                         <div className="relative flex-1">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                            <input 
-                                type="text" 
-                                placeholder="Buscar por nombre, correo o empresa..." 
-                                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none text-sm md:text-base transition-all" 
-                                value={busqueda} 
-                                onChange={(e) => setBusqueda(e.target.value)} 
+                            <input
+                                type="text"
+                                placeholder="Buscar por nombre, correo o empresa..."
+                                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-tenri-300 outline-none text-sm md:text-base transition-all"
+                                value={busqueda}
+                                onChange={(e) => setBusqueda(e.target.value)}
                             />
                         </div>
-                        <button 
+                        <button
                             onClick={() => setMostrarFiltros(!mostrarFiltros)}
                             className={`md:hidden p-3 rounded-xl border transition-colors ${mostrarFiltros ? 'bg-tenri-900 text-white border-tenri-900' : 'bg-white text-gray-600 border-gray-200'}`}
                         >
@@ -191,8 +242,8 @@ const AdminUsuarios = () => {
                     </div>
 
                     <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 ${mostrarFiltros ? 'flex' : 'hidden md:grid'}`}>
-                        <select 
-                            value={filtroRol} 
+                        <select
+                            value={filtroRol}
                             onChange={e => setFiltroRol(e.target.value)}
                             className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer"
                         >
@@ -201,8 +252,8 @@ const AdminUsuarios = () => {
                             <option value="2">Solo Clientes</option>
                         </select>
 
-                        <select 
-                            value={filtroTipo} 
+                        <select
+                            value={filtroTipo}
                             onChange={e => setFiltroTipo(e.target.value)}
                             className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer"
                         >
@@ -211,8 +262,8 @@ const AdminUsuarios = () => {
                             <option value="particular">Particulares</option>
                         </select>
 
-                        <select 
-                            value={filtroEstado} 
+                        <select
+                            value={filtroEstado}
                             onChange={e => setFiltroEstado(e.target.value)}
                             className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer"
                         >
@@ -221,8 +272,8 @@ const AdminUsuarios = () => {
                             <option value="inactive">Cuentas Inactivas</option>
                         </select>
 
-                        <select 
-                            value={ordenTickets} 
+                        <select
+                            value={ordenTickets}
                             onChange={e => setOrdenTickets(e.target.value)}
                             className="bg-white border border-gray-200 text-gray-600 text-sm rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-tenri-300 cursor-pointer flex items-center"
                         >
@@ -259,7 +310,7 @@ const AdminUsuarios = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 font-bold shrink-0">
-                                                {u.name.charAt(0)}
+                                                {getInitial(u.name)}
                                             </div>
                                             <div>
                                                 <p className="font-bold text-gray-900">{u.name}</p>
@@ -310,7 +361,7 @@ const AdminUsuarios = () => {
                             <button onClick={() => setDrawerOpen(false)} className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 p-2 rounded-full backdrop-blur-md transition-colors"><X size={20} /></button>
                             <div className="absolute -bottom-10 left-6 md:left-8 flex items-end gap-4">
                                 <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-2xl p-1.5 shadow-lg">
-                                    <div className="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center text-3xl md:text-4xl font-black text-gray-400">{usuarioDetalle.name.charAt(0)}</div>
+                                    <div className="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center text-3xl md:text-4xl font-black text-gray-400">{getInitial(usuarioDetalle.name)}</div>
                                 </div>
                                 <div className="mb-3">
                                     <h2 className="text-xl md:text-2xl font-bold text-white leading-none">{usuarioDetalle.name}</h2>
@@ -335,6 +386,12 @@ const AdminUsuarios = () => {
                                             <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Rol</p><span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">{Number(usuarioDetalle.role_id) === 1 ? 'Admin' : 'Cliente'}</span></div>
                                             <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Teléfono</p><p className="text-gray-800 font-medium flex items-center gap-2"><Phone size={16} className="text-gray-400" /> {usuarioDetalle.phone || 'Sin teléfono'}</p></div>
                                             <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Estado</p><span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${usuarioDetalle.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{usuarioDetalle.is_active ? 'Activo' : 'Inactivo'}</span></div>
+                                            {usuarioDetalle.rut && (
+                                                <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">RUT</p><p className="text-gray-800 font-medium font-mono">{usuarioDetalle.rut}</p></div>
+                                            )}
+                                            {usuarioDetalle.created_at && (
+                                                <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Miembro desde</p><p className="text-gray-800 font-medium flex items-center gap-2"><Calendar size={16} className="text-gray-400" /> {new Date(usuarioDetalle.created_at).toLocaleDateString()}</p></div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -347,10 +404,16 @@ const AdminUsuarios = () => {
                                             <div key={t.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <span className="text-xs font-bold text-gray-400">{t.ticket_code}</span>
-                                                    <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${t.status === 'nuevo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{t.status}</span>
+                                                    <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${
+                                                        t.status === 'nuevo' ? 'bg-emerald-100 text-emerald-700' :
+                                                        t.status === 'abierto' ? 'bg-blue-100 text-blue-700' :
+                                                        t.status === 'esperando_cliente' ? 'bg-amber-100 text-amber-700' :
+                                                        t.status === 'resuelto' ? 'bg-violet-100 text-violet-700' :
+                                                        'bg-gray-100 text-gray-600'
+                                                    }`}>{t.status_label || t.status}</span>
                                                 </div>
                                                 <h4 className="font-bold text-gray-800 text-sm mb-1">{t.subject}</h4>
-                                                <p className="text-xs text-gray-500">{new Date(t.created_at).toLocaleDateString()} • {t.category}</p>
+                                                <p className="text-xs text-gray-500">{new Date(t.created_at).toLocaleDateString()} • {t.category_label || t.category}</p>
                                             </div>
                                         ))
                                     ) : (
@@ -373,7 +436,7 @@ const AdminUsuarios = () => {
                                                 </div>
                                                 <div className="text-left sm:text-right ml-14 sm:ml-0">
                                                     <p className="font-bold text-gray-900">${parseInt(orden.total).toLocaleString('es-CL')}</p>
-                                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${orden.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{orden.status}</span>
+                                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${orden.status === 'paid' || orden.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{orden.status_label || orden.status}</span>
                                                 </div>
                                             </div>
                                         ))
@@ -387,7 +450,7 @@ const AdminUsuarios = () => {
                 )}
             </div>
 
-            {modalEditarOpen && (
+            {modalEditarOpen && usuarioEditar && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-2xl p-6 md:p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <div className="flex justify-between items-center mb-6">
@@ -395,15 +458,26 @@ const AdminUsuarios = () => {
                             <button onClick={() => setModalEditarOpen(false)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-500"><X size={20}/></button>
                         </div>
 
+                        {usuarioEditar.company_name && (
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-5 flex items-start gap-2 text-xs text-blue-700">
+                                <Building size={14} className="shrink-0 mt-0.5" />
+                                <span>Empresa asociada: <strong>{usuarioEditar.company_name}</strong>. Para modificar datos comerciales, el cliente debe editarlo desde su perfil de facturación.</span>
+                            </div>
+                        )}
+
                         <form onSubmit={guardarEdicion} className="space-y-6">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
-                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-900 outline-none" value={usuarioEditar.name} onChange={e => setUsuarioEditar({ ...usuarioEditar, name: e.target.value })} required />
+                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-900 outline-none" value={usuarioEditar.name || ''} onChange={e => setUsuarioEditar({ ...usuarioEditar, name: e.target.value })} required />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-500 uppercase">Empresa</label>
-                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-900 outline-none" value={usuarioEditar.company_name} onChange={e => setUsuarioEditar({ ...usuarioEditar, company_name: e.target.value })} />
+                                    <label className="text-xs font-bold text-gray-500 uppercase">Email</label>
+                                    <input type="email" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-900 outline-none" value={usuarioEditar.email || ''} onChange={e => setUsuarioEditar({ ...usuarioEditar, email: e.target.value })} required />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase">Teléfono</label>
+                                    <input type="text" className="w-full p-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:ring-2 focus:ring-tenri-900 outline-none" value={usuarioEditar.phone || ''} onChange={e => setUsuarioEditar({ ...usuarioEditar, phone: e.target.value })} placeholder="+56 9 ..." />
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase">Rol</label>
@@ -412,7 +486,7 @@ const AdminUsuarios = () => {
                                         <option value={2}>Cliente</option>
                                     </select>
                                 </div>
-                                <div>
+                                <div className="sm:col-span-2">
                                     <label className="text-xs font-bold text-gray-500 uppercase">Estado</label>
                                     <select className="w-full p-3 bg-gray-50 rounded-xl outline-none" value={usuarioEditar.is_active ? 1 : 0} onChange={e => setUsuarioEditar({ ...usuarioEditar, is_active: e.target.value == 1 })}>
                                         <option value={1}>Activo</option>
@@ -430,10 +504,10 @@ const AdminUsuarios = () => {
                                         {PERMISOS_DISPONIBLES.map(permiso => (
                                             <label key={permiso.id} className="flex items-center gap-3 cursor-pointer group">
                                                 <div className="relative flex items-center shrink-0">
-                                                    <input 
-                                                        type="checkbox" 
+                                                    <input
+                                                        type="checkbox"
                                                         className="peer w-5 h-5 cursor-pointer appearance-none rounded-md border border-gray-300 checked:bg-tenri-900 checked:border-tenri-900 transition-all"
-                                                        checked={permisosEdit[permiso.id] || false}
+                                                        checked={Boolean(permisosEdit[permiso.id])}
                                                         onChange={() => handleTogglePermiso(permiso.id)}
                                                     />
                                                     <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
@@ -454,14 +528,17 @@ const AdminUsuarios = () => {
 
                             <div className="flex gap-3 pt-4 border-t border-gray-100">
                                 <button type="button" onClick={() => setModalEditarOpen(false)} className="flex-1 py-3.5 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
-                                <button type="submit" className="flex-1 py-3.5 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg transition-all">Guardar Cambios</button>
+                                <button type="submit" disabled={guardandoEdit} className="flex-1 py-3.5 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                                    {guardandoEdit && <Loader2 size={16} className="animate-spin" />}
+                                    Guardar Cambios
+                                </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            <AlertModal 
+            <AlertModal
                 isOpen={errorModal.show}
                 onClose={() => setErrorModal({ ...errorModal, show: false })}
                 title={errorModal.title}

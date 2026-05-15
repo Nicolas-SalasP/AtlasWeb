@@ -1,41 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../api/axiosConfig';
 import {
-    Search, Plus, Briefcase, DollarSign, Image as ImageIcon,
-    Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
-    AlertTriangle, CheckCircle, AlertCircle, Check, MinusCircle, PlusCircle
+    Search, Plus, Briefcase, DollarSign,
+    Edit, Trash2, X, Save, Loader2, UploadCloud,
+    AlertTriangle, CheckCircle, AlertCircle, Check, MinusCircle, PlusCircle, EyeOff
 } from 'lucide-react';
 import { BASE_URL } from '../../api/constants';
 
 const AdminServices = () => {
-    // --- ESTADOS DE DATOS ---
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
 
-    // --- ESTADOS UI ---
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [editando, setEditando] = useState(null);
     const [guardando, setGuardando] = useState(false);
 
-    // --- NOTIFICACIONES Y MODALES ---
     const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
     const [confirmModal, setConfirmModal] = useState({ show: false, message: '', action: null });
 
-    // --- FORMULARIO ---
     const [form, setForm] = useState({
         name: '',
         price: '',
         duration_days: 30,
         description: '',
         features: [''],
+        is_active: true,
         image: null,
         previewUrl: null
     });
 
     const fileInputRef = useRef(null);
 
-    // 1. CARGA INICIAL
     useEffect(() => {
         cargarDatos();
     }, []);
@@ -52,10 +48,9 @@ const AdminServices = () => {
         }
     };
 
-    // --- HELPERS UX ---
     const showToast = (type, message) => {
         setToast({ show: true, type, message });
-        setTimeout(() => setToast({ ...toast, show: false }), 3000);
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
     };
 
     const pedirConfirmacion = (message, action) => {
@@ -71,7 +66,6 @@ const AdminServices = () => {
         cerrarConfirmacion();
     };
 
-    // 2. ABRIR DRAWER
     const abrirDrawer = (service = null) => {
         if (service) {
             setEditando(service);
@@ -81,6 +75,7 @@ const AdminServices = () => {
                 duration_days: service.duration_days,
                 description: service.description || '',
                 features: service.features && service.features.length > 0 ? service.features : [''],
+                is_active: Boolean(service.is_active ?? true),
                 image: null,
                 previewUrl: service.image_url ? `${BASE_URL}${service.image_url}` : null
             });
@@ -88,13 +83,12 @@ const AdminServices = () => {
             setEditando(null);
             setForm({
                 name: '', price: '', duration_days: 30, description: '',
-                features: [''], image: null, previewUrl: null
+                features: [''], is_active: true, image: null, previewUrl: null
             });
         }
         setDrawerOpen(true);
     };
 
-    // 3. LOGICA FORMULARIO
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -118,10 +112,9 @@ const AdminServices = () => {
 
     const removeFeatureField = (index) => {
         const newFeatures = form.features.filter((_, i) => i !== index);
-        setForm({ ...form, features: newFeatures });
+        setForm({ ...form, features: newFeatures.length > 0 ? newFeatures : [''] });
     };
 
-    // 4. GUARDAR SERVICIO
     const guardarServicio = async (e) => {
         e.preventDefault();
         setGuardando(true);
@@ -132,6 +125,7 @@ const AdminServices = () => {
             formData.append('price', form.price);
             formData.append('duration_days', form.duration_days);
             formData.append('description', form.description);
+            formData.append('is_active', form.is_active ? '1' : '0');
 
             if (form.image instanceof File) {
                 formData.append('image', form.image);
@@ -157,7 +151,8 @@ const AdminServices = () => {
 
         } catch (error) {
             console.error(error);
-            showToast('error', 'Error al guardar');
+            const msg = error.response?.data?.message || 'Error al guardar';
+            showToast('error', msg);
         } finally {
             setGuardando(false);
         }
@@ -170,12 +165,12 @@ const AdminServices = () => {
                 setServices(services.filter(s => s.id !== id));
                 showToast('success', 'Plan eliminado');
             } catch (error) {
-                showToast('error', 'Error al eliminar');
+                const msg = error.response?.data?.message || 'Error al eliminar';
+                showToast('error', msg);
             }
         });
     };
 
-    // Filtros
     const filtrados = services.filter(s =>
         s.name.toLowerCase().includes(busqueda.toLowerCase())
     );
@@ -185,15 +180,13 @@ const AdminServices = () => {
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
 
-            {/* NOTIFICACIÓN TOAST */}
             {toast.show && (
-                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-tenri-900 text-white' : 'bg-red-500 text-white'}`}>
                     {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                    <span className="font-medium text-sm">{toast.message}</span>
+                    <span className="font-bold text-sm">{toast.message}</span>
                 </div>
             )}
 
-            {/* HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 flex-shrink-0">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Servicios</h1>
@@ -204,7 +197,6 @@ const AdminServices = () => {
                 </button>
             </div>
 
-            {/* TABLA CONTAINER */}
             <div className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] shadow-xl border border-gray-100 flex flex-col flex-1 overflow-hidden">
                 <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
                     <div className="relative w-full md:max-w-md">
@@ -221,6 +213,7 @@ const AdminServices = () => {
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Duración</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Precio</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50">Beneficios</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50 text-center">Estado</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase bg-gray-50 text-right">Acciones</th>
                             </tr>
                         </thead>
@@ -261,6 +254,13 @@ const AdminServices = () => {
                                             </span>
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4 text-center">
+                                        {Boolean(s.is_active ?? true) ? (
+                                            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 border border-green-100 px-2 py-1 rounded-lg w-fit"><CheckCircle size={12} /> Activo</span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-1 rounded-lg w-fit"><EyeOff size={12} /> Pausado</span>
+                                        )}
+                                    </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
                                             <button onClick={() => abrirDrawer(s)} className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"><Edit size={18} /></button>
@@ -269,14 +269,13 @@ const AdminServices = () => {
                                     </td>
                                 </tr>
                             )) : (
-                                <tr><td colSpan="5" className="p-10 text-center text-gray-400">No hay servicios registrados.</td></tr>
+                                <tr><td colSpan="6" className="p-10 text-center text-gray-400">No hay servicios registrados.</td></tr>
                             )}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {/* --- MODAL CONFIRMACIÓN --- */}
             {confirmModal.show && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95 text-center">
@@ -293,7 +292,6 @@ const AdminServices = () => {
                 </div>
             )}
 
-            {/* --- DRAWER FORMULARIO --- */}
             <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setDrawerOpen(false)} />
             <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
@@ -304,7 +302,6 @@ const AdminServices = () => {
 
                 <form onSubmit={guardarServicio} className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar space-y-8 bg-gray-50/50">
 
-                    {/* IMAGEN DEL SERVICIO */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center">
                         <label className="text-sm font-bold text-gray-900 mb-4 w-full">Icono / Imagen del Plan</label>
                         <div onClick={() => fileInputRef.current.click()} className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-tenri-900 hover:bg-tenri-50 transition-all bg-gray-50 overflow-hidden relative group">
@@ -325,7 +322,6 @@ const AdminServices = () => {
                         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
                     </div>
 
-                    {/* DATOS DEL SERVICIO */}
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -343,10 +339,11 @@ const AdminServices = () => {
 
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Duración</label>
-                            <select className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none appearance-none" value={form.duration_days} onChange={e => setForm({ ...form, duration_days: e.target.value })}>
-                                <option value="30">Mensual (30 días)</option>
-                                <option value="365">Anual (365 días)</option>
+                            <select className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none appearance-none" value={form.duration_days} onChange={e => setForm({ ...form, duration_days: parseInt(e.target.value) })}>
                                 <option value="7">Semanal (7 días)</option>
+                                <option value="30">Mensual (30 días)</option>
+                                <option value="180">Semestral (180 días)</option>
+                                <option value="365">Anual (365 días)</option>
                             </select>
                         </div>
 
@@ -355,7 +352,6 @@ const AdminServices = () => {
                             <textarea rows="3" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none resize-none" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Breve resumen del servicio..." />
                         </div>
 
-                        {/* LISTA DINÁMICA DE FEATURES */}
                         <div className="bg-white p-4 rounded-xl border border-gray-200">
                             <label className="text-xs font-bold text-gray-500 uppercase mb-3 block">Beneficios Incluidos</label>
                             <div className="space-y-3">
@@ -381,12 +377,19 @@ const AdminServices = () => {
                                 <PlusCircle size={16} /> Agregar otro beneficio
                             </button>
                         </div>
+
+                        <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-200 cursor-pointer" onClick={() => setForm({ ...form, is_active: !form.is_active })}>
+                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${form.is_active ? 'bg-tenri-900 border-tenri-900' : 'border-gray-300'}`}>
+                                {form.is_active && <CheckCircle size={14} className="text-white" />}
+                            </div>
+                            <label className="text-sm font-medium text-gray-700 cursor-pointer">Plan activo y visible para clientes</label>
+                        </div>
                     </div>
                 </form>
 
                 <div className="p-6 border-t border-gray-100 bg-white flex justify-end gap-3 flex-shrink-0">
                     <button onClick={() => setDrawerOpen(false)} className="px-6 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
-                    <button onClick={guardarServicio} disabled={guardando} className="px-8 py-3 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg flex items-center gap-2">
+                    <button onClick={guardarServicio} disabled={guardando} className="px-8 py-3 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg flex items-center gap-2 disabled:opacity-70">
                         {guardando ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
                         Guardar
                     </button>
