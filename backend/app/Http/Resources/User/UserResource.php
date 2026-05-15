@@ -15,7 +15,7 @@ class UserResource extends JsonResource
         /** @var User $user */
         $user = $this->resource;
 
-        return [
+        $data = [
             'id'                 => $user->id,
             'name'               => $user->name,
             'email'              => $user->email,
@@ -30,12 +30,23 @@ class UserResource extends JsonResource
             'terms_accepted_at'  => $user->terms_accepted_at?->toIso8601String(),
             'created_at'         => $user->created_at?->toIso8601String(),
             'updated_at'         => $user->updated_at?->toIso8601String(),
-            'role'               => $this->whenLoaded('role', fn () => $user->role ? [
+        ];
+
+        if ($user->relationLoaded('role') && $user->role) {
+            $data['role'] = [
                 'id'   => $user->role->id,
                 'name' => $user->role->name,
-            ] : null),
-            'tickets'            => TicketResource::collection($this->whenLoaded('tickets')),
-            'orders'             => OrderResource::collection($this->whenLoaded('orders')),
-        ];
+            ];
+        }
+
+        if ($user->relationLoaded('tickets')) {
+            $data['tickets'] = TicketResource::collection($user->tickets)->toArray($request);
+        }
+
+        if ($user->relationLoaded('orders')) {
+            $data['orders'] = OrderResource::collection($user->orders)->toArray($request);
+        }
+
+        return $data;
     }
 }
