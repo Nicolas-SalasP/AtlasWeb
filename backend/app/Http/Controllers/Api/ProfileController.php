@@ -162,18 +162,22 @@ class ProfileController extends Controller
         }
 
         $tickets = Ticket::where('user_id', $user->id)
+            ->withCount('messages')
             ->orderByDesc('created_at')
             ->take(10)
             ->get();
 
+        $statusAbiertos = ['nuevo', 'abierto', 'esperando_cliente'];
+        $statusCerrados = ['resuelto', 'cerrado'];
+
         $stats = [
             'total'  => Ticket::where('user_id', $user->id)->count(),
-            'open'   => Ticket::where('user_id', $user->id)->whereIn('status', ['open', 'in_progress'])->count(),
-            'closed' => Ticket::where('user_id', $user->id)->where('status', 'closed')->count(),
+            'open'   => Ticket::where('user_id', $user->id)->whereIn('status', $statusAbiertos)->count(),
+            'closed' => Ticket::where('user_id', $user->id)->whereIn('status', $statusCerrados)->count(),
         ];
 
         return response()->json([
-            'tickets' => $tickets,
+            'tickets' => \App\Http\Resources\Ticket\TicketResource::collection($tickets)->toArray($request),
             'stats'   => $stats,
         ]);
     }
