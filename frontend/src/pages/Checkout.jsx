@@ -411,9 +411,9 @@ const Checkout = () => {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto w-full relative document-modal-content">
-                            {legalModal.type === 'terminos' && <Terminos />}
-                            {legalModal.type === 'privacidad' && <Privacidad />}
-                            {legalModal.type === 'sla' && <SLA />}
+                            {legalModal.type === 'terminos' && <Terminos embedded />}
+                            {legalModal.type === 'privacidad' && <Privacidad embedded />}
+                            {legalModal.type === 'sla' && <SLA embedded />}
                         </div>
                         <div className="p-4 sm:px-6 border-t border-gray-200 bg-white flex justify-end">
                             <button
