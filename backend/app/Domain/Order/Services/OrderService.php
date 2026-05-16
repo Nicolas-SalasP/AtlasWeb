@@ -197,6 +197,7 @@ class OrderService
         return DB::transaction(function () use ($data) {
             $itemsToInsert = [];
             $subtotal = 0;
+            $hasPhysicalProduct = false;
 
             foreach ($data->items as $item) {
                 $rawId = (string) ($item['id'] ?? '');
@@ -226,6 +227,8 @@ class OrderService
                     continue;
                 }
 
+                $hasPhysicalProduct = true;
+
                 $product = $this->productService->reserveStock(
                     productId: (int) $rawId,
                     quantity: $quantity,
@@ -248,7 +251,7 @@ class OrderService
             }
 
             $region = $data->customerData['region'] ?? 'Metropolitana';
-            $shippingCost = ChileShippingRates::for($region);
+            $shippingCost = $hasPhysicalProduct ? ChileShippingRates::for($region) : 0;
 
             $cleanAddress = trim(strip_tags((string) ($data->shippingAddress ?? '')));
             $cleanNotes = trim(strip_tags((string) ($data->notes ?? '')));

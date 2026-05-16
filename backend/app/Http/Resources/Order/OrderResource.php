@@ -32,13 +32,13 @@ class OrderResource extends JsonResource
             'transfer_date'      => $order->transfer_date?->toIso8601String(),
             'created_at'         => $order->created_at?->toIso8601String(),
             'updated_at'         => $order->updated_at?->toIso8601String(),
-            'user'               => $this->whenLoaded('user', fn () => [
+            'user'               => $this->whenLoaded('user', fn () => $order->user ? [
                 'id'    => $order->user->id,
                 'name'  => $order->user->name,
                 'email' => $order->user->email,
-            ]),
-            'items'              => OrderItemResource::collection($this->whenLoaded('items')),
-            'status_logs'        => OrderStatusLogResource::collection($this->whenLoaded('statusLogs')),
+            ] : null),
+            'items'              => $this->whenLoaded('items', fn () => OrderItemResource::collection($order->items)),
+            'status_logs'        => $this->whenLoaded('statusLogs', fn () => OrderStatusLogResource::collection($order->statusLogs)),
         ];
     }
 }

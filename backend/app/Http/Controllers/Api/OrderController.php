@@ -87,9 +87,23 @@ class OrderController extends Controller
         } catch (ProductNotFoundException | OfferingNotFoundException $e) {
             return response()->json(['message' => $e->getMessage()], 404);
         } catch (Throwable $e) {
-            Log::error('Error creando orden: ' . $e->getMessage());
+            Log::error('Error creando orden: ' . $e->getMessage(), [
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
-            return response()->json(['message' => 'No se pudo crear la orden'], 500);
+            $payload = ['message' => 'No se pudo crear la orden'];
+
+            if (config('app.debug')) {
+                $payload['debug'] = [
+                    'exception' => get_class($e),
+                    'error'     => $e->getMessage(),
+                    'file'      => basename($e->getFile()) . ':' . $e->getLine(),
+                ];
+            }
+
+            return response()->json($payload, 500);
         }
 
         $clientEmail = $order->customer_data['email'] ?? null;
