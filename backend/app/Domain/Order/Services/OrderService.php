@@ -255,6 +255,7 @@ class OrderService
 
             $cleanAddress = trim(strip_tags((string) ($data->shippingAddress ?? '')));
             $cleanNotes = trim(strip_tags((string) ($data->notes ?? '')));
+            $cleanCustomerData = $this->sanitizeCustomerData($data->customerData);
 
             $order = Order::create([
                 'user_id'           => $data->userId,
@@ -264,9 +265,9 @@ class OrderService
                 'shipping_cost'     => $shippingCost,
                 'total'             => $subtotal + $shippingCost,
                 'shipping_address'  => $cleanAddress !== '' ? $cleanAddress : null,
-                'customer_data'     => $data->customerData,
+                'customer_data'     => $cleanCustomerData,
                 'notes'             => $cleanNotes !== '' ? $cleanNotes : null,
-                'rut'               => $data->customerData['rut'] ?? null,
+                'rut'               => $cleanCustomerData['rut'] ?? null,
                 'terms_accepted_at' => now(),
                 'terms_accepted_ip' => $data->clientIp,
             ]);
@@ -455,6 +456,25 @@ class OrderService
         } while (Order::where('order_number', $candidate)->exists());
 
         return $candidate;
+    }
+
+    private function sanitizeCustomerData(array $data): array
+    {
+        $clean = [];
+
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $stripped = strip_tags($value);
+                $stripped = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $stripped) ?? '';
+                $clean[$key] = trim($stripped);
+            } elseif (is_array($value)) {
+                $clean[$key] = $this->sanitizeCustomerData($value);
+            } else {
+                $clean[$key] = $value;
+            }
+        }
+
+        return $clean;
     }
 
     private function applyFilters(Builder $query, array $filters): void
