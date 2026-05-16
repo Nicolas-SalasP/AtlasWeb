@@ -26,7 +26,7 @@ const Footer = () => {
                         <h4 className="text-white font-semibold mb-6 uppercase text-sm tracking-wider">Mapa del Sitio</h4>
                         <ul className="space-y-3 text-sm">
                             <li><Link to="/" className="hover:text-white transition-colors block py-1">Inicio</Link></li>
-                            <li><Link to="/proyectos" className="hover:text-white transition-colors block py-1">Proyectos</Link></li>
+                            <li><Link to="/servicios" className="hover:text-white transition-colors block py-1">Servicios</Link></li>
                             <li><Link to="/catalogo" className="hover:text-white transition-colors block py-1">Tienda</Link></li>
                             <li><a href="https://erp.tenri.cl" className="text-tenri-300 font-medium hover:text-white transition-colors block py-1">Sistema ERP</a></li>
                             <li><Link to="/contacto" className="text-tenri-300 font-medium hover:text-white transition-colors block py-1">Contacto</Link></li>

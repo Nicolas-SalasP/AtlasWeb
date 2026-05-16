@@ -58,9 +58,8 @@ const Navbar = () => {
                         <div className="hidden md:block">
                             <div className="ml-10 flex items-baseline space-x-8">
                                 <Link to="/" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Inicio</Link>
-                                <Link to="/proyectos" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Proyectos</Link>
-                                <Link to="/catalogo" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Tienda</Link>
                                 <Link to="/servicios" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Servicios</Link>
+                                <Link to="/catalogo" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Tienda</Link>
                                 <Link to="/contacto" className="hover:text-tenri-300 transition-colors px-3 py-2 rounded-md text-sm font-bold">Contacto</Link>
                             </div>
                         </div>
@@ -158,9 +157,8 @@ const Navbar = () => {
                     <div className="md:hidden bg-tenri-900 border-t border-tenri-800 shadow-inner">
                         <div className="px-4 pt-4 pb-6 space-y-2 sm:px-3">
                             <Link to="/" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Inicio</Link>
-                            <Link to="/proyectos" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Proyectos</Link>
-                            <Link to="/catalogo" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Tienda</Link>
                             <Link to="/servicios" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Servicios</Link>
+                            <Link to="/catalogo" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Tienda</Link>
                             <Link to="/contacto" onClick={() => setIsOpen(false)} className="block px-3 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-tenri-800 transition-colors">Contacto</Link>
 
                             {isAuthenticated ? (
