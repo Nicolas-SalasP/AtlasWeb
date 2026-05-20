@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api/axiosConfig';
 import {
     Loader2, Save, Plus, X, CheckCircle,
-    AlertCircle, Layers, ChevronDown
+    AlertCircle, Layers, DollarSign
 } from 'lucide-react';
 
 const CATEGORIAS_MODULOS = [
@@ -41,7 +41,7 @@ const AdminPlanes = () => {
     const fetchData = async () => {
         try {
             const res = await api.get('/admin/erp-plans');
-            setPlanes(res.data.planes.map(p => ({ ...p, module_keys: p.module_keys || [], dirty: false })));
+            setPlanes(res.data.planes.map(p => ({ ...p, module_keys: p.module_keys || [], costo_operacional: p.costo_operacional || {}, dirty: false })));
             setAllModules(res.data.all_modules);
             if (res.data.planes.length > 0 && !planActivo) setPlanActivo(res.data.planes[0].id);
         } catch {
@@ -54,6 +54,22 @@ const AdminPlanes = () => {
     const showToast = (type, message) => {
         setToast({ type, message });
         setTimeout(() => setToast(null), 3500);
+    };
+
+    const setCosto = (planId, key, valor) => {
+        setPlanes(prev => prev.map(p => {
+            if (p.id !== planId) return p;
+            const num = parseInt(valor.replace(/[^0-9]/g, ''), 10) || 0;
+            return {
+                ...p,
+                dirty: true,
+                costo_operacional: { ...p.costo_operacional, [key]: num },
+            };
+        }));
+    };
+
+    const getCostoTotal = (plan) => {
+        return plan.module_keys.reduce((sum, k) => sum + (plan.costo_operacional?.[k] || 0), 0);
     };
 
     const toggleModulo = (planId, key) => {
@@ -71,7 +87,7 @@ const AdminPlanes = () => {
     const guardarPlan = async (plan) => {
         setGuardando(plan.id);
         try {
-            await api.put(`/admin/erp-plans/${plan.id}`, { module_keys: plan.module_keys });
+            await api.put(`/admin/erp-plans/${plan.id}`, { module_keys: plan.module_keys, costo_operacional: plan.costo_operacional });
             setPlanes(prev => prev.map(p => p.id === plan.id ? { ...p, dirty: false } : p));
             showToast('success', `"${plan.name}" actualizado y sincronizado con el ERP.`);
         } catch {
@@ -217,6 +233,21 @@ const AdminPlanes = () => {
                                     <p className="text-xs text-gray-400 mt-0.5">
                                         {planSeleccionado.module_keys.length} de {allModules.length} módulos activos
                                     </p>
+                                    {(() => {
+                                        const costo = getCostoTotal(planSeleccionado);
+                                        const precio = planSeleccionado.price || 0;
+                                        const margen = precio > 0 ? Math.round(((precio - costo) / precio) * 100) : null;
+                                        return costo > 0 && (
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <span className="text-xs text-red-500">Costo: ${costo.toLocaleString('es-CL')}/mes</span>
+                                                {margen !== null && (
+                                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${margen >= 50 ? 'bg-green-100 text-green-700' : margen >= 20 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                                                        Margen {margen}%
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                                 <button
                                     onClick={() => guardarPlan(planSeleccionado)}
@@ -242,17 +273,36 @@ const AdminPlanes = () => {
                                                 <span className="text-xs text-gray-400">{activos}/{modulosCat.length}</span>
                                             </div>
                                             <div className="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                {modulosCat.map(m => (
-                                                    <label key={m.key} className="flex items-center gap-2.5 cursor-pointer group">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={planSeleccionado.module_keys.includes(m.key)}
-                                                            onChange={() => toggleModulo(planSeleccionado.id, m.key)}
-                                                            className="w-4 h-4 rounded accent-tenri-900 cursor-pointer"
-                                                        />
-                                                        <span className="text-sm text-gray-700 group-hover:text-gray-900">{m.label}</span>
-                                                    </label>
-                                                ))}
+                                                {modulosCat.map(m => {
+                                                    const activo = planSeleccionado.module_keys.includes(m.key);
+                                                    return (
+                                                        <div key={m.key} className="flex items-center gap-2">
+                                                            <label className="flex items-center gap-2 cursor-pointer group flex-1">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={activo}
+                                                                    onChange={() => toggleModulo(planSeleccionado.id, m.key)}
+                                                                    className="w-4 h-4 rounded accent-tenri-900 cursor-pointer flex-shrink-0"
+                                                                />
+                                                                <span className="text-sm text-gray-700 group-hover:text-gray-900">{m.label}</span>
+                                                            </label>
+                                                            {activo && (
+                                                                <div className="flex items-center gap-1 flex-shrink-0">
+                                                                    <span className="text-xs text-gray-400">$</span>
+                                                                    <input
+                                                                        type="text"
+                                                                        inputMode="numeric"
+                                                                        value={(planSeleccionado.costo_operacional?.[m.key] || 0).toLocaleString('es-CL')}
+                                                                        onChange={e => setCosto(planSeleccionado.id, m.key, e.target.value)}
+                                                                        className="w-24 text-xs border border-gray-200 rounded px-2 py-1 text-right focus:outline-none focus:ring-1 focus:ring-tenri-900"
+                                                                        placeholder="0"
+                                                                        title="Costo mensual de este módulo en CLP"
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     );

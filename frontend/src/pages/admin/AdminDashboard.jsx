@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
-    Tooltip, ResponsiveContainer
+    Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
-import { Wifi, WifiOff, Users } from 'lucide-react';
+import { Wifi, WifiOff, Users, TrendingUp, TrendingDown, Layers, CreditCard, Minus } from 'lucide-react';
 
 const buildChartLabels = (count = 10) => {
     const today = new Date();
@@ -26,8 +26,8 @@ const buildChartLabels = (count = 10) => {
 const AdminDashboard = () => {
     const [data, setData] = useState(null);
     const [notifs, setNotifs] = useState({ pending_orders: 0, new_tickets: 0 });
-    const [loading, setLoading] = useState(true);
     const [onlineUsers, setOnlineUsers] = useState({ paid: [], all: [], error: false });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -58,6 +58,9 @@ const AdminDashboard = () => {
     if (!data) return <div className="p-10 text-center text-gray-500">No hay datos disponibles en este momento.</div>;
 
     const chartLabels = buildChartLabels(data.chart_data?.length || 10);
+    const financiero = data.financiero || { productos: {}, servicios: {}, total: {} };
+    const erpStats = data.erp_stats || {};
+
     const chartData = (data.chart_data || []).map((value, index) => ({
         day: chartLabels[index] || `Día ${index + 1}`,
         ventas: value
@@ -195,6 +198,139 @@ const AdminDashboard = () => {
                             )}
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* ── SECCIÓN FINANCIERA ── */}
+            <div className="mb-8">
+                <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <TrendingUp size={18} className="text-tenri-900" /> Resumen financiero del mes
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                        { label: 'Productos físicos', data: financiero.productos, color: 'blue' },
+                        { label: 'Servicios ERP',     data: financiero.servicios, color: 'purple' },
+                        { label: 'Total general',     data: financiero.total,     color: 'green' },
+                    ].map(({ label, data: d, color }) => {
+                        const colorMap = {
+                            blue:   { bg: 'bg-blue-50',   border: 'border-blue-200',   text: 'text-blue-700',   badge: 'bg-blue-100' },
+                            purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100' },
+                            green:  { bg: 'bg-green-50',  border: 'border-green-200',  text: 'text-green-700',  badge: 'bg-green-100' },
+                        }[color];
+                        const margen = d?.margen_pct;
+                        return (
+                            <div key={label} className={`${colorMap.bg} border ${colorMap.border} rounded-2xl p-5`}>
+                                <p className={`text-xs font-bold uppercase tracking-wide ${colorMap.text} mb-3`}>{label}</p>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Ingresos</span>
+                                        <span className="font-bold text-gray-900">${parseInt(d?.ingresos || 0).toLocaleString('es-CL')}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Costos</span>
+                                        <span className="font-bold text-red-600">-${parseInt(d?.costos || 0).toLocaleString('es-CL')}</span>
+                                    </div>
+                                    <div className={`flex justify-between text-sm pt-2 border-t border-current border-opacity-20`}>
+                                        <span className="font-bold text-gray-700">Margen</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-black text-gray-900">${parseInt(d?.margen || 0).toLocaleString('es-CL')}</span>
+                                            {margen !== null && margen !== undefined && (
+                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${margen >= 50 ? 'bg-green-100 text-green-700' : margen >= 20 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                                                    {margen}%
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* ── ERP STATS ── */}
+            <div className="mb-8">
+                <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Layers size={18} className="text-tenri-900" /> ERP Contable
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-tenri-900 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Users size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <p className="text-2xl font-black text-gray-900">{erpStats.suscripciones_activas || 0}</p>
+                            <p className="text-xs text-gray-500 font-medium">Suscripciones activas</p>
+                        </div>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <CreditCard size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <p className="text-2xl font-black text-gray-900">{erpStats.nuevas_este_mes || 0}</p>
+                            <p className="text-xs text-gray-500 font-medium">Nuevas este mes</p>
+                        </div>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Por plan</p>
+                        <div className="space-y-1.5">
+                            {(erpStats.distribucion_por_plan || []).map((p, i) => (
+                                <div key={i} className="flex justify-between text-sm">
+                                    <span className="text-gray-600 truncate">{p.plan?.replace('ERP ', '')}</span>
+                                    <span className="font-bold text-gray-900 ml-2">{p.cantidad}</span>
+                                </div>
+                            ))}
+                            {(!erpStats.distribucion_por_plan || erpStats.distribucion_por_plan.length === 0) && (
+                                <p className="text-xs text-gray-400">Sin suscripciones aún</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Widget usuarios online */}
+                <div className="grid lg:grid-cols-2 gap-4">
+                    {[
+                        { title: 'Con plan pagado', data: onlineUsers.paid, color: 'green' },
+                        { title: 'Todos los usuarios ERP', data: onlineUsers.all, color: 'gray' },
+                    ].map(({ title, data: users, color }) => (
+                        <div key={title} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                            <div className={`flex items-center justify-between px-5 py-3 border-b border-gray-100 ${color === 'green' ? 'bg-green-50' : 'bg-gray-50'}`}>
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${color === 'green' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
+                                    <span className={`text-sm font-semibold ${color === 'green' ? 'text-green-800' : 'text-gray-700'}`}>{title}</span>
+                                </div>
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${color === 'green' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                    {users.length} online
+                                </span>
+                            </div>
+                            {users.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                    <WifiOff size={20} className="mb-1" />
+                                    <p className="text-xs">{onlineUsers.error ? 'ERP no disponible' : 'Sin actividad reciente'}</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-50 max-h-48 overflow-y-auto">
+                                    {users.map(u => (
+                                        <div key={u.id} className="flex items-center justify-between px-5 py-2.5">
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{u.nombre}</p>
+                                                <p className="text-xs text-gray-400">{u.empresa || u.email}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">
+                                                    {u.plan_slug?.replace('erp-', '').replace(/-/g, ' ') || 'starter'}
+                                                </span>
+                                                <p className="text-[10px] text-gray-400 mt-0.5">
+                                                    {u.ultimo_acceso ? new Date(u.ultimo_acceso).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
 
