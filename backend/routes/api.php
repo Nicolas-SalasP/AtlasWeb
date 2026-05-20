@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\Api\PublicServiceController;
+use App\Http\Controllers\Api\ErpInternalController;
 use App\Http\Controllers\Api\IndicadoresController;
 use App\Http\Controllers\Api\SystemStatusController;
 use App\Http\Controllers\Api\TicketController;
@@ -48,22 +49,11 @@ Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 
 Route::post('/contacto', [ContactController::class, 'submit'])->middleware($contactLimit);
 
-Route::middleware(['erp.api.key'])->post('/internal/erp/validate-login', function (Request $request) {
-    $user = User::where('email', $request->email)->first();
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['success' => false, 'message' => 'Credenciales inválidas'], 401);
-    }
-
-    return response()->json([
-        'success' => true,
-        'user'    => [
-            'atlas_id'  => $user->id,
-            'name'      => $user->name,
-            'email'     => $user->email,
-            'rut'       => $user->rut ?? null,
-            'is_active' => true,
-        ],
-    ]);
+Route::prefix('internal/erp')->middleware(['erp.api.key'])->group(function () {
+    Route::post('/validate-login',  [ErpInternalController::class, 'validateLogin']);
+    Route::post('/validate-token',  [ErpInternalController::class, 'validateToken']);
+    Route::post('/sync-password',   [ErpInternalController::class, 'syncPassword']);
+    Route::get('/user-info/{tenriUserId}', [ErpInternalController::class, 'userInfo'])->whereNumber('tenriUserId');
 });
 
 Route::middleware('auth:sanctum')->group(function () {

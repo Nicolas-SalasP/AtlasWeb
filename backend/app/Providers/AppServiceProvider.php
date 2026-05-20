@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Domain\Erp\Services\ErpClient;
+use App\Domain\Erp\Services\ErpPasswordSyncService;
+use App\Domain\Order\Models\Order;
+use App\Observers\OrderObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -11,7 +15,21 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->singleton(ErpClient::class, function ($app) {
+            $config = $app['config']->get('services.erp');
+
+            return new ErpClient(
+                baseUrl: $config['base_url'],
+                apiKey: $config['api_key'],
+                timeout: (int) ($config['timeout'] ?? 8),
+            );
+        });
+
+        $this->app->singleton(ErpPasswordSyncService::class, function ($app) {
+            return new ErpPasswordSyncService(
+                client: $app->make(ErpClient::class),
+            );
+        });
     }
 
     public function boot(): void
@@ -33,5 +51,7 @@ class AppServiceProvider extends ServiceProvider
                 ->subject('Recuperar Contraseña - Tenri')
                 ->view('emails.profile.email_change', ['url' => $url]);
         });
+
+        Order::observe(OrderObserver::class);
     }
 }
