@@ -13,17 +13,22 @@ class Service extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'price',
+        'price_uf',
+        'price_label',
         'duration_days',
         'features',
         'is_active',
+        'is_popular',
         'image_url',
     ];
 
     protected $casts = [
         'features'      => 'array',
         'is_active'     => 'boolean',
+        'is_popular'    => 'boolean',
         'price'         => 'integer',
         'duration_days' => 'integer',
     ];
