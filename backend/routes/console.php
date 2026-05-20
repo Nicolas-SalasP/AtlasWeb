@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('orders:process-transfers')->everyTenMinutes();
 Schedule::command('orders:release-unpaid')->hourly();
+Schedule::command('uf:actualizar')->dailyAt('09:00');

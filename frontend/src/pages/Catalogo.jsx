@@ -495,17 +495,31 @@ const ProductCard = ({ producto }) => {
 
                 <div className="mt-auto pt-3 flex items-end justify-between border-t border-gray-100">
                     <div className="flex flex-col min-w-0">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Desde</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-xl md:text-2xl font-black text-gray-900">
-                                ${parseInt(producto.price).toLocaleString('es-CL')}
-                            </span>
-                            {producto.is_service && producto.duration_days && (
-                                <span className="text-xs text-gray-500 font-medium">
-                                    /{producto.duration_days === 30 ? 'mes' : producto.duration_days === 365 ? 'año' : `${producto.duration_days}d`}
-                                </span>
-                            )}
-                        </div>
+                        {producto.is_service && producto.price_label ? (
+                            <>
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Desde</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-xl md:text-2xl font-black text-gray-900">
+                                        {producto.price_label}
+                                    </span>
+                                </div>
+
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Desde</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-xl md:text-2xl font-black text-gray-900">
+                                        ${parseInt(producto.price).toLocaleString('es-CL')}
+                                    </span>
+                                    {producto.duration_days && (
+                                        <span className="text-xs text-gray-500 font-medium">
+                                            /{producto.duration_days === 30 ? 'mes' : producto.duration_days === 365 ? 'año' : `${producto.duration_days}d`}
+                                        </span>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <button

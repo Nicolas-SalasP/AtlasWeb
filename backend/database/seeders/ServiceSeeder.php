@@ -3,22 +3,23 @@
 namespace Database\Seeders;
 
 use App\Domain\Catalog\Models\Service;
+use App\Domain\System\Services\UfService;
 use Illuminate\Database\Seeder;
 
 class ServiceSeeder extends Seeder
 {
     public function run(): void
     {
-        $services = [
+        $uf = app(UfService::class);
+
+        $planes = [
             [
                 'name' => 'ERP Starter',
                 'slug' => 'erp-starter',
                 'description' => 'Para emprendedores y micro-PYMEs que recién empiezan a ordenar su negocio. Ideal para validar tu empresa sin pagar nada.',
-                'price' => 0,
-                'duration_days' => 30,
-                'is_popular' => false,
-                'price_uf' => '0',
+                'uf' => 0,
                 'price_label' => 'Gratis',
+                'is_popular' => false,
                 'features' => [
                     'Dashboard con métricas principales',
                     'Gestión de Clientes',
@@ -31,17 +32,14 @@ class ServiceSeeder extends Seeder
                     '1 GB de almacenamiento',
                     'Soporte: Documentación',
                 ],
-                'image_url' => null,
             ],
             [
                 'name' => 'ERP Pyme Esencial',
                 'slug' => 'erp-pyme-esencial',
                 'description' => 'Tu primera contabilidad de verdad. Para PYMEs que ya facturan en serio. Incluye emisión DTE y módulos contables completos.',
-                'price' => 80614,
-                'duration_days' => 30,
-                'is_popular' => false,
-                'price_uf' => '2.0',
+                'uf' => 2.0,
                 'price_label' => '2.0 UF/mes',
+                'is_popular' => false,
                 'features' => [
                     'Todo lo del plan Starter',
                     'Emisión DTE (200 documentos/mes)',
@@ -58,17 +56,14 @@ class ServiceSeeder extends Seeder
                     'Backups diarios',
                     'Soporte: Email < 24h',
                 ],
-                'image_url' => null,
             ],
             [
                 'name' => 'ERP Pyme Profesional',
                 'slug' => 'erp-pyme-profesional',
                 'description' => 'El plan estrella. Para PYMEs en crecimiento con operación real. Incluye banco, conciliación, inventario y gestión de usuarios.',
-                'price' => 141075,
-                'duration_days' => 30,
-                'is_popular' => true,
-                'price_uf' => '3.5',
+                'uf' => 3.5,
                 'price_label' => '3.5 UF/mes',
+                'is_popular' => true,
                 'features' => [
                     'Todo lo del plan Esencial',
                     'Proveedores (gestión + visor 360°)',
@@ -86,17 +81,14 @@ class ServiceSeeder extends Seeder
                     'Backups diarios',
                     'Soporte: Email < 12h',
                 ],
-                'image_url' => null,
             ],
             [
                 'name' => 'ERP Pyme Avanzada',
                 'slug' => 'erp-pyme-avanzada',
                 'description' => 'Para empresas medianas con todas las necesidades cubiertas. Todo el catálogo sin add-ons: inventario avanzado, activos fijos y tributario completo.',
-                'price' => 241842,
-                'duration_days' => 30,
-                'is_popular' => false,
-                'price_uf' => '6.0',
+                'uf' => 6.0,
                 'price_label' => '6.0 UF/mes',
+                'is_popular' => false,
                 'features' => [
                     'Todo lo del plan Profesional',
                     'Inventario avanzado (Kardex, Lotes, Reservas, Valorización, Tomas físicas)',
@@ -110,17 +102,14 @@ class ServiceSeeder extends Seeder
                     'Backups diarios + restore',
                     'Soporte: Email < 4h + chat',
                 ],
-                'image_url' => null,
             ],
             [
                 'name' => 'ERP Enterprise',
                 'slug' => 'erp-enterprise',
                 'description' => 'Para empresas medianas-grandes con necesidades específicas y personalización. Usuarios ilimitados, integraciones API, SLA garantizado y account manager dedicado.',
-                'price' => 403070,
-                'duration_days' => 30,
-                'is_popular' => false,
-                'price_uf' => '10+',
+                'uf' => 10.0,
                 'price_label' => 'Desde 10 UF/mes',
+                'is_popular' => false,
                 'features' => [
                     'Todo lo del plan Avanzada',
                     'Usuarios ilimitados',
@@ -137,20 +126,23 @@ class ServiceSeeder extends Seeder
                     'Almacenamiento ilimitado',
                     'Precio por cotización individual',
                 ],
-                'image_url' => null,
             ],
         ];
 
-        foreach ($services as $data) {
+        foreach ($planes as $plan) {
             Service::firstOrCreate(
-                ['name' => $data['name']],
+                ['name' => $plan['name']],
                 [
-                    'description' => $data['description'],
-                    'price' => $data['price'],
-                    'duration_days' => $data['duration_days'],
-                    'features' => $data['features'],
-                    'image_url' => $data['image_url'],
+                    'slug' => $plan['slug'],
+                    'description' => $plan['description'],
+                    'price' => $plan['uf'] > 0 ? $uf->clpDesdeUf($plan['uf']) : 0,
+                    'price_uf' => (string) $plan['uf'],
+                    'price_label' => $plan['price_label'],
+                    'duration_days' => 30,
+                    'features' => $plan['features'],
+                    'is_popular' => $plan['is_popular'],
                     'is_active' => true,
+                    'image_url' => null,
                 ]
             );
         }

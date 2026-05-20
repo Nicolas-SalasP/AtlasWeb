@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\Api\PublicServiceController;
+use App\Http\Controllers\Api\IndicadoresController;
 use App\Http\Controllers\Api\SystemStatusController;
 use App\Http\Controllers\Api\TicketController;
 use Illuminate\Http\Request;
@@ -40,6 +41,7 @@ Route::get('/services/catalog', [PublicServiceController::class, 'indexPublic'])
 Route::get('/categories', [PublicCategoryController::class, 'index']);
 
 Route::get('/system-status', [SystemStatusController::class, 'publicStatus']);
+Route::get('/indicadores/uf', [IndicadoresController::class, 'uf']);
 
 Route::post('/orders', [OrderController::class, 'store']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
