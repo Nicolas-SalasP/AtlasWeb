@@ -39,7 +39,7 @@ const AdminServices = () => {
     const cargarDatos = async () => {
         try {
             const { data } = await api.get('/admin/services');
-            setServices(data);
+            setServices(data.filter(s => !s.tipo || s.tipo === 'spa'));
         } catch (error) {
             console.error("Error:", error);
             showToast('error', 'Error al cargar servicios');

@@ -32,19 +32,15 @@ class ErpClient
                 'error' => $e->getMessage(),
                 'email' => $data->email,
             ]);
-
-            throw new ErpProvisioningException(
-                'No se pudo contactar al ERP: ' . $e->getMessage(),
-            );
+            throw new ErpProvisioningException('No se pudo contactar al ERP: ' . $e->getMessage());
         }
 
         if (!$response->successful()) {
             Log::warning('ErpClient: ERP rechazó la provisión', [
                 'status' => $response->status(),
-                'body' => $response->body(),
-                'email' => $data->email,
+                'body'   => $response->body(),
+                'email'  => $data->email,
             ]);
-
             throw new ErpProvisioningException(
                 'El ERP rechazó la provisión.',
                 httpStatus: $response->status(),
@@ -68,9 +64,57 @@ class ErpClient
             ]);
         } catch (Throwable $e) {
             Log::warning('ErpClient: error al sincronizar password', [
-                'error' => $e->getMessage(),
+                'error'         => $e->getMessage(),
                 'tenri_user_id' => $tenriUserId,
             ]);
+        }
+    }
+
+    public function syncPlan(string $planSlug, array $moduleKeys): void
+    {
+        if ($this->apiKey === null || $this->apiKey === '') {
+            return;
+        }
+
+        try {
+            $response = $this->request()->post('/api/internal/web/sync-plan', [
+                'plan_slug'   => $planSlug,
+                'module_keys' => $moduleKeys,
+            ]);
+
+            if (!$response->successful()) {
+                Log::warning('ErpClient: ERP rechazó sync-plan', [
+                    'status'    => $response->status(),
+                    'plan_slug' => $planSlug,
+                ]);
+            }
+        } catch (Throwable $e) {
+            Log::warning('ErpClient: error al sincronizar plan', [
+                'error'     => $e->getMessage(),
+                'plan_slug' => $planSlug,
+            ]);
+        }
+    }
+
+    public function onlineUsers(): array
+    {
+        if ($this->apiKey === null || $this->apiKey === '') {
+            return ['paid' => [], 'all' => []];
+        }
+
+        try {
+            $response = $this->request()->get('/api/internal/web/online-users');
+
+            if (!$response->successful()) {
+                return ['paid' => [], 'all' => []];
+            }
+
+            return $response->json() ?? ['paid' => [], 'all' => []];
+        } catch (Throwable $e) {
+            Log::warning('ErpClient: error al obtener usuarios online', [
+                'error' => $e->getMessage(),
+            ]);
+            return ['paid' => [], 'all' => []];
         }
     }
 
@@ -78,7 +122,7 @@ class ErpClient
     {
         return Http::withHeaders([
             'X-WEB-API-KEY' => $this->apiKey,
-            'Accept' => 'application/json',
+            'Accept'        => 'application/json',
         ])
             ->timeout($this->timeout)
             ->baseUrl($this->baseUrl);

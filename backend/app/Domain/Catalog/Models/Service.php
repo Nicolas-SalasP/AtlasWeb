@@ -14,6 +14,7 @@ class Service extends Model
     protected $fillable = [
         'name',
         'slug',
+        'tipo',
         'description',
         'price',
         'price_uf',
@@ -27,11 +28,21 @@ class Service extends Model
     ];
 
     protected $casts = [
-        'features' => 'array',
-        'module_keys' => 'array',
-        'is_active' => 'boolean',
-        'is_popular' => 'boolean',
-        'price' => 'integer',
+        'features'      => 'array',
+        'module_keys'   => 'array',
+        'is_active'     => 'boolean',
+        'is_popular'    => 'boolean',
+        'price'         => 'integer',
         'duration_days' => 'integer',
     ];
+
+    public function scopeErp($query)
+    {
+        return $query->where('tipo', 'erp');
+    }
+
+    public function scopeSpa($query)
+    {
+        return $query->where('tipo', 'spa');
+    }
 }

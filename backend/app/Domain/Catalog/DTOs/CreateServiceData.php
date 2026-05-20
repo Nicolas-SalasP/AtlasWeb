@@ -14,6 +14,11 @@ final readonly class CreateServiceData
         public ?array $features,
         public bool $isActive,
         public ?UploadedFile $image,
+        public string $tipo = 'spa',
+        public ?string $slug = null,
+        public ?string $priceUf = null,
+        public ?string $priceLabel = null,
+        public ?array $moduleKeys = null,
     ) {
     }
 
@@ -29,6 +34,11 @@ final readonly class CreateServiceData
                 ? filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN)
                 : true,
             image: $image,
+            tipo: $data['tipo'] ?? 'spa',
+            slug: $data['slug'] ?? null,
+            priceUf: $data['price_uf'] ?? null,
+            priceLabel: $data['price_label'] ?? null,
+            moduleKeys: is_array($data['module_keys'] ?? null) ? $data['module_keys'] : null,
         );
     }
 }

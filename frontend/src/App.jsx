@@ -35,6 +35,7 @@ const AdminPedidos = lazy(() => import('./pages/admin/AdminPedidos'));
 const AdminConfig = lazy(() => import('./pages/admin/AdminConfig'));
 const AdminUsuarios = lazy(() => import('./pages/admin/AdminUsuarios'));
 const AdminTickets = lazy(() => import('./pages/admin/AdminTickets'));
+const AdminPlanes = lazy(() => import('./pages/admin/AdminPlanes'));
 const AdminServices = lazy(() => import('./pages/admin/AdminServices'));
 
 // Loader Component
@@ -121,6 +122,7 @@ function App() {
                 <Route path="services" element={<AdminServices />} />
                 <Route path="pedidos" element={<AdminPedidos />} />
                 <Route path="usuarios" element={<AdminUsuarios />} />
+                <Route path="planes" element={<AdminPlanes />} />
                 <Route path="tickets" element={<AdminTickets />} />
                 <Route path="configuracion" element={<AdminConfig />} />
               </Route>

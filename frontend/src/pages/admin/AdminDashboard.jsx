@@ -10,6 +10,7 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer
 } from 'recharts';
+import { Wifi, WifiOff, Users } from 'lucide-react';
 
 const buildChartLabels = (count = 10) => {
     const today = new Date();
@@ -26,16 +27,19 @@ const AdminDashboard = () => {
     const [data, setData] = useState(null);
     const [notifs, setNotifs] = useState({ pending_orders: 0, new_tickets: 0 });
     const [loading, setLoading] = useState(true);
+    const [onlineUsers, setOnlineUsers] = useState({ paid: [], all: [], error: false });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [summary, notifications] = await Promise.all([
+                const [summary, notifications, online] = await Promise.all([
                     api.get('/admin/dashboard'),
                     api.get('/admin/notifications-summary').catch(() => ({ data: { pending_orders: 0, new_tickets: 0 } })),
+                    api.get('/admin/erp-plans/online-users').catch(() => ({ data: { paid: [], all: [], error: true } })),
                 ]);
                 setData(summary.data);
                 setNotifs(notifications.data);
+                setOnlineUsers(online.data);
             } catch (error) {
                 console.error("Error cargando dashboard:", error);
             } finally {

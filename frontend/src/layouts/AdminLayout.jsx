@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
 import {
     LayoutDashboard, Package, ShoppingCart, LogOut,
-    Settings, Home, Users, LifeBuoy, Menu, X, Zap
+    Settings, Home, Users, LifeBuoy, Menu, X, Zap, Layers
 } from 'lucide-react';
 
 const parsePermissions = (raw) => {
@@ -132,9 +132,14 @@ const AdminLayout = () => {
                     )}
 
                     {checkPermission('manage_services') && (
-                        <Link to="/admin/services" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/services')}`}>
-                            <Zap size={20} /> Servicios
-                        </Link>
+                        <>
+                            <Link to="/admin/services" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/services')}`}>
+                                <Zap size={20} /> Servicios
+                            </Link>
+                            <Link to="/admin/planes" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/planes')}`}>
+                                <Layers size={20} /> Planes ERP
+                            </Link>
+                        </>
                     )}
 
                     {checkPermission('view_orders') && (
