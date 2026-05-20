@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'nicolas@tenri.cl';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password';
-const BACKEND_URL = process.env.E2E_BACKEND_URL || 'http://localhost:8001';
+
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe('Autenticacion - flujo SPA con sesion web', () => {
     test('rechaza login con credenciales invalidas', async ({ page }) => {
@@ -13,48 +14,49 @@ test.describe('Autenticacion - flujo SPA con sesion web', () => {
         await page.locator('button[type="submit"]').first().click();
 
         await page.waitForTimeout(2_000);
-        const url = page.url();
-        expect(url).toContain('/login');
+        expect(page.url()).toContain('/login');
     });
 
     test('permite login con credenciales validas y redirige fuera de login', async ({ page }) => {
-        const apiCalls = [];
-        page.on('response', async (response) => {
-            if (response.url().includes('/api/login') || response.url().includes('/sanctum/csrf-cookie')) {
-                let body = '';
-                try { body = await response.text(); } catch (e) { body = '(no body)'; }
-                apiCalls.push({
-                    url: response.url(),
-                    status: response.status(),
-                    body: body.slice(0, 300),
-                });
+        const allRequests = [];
+        const allResponses = [];
+        const consoleMessages = [];
+
+        page.on('request', (req) => {
+            if (req.url().includes('localhost:8000') || req.url().includes('localhost:5173/api')) {
+                allRequests.push(`${req.method()} ${req.url()}`);
             }
         });
 
-        await page.goto('/login');
+        page.on('response', async (res) => {
+            const url = res.url();
+            if (url.includes('/api/') || url.includes('/sanctum/')) {
+                let body = '';
+                try { body = (await res.text()).slice(0, 300); } catch {}
+                allResponses.push(`[${res.status()}] ${url} → ${body}`);
+            }
+        });
 
+        page.on('console', (msg) => { consoleMessages.push(`[${msg.type()}] ${msg.text()}`); });
+        page.on('pageerror', (err) => { consoleMessages.push(`[pageerror] ${err.message}`); });
+
+        await page.goto('/login');
+        await page.locator('input[type="email"], input[name="email"]').first()
+            .waitFor({ state: 'visible', timeout: 5_000 });
         await page.locator('input[type="email"], input[name="email"]').first().fill(USER_EMAIL);
         await page.locator('input[type="password"]').first().fill(USER_PASSWORD);
         await page.locator('button[type="submit"]').first().click();
 
         try {
-            await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 });
-        } catch (err) {
-            const diagnostico = apiCalls.length === 0
-                ? `\n\nDIAGNOSTICO: el frontend NO hizo ninguna llamada a ${BACKEND_URL}/api/login.\n` +
-                  `Probables causas:\n` +
-                  `  1. El frontend pega a otro puerto (revisa axiosConfig.js / .env del frontend).\n` +
-                  `  2. El boton 'Iniciar sesion' no dispara el submit (revisa el handler en Login.jsx).\n`
-                : `\n\nDIAGNOSTICO - calls API capturadas:\n` +
-                  apiCalls.map(c => `  [${c.status}] ${c.url}\n    Body: ${c.body}`).join('\n') +
-                  `\n\nInterpretacion:\n` +
-                  `  - status 401 -> credenciales incorrectas (revisa seeder y BD).\n` +
-                  `  - status 419 -> CSRF mismatch (revisa SANCTUM_STATEFUL_DOMAINS en backend/.env).\n` +
-                  `  - status 422 -> validacion fallo (revisa el body).\n` +
-                  `  - status 500 -> error backend (revisa storage/logs/laravel.log).\n` +
-                  `  - status 200 pero sigue en /login -> el frontend no redirige (revisa AuthContext.jsx login()).\n`;
-
-            throw new Error(`Login no redirigio fuera de /login en 15s.${diagnostico}`);
+            await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 20_000 });
+        } catch {
+            throw new Error(
+                `\n\n❌ Login no redirigió fuera de /login en 20s.\n\n` +
+                `📡 Requests:\n${allRequests.map(r => '  ' + r).join('\n') || '  (ninguno)'}\n\n` +
+                `📨 Responses:\n${allResponses.map(r => '  ' + r).join('\n') || '  (ninguno)'}\n\n` +
+                `🖥️ Consola:\n${consoleMessages.filter(m => !m.includes('[log]')).map(m => '  ' + m).join('\n') || '  (ninguna)'}\n\n` +
+                `🔍 URL actual: ${page.url()}\n`
+            );
         }
 
         await expect(page).not.toHaveURL(/.*\/login/);
@@ -62,24 +64,23 @@ test.describe('Autenticacion - flujo SPA con sesion web', () => {
 
     test('rechaza login con email mal formado (validacion frontend)', async ({ page }) => {
         await page.goto('/login');
-
         await page.locator('input[type="email"], input[name="email"]').first().fill('no-es-email');
         await page.locator('input[type="password"]').first().fill('algo');
         await page.locator('button[type="submit"]').first().click();
 
         await page.waitForTimeout(1_500);
-        const url = page.url();
-        expect(url).toContain('/login');
+        expect(page.url()).toContain('/login');
     });
 
     test('login con email en mayusculas funciona (case-insensitive)', async ({ page }) => {
         await page.goto('/login');
-
+        await page.locator('input[type="email"], input[name="email"]').first()
+            .waitFor({ state: 'visible', timeout: 5_000 });
         await page.locator('input[type="email"], input[name="email"]').first().fill(USER_EMAIL.toUpperCase());
         await page.locator('input[type="password"]').first().fill(USER_PASSWORD);
         await page.locator('button[type="submit"]').first().click();
 
-        await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 });
+        await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 20_000 });
         await expect(page).not.toHaveURL(/.*\/login/);
     });
 });

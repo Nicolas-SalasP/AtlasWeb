@@ -9,7 +9,9 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-    const rootURL = baseURL.endsWith('/api') ? baseURL.slice(0, -4) : baseURL;
+    const rootURL = import.meta.env.VITE_ROOT_URL !== undefined
+        ? (import.meta.env.VITE_ROOT_URL || '')
+        : (baseURL.endsWith('/api') ? baseURL.slice(0, -4) : baseURL);
 
     const [user, setUser] = useState(() => {
         try {
