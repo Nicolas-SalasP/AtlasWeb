@@ -15,12 +15,18 @@ const CLIENT_PASSWORD = process.env.E2E_CLIENT_PASSWORD || 'password';
 
 async function doLogin(page, email, password) {
     await page.goto(`${BASE_URL}/login`);
-    await page.locator('input[type="email"], input[name="email"]').first()
-        .waitFor({ state: 'visible', timeout: 10_000 });
+    await page.locator('input[type="email"], input[name="email"]').first().waitFor({ state: 'visible', timeout: 10_000 });
     await page.locator('input[type="email"], input[name="email"]').first().fill(email);
     await page.locator('input[type="password"]').first().fill(password);
+    const rememberCheckbox = page.locator('input[type="checkbox"]').first();
+    await rememberCheckbox.check({ force: true }).catch(() => {});
+    const loginResponsePromise = page.waitForResponse(response => 
+        response.url().includes('/login') && response.status() === 200
+    );
     await page.locator('button[type="submit"]').first().click();
+    await loginResponsePromise;
     await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 20_000 });
+    await page.waitForTimeout(2000);
 }
 
 async function globalSetup() {
@@ -28,12 +34,14 @@ async function globalSetup() {
 
     const browser = await chromium.launch();
 
+    // SETUP ADMIN
     const adminContext = await browser.newContext();
     const adminPage = await adminContext.newPage();
     await doLogin(adminPage, ADMIN_EMAIL, ADMIN_PASSWORD);
     await adminContext.storageState({ path: path.resolve(__dirname, '.auth/admin.json') });
     await adminContext.close();
 
+    // SETUP CLIENTE
     const clientContext = await browser.newContext();
     const clientPage = await clientContext.newPage();
     await doLogin(clientPage, CLIENT_EMAIL, CLIENT_PASSWORD);

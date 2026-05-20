@@ -25,9 +25,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
+$loginLimit = app()->isProduction() ? 'throttle:5,1' : 'throttle:100,1';
+$forgotLimit = app()->isProduction() ? 'throttle:3,1' : 'throttle:100,1';
+$contactLimit = app()->isProduction() ? 'throttle:5,1' : 'throttle:100,1';
+
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:3,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware($loginLimit);
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware($forgotLimit);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::get('/products', [PublicProductController::class, 'index']);
@@ -40,7 +44,7 @@ Route::get('/system-status', [SystemStatusController::class, 'publicStatus']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 
-Route::post('/contacto', [ContactController::class, 'submit'])->middleware('throttle:5,1');
+Route::post('/contacto', [ContactController::class, 'submit'])->middleware($contactLimit);
 
 Route::middleware(['erp.api.key'])->post('/internal/erp/validate-login', function (Request $request) {
     $user = User::where('email', $request->email)->first();
