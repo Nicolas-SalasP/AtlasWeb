@@ -54,23 +54,19 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const register = async (formData) => {
-        try {
-            await api.get('/sanctum/csrf-cookie', { baseURL: rootURL });
-            const response = await api.post('/register', formData);
-            const payload = response.data.data || response.data;
-            const userData = payload.user;
+        await api.get('/sanctum/csrf-cookie', { baseURL: rootURL });
+        const response = await api.post('/register', formData);
+        const payload = response.data.data || response.data;
+        const userData = payload.user;
 
-            localStorage.setItem('user_data', JSON.stringify(userData));
-            setUser(userData);
-            
-            return payload; 
-        } catch (error) {
-            throw error;
-        }
+        localStorage.setItem('user_data', JSON.stringify(userData));
+        setUser(userData);
+        
+        return payload;
     };
 
     const login = async (email, password, remember) => {
-        try {
+        
             await api.get('/sanctum/csrf-cookie', { baseURL: rootURL });
             const response = await api.post('/login', {
                 email,
@@ -95,9 +91,6 @@ export const AuthProvider = ({ children }) => {
 
             setUser(userData);
             return userData;
-        } catch (error) {
-            throw error;
-        }
     };
 
     const logout = async () => {
