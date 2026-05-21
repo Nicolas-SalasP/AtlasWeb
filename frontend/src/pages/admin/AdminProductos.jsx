@@ -1,41 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../api/axiosConfig';
 import {
-    Search, Plus, Package, DollarSign, Image as ImageIcon,
-    MoreVertical, Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
+    Search, Plus, Package, DollarSign,
+    Edit, Trash2, X, Save, Loader2, Star, UploadCloud,
     AlertTriangle, CheckCircle, AlertCircle, List, MinusCircle, PlusCircle
 } from 'lucide-react';
 import { BASE_URL } from '../../api/constants';
 
+const normalizeSpecs = (specs) => {
+    if (!specs) return [''];
+    if (Array.isArray(specs)) {
+        return specs.length > 0 ? specs.map(s => String(s)) : [''];
+    }
+    if (typeof specs === 'object') {
+        const entries = Object.entries(specs);
+        if (entries.length === 0) return [''];
+        return entries.map(([k, v]) => `${k}: ${v}`);
+    }
+    return [''];
+};
+
 const AdminProductos = () => {
-    // --- ESTADOS DE DATOS ---
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
 
-    // --- ESTADOS UI ---
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [editando, setEditando] = useState(null);
     const [guardando, setGuardando] = useState(false);
 
-    // --- SISTEMA DE NOTIFICACIONES Y MODALES ---
     const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
     const [confirmModal, setConfirmModal] = useState({ show: false, message: '', action: null });
 
-    // --- FORMULARIO ---
     const [form, setForm] = useState({
         name: '', sku: '', price: '', cost_price: '',
-        stock_current: '', category_id: '', description: '', is_visible: true,
-        specs: ['']
+        stock_current: '', stock_alert: '', category_id: '',
+        description: '', is_visible: true, specs: ['']
     });
 
-    // Gestor de Imágenes
     const [imagenesExistentes, setImagenesExistentes] = useState([]);
     const [nuevasImagenes, setNuevasImagenes] = useState([]);
     const fileInputRef = useRef(null);
 
-    // 1. CARGA INICIAL
     useEffect(() => {
         cargarDatos();
     }, []);
@@ -56,10 +63,9 @@ const AdminProductos = () => {
         }
     };
 
-    // --- HELPERS UX ---
     const showToast = (type, message) => {
         setToast({ show: true, type, message });
-        setTimeout(() => setToast({ ...toast, show: false }), 3000);
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
     };
 
     const pedirConfirmacion = (message, action) => {
@@ -77,7 +83,6 @@ const AdminProductos = () => {
         cerrarConfirmacion();
     };
 
-    // --- LÓGICA DE ESPECIFICACIONES ---
     const handleSpecChange = (index, value) => {
         const newSpecs = [...form.specs];
         newSpecs[index] = value;
@@ -90,10 +95,9 @@ const AdminProductos = () => {
 
     const removeSpecField = (index) => {
         const newSpecs = form.specs.filter((_, i) => i !== index);
-        setForm({ ...form, specs: newSpecs });
+        setForm({ ...form, specs: newSpecs.length > 0 ? newSpecs : [''] });
     };
 
-    // 2. ABRIR DRAWER
     const abrirDrawer = (producto = null) => {
         setNuevasImagenes([]);
 
@@ -104,26 +108,26 @@ const AdminProductos = () => {
                 sku: producto.sku,
                 price: parseInt(producto.price),
                 cost_price: producto.cost_price ? parseInt(producto.cost_price) : '',
-                stock_current: producto.stock_current,
+                stock_current: producto.stock_current ?? 0,
+                stock_alert: producto.stock_alert ?? 5,
                 category_id: producto.category_id,
                 description: producto.description || '',
                 is_visible: Boolean(producto.is_visible),
-                specs: producto.specs && producto.specs.length > 0 ? producto.specs : ['']
+                specs: normalizeSpecs(producto.specs)
             });
             setImagenesExistentes(producto.images || []);
         } else {
             setEditando(null);
-            setForm({ 
-                name: '', sku: '', price: '', cost_price: '', 
-                stock_current: '', category_id: '', description: '', 
-                is_visible: true, specs: [''] 
+            setForm({
+                name: '', sku: '', price: '', cost_price: '',
+                stock_current: '', stock_alert: 5, category_id: '',
+                description: '', is_visible: true, specs: ['']
             });
             setImagenesExistentes([]);
         }
         setDrawerOpen(true);
     };
 
-    // 3. LOGICA IMÁGENES
     const eliminarImagenExistente = (idImagen) => {
         pedirConfirmacion("¿Eliminar esta imagen permanentemente?", async () => {
             try {
@@ -142,7 +146,7 @@ const AdminProductos = () => {
             await api.post(`/admin/product-images/${idImagen}/cover`);
             setImagenesExistentes(prev => prev.map(img => ({
                 ...img,
-                is_cover: img.id === idImagen ? 1 : 0
+                is_cover: img.id === idImagen
             })));
             cargarDatos();
             showToast('success', 'Portada actualizada');
@@ -151,7 +155,6 @@ const AdminProductos = () => {
         }
     };
 
-    // 4. GUARDAR PRODUCTO
     const guardarProducto = async (e) => {
         e.preventDefault();
         setGuardando(true);
@@ -164,7 +167,7 @@ const AdminProductos = () => {
                 } else if (key === 'specs') {
                     const cleanSpecs = form.specs.filter(s => s.trim() !== '');
                     formData.append('specs', JSON.stringify(cleanSpecs));
-                } else {
+                } else if (form[key] !== '' && form[key] !== null && form[key] !== undefined) {
                     formData.append(key, form[key]);
                 }
             });
@@ -187,7 +190,9 @@ const AdminProductos = () => {
 
         } catch (error) {
             console.error(error);
-            showToast('error', 'Error al guardar. Revisa el SKU.');
+            const msg = error.response?.data?.message
+                || (error.response?.status === 422 ? 'Datos inválidos. Revisa el SKU y los campos.' : 'Error al guardar.');
+            showToast('error', msg);
         } finally {
             setGuardando(false);
         }
@@ -200,13 +205,14 @@ const AdminProductos = () => {
                 setProductos(productos.filter(p => p.id !== id));
                 showToast('success', 'Producto eliminado');
             } catch (error) {
-                showToast('error', 'Error al eliminar');
+                const msg = error.response?.data?.message || 'Error al eliminar';
+                showToast('error', msg);
             }
         });
     };
 
-    const filtrados = productos.filter(p => 
-        p.name.toLowerCase().includes(busqueda.toLowerCase()) || 
+    const filtrados = productos.filter(p =>
+        p.name.toLowerCase().includes(busqueda.toLowerCase()) ||
         p.sku.toLowerCase().includes(busqueda.toLowerCase())
     );
 
@@ -215,15 +221,13 @@ const AdminProductos = () => {
     return (
         <div className="h-[calc(100vh-80px)] p-4 md:p-10 bg-gray-50/50 flex flex-col overflow-hidden relative">
 
-            {/* NOTIFICACIÓN TOAST */}
             {toast.show && (
-                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                <div className={`fixed top-24 right-4 md:right-10 z-[100] px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300 ${toast.type === 'success' ? 'bg-tenri-900 text-white' : 'bg-red-500 text-white'}`}>
                     {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                    <span className="font-medium text-sm">{toast.message}</span>
+                    <span className="font-bold text-sm">{toast.message}</span>
                 </div>
             )}
 
-            {/* HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 flex-shrink-0">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Productos</h1>
@@ -234,7 +238,6 @@ const AdminProductos = () => {
                 </button>
             </div>
 
-            {/* TABLA CONTAINER */}
             <div className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] shadow-xl border border-gray-100 flex flex-col flex-1 overflow-hidden">
                 <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
                     <div className="relative w-full md:max-w-md">
@@ -255,50 +258,72 @@ const AdminProductos = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {filtrados.map((p) => (
-                                <tr key={p.id} className="hover:bg-gray-50/50 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center relative flex-shrink-0">
-                                                {p.images && p.images.find(img => img.is_cover) ? (
-                                                    <img src={`${BASE_URL}${p.images.find(img => img.is_cover).url}`} alt="" className="w-full h-full object-cover" />
-                                                ) : p.images && p.images.length > 0 ? (
-                                                    <img src={`${BASE_URL}${p.images[0].url}`} alt="" className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Package size={20} className="text-gray-400" />
+                            {filtrados.length === 0 && (
+                                <tr><td colSpan="5" className="text-center py-10 text-gray-400">No se encontraron productos.</td></tr>
+                            )}
+                            {filtrados.map((p) => {
+                                const stockActual = Number(p.stock_current ?? 0);
+                                const stockAlerta = Number(p.stock_alert ?? 0);
+                                const stockBajo = stockAlerta > 0 && stockActual <= stockAlerta;
+                                const sinStock = stockActual <= 0;
+                                const portada = (p.images || []).find(img => Boolean(img.is_cover));
+                                const imagenMostrar = portada || (p.images && p.images[0]);
+
+                                return (
+                                    <tr key={p.id} className="hover:bg-gray-50/50 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center relative flex-shrink-0">
+                                                    {imagenMostrar ? (
+                                                        <img src={`${BASE_URL}${imagenMostrar.url}`} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <Package size={20} className="text-gray-400" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-gray-900 text-sm md:text-base">{p.name}</p>
+                                                    <p className="text-xs text-gray-500 font-mono">SKU: {p.sku}</p>
+                                                    {!p.is_visible && (
+                                                        <span className="inline-block mt-1 text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded uppercase">Oculto</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            <span className="bg-gray-100 px-2 py-1 rounded-md text-xs font-bold">{p.category?.name || 'Sin Categoría'}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <p className="font-bold text-gray-900">${parseInt(p.price).toLocaleString('es-CL')}</p>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold ${
+                                                    sinStock ? 'bg-red-100 text-red-700' :
+                                                    stockBajo ? 'bg-amber-100 text-amber-700' :
+                                                    'bg-emerald-100 text-emerald-700'
+                                                }`}>
+                                                    {(sinStock || stockBajo) && <AlertTriangle size={12} />}
+                                                    {stockActual}
+                                                </span>
+                                                {stockBajo && !sinStock && (
+                                                    <span className="text-[9px] text-amber-600 font-bold uppercase">Bajo mín. ({stockAlerta})</span>
                                                 )}
                                             </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900 text-sm md:text-base">{p.name}</p>
-                                                <p className="text-xs text-gray-500 font-mono">SKU: {p.sku}</p>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <button onClick={() => abrirDrawer(p)} className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"><Edit size={18} /></button>
+                                                <button onClick={() => eliminarProducto(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"><Trash2 size={18} /></button>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">
-                                        <span className="bg-gray-100 px-2 py-1 rounded-md text-xs font-bold">{p.category?.name || 'Sin Categoría'}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <p className="font-bold text-gray-900">${parseInt(p.price).toLocaleString('es-CL')}</p>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${p.stock_current > 5 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                            {p.stock_current}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <button onClick={() => abrirDrawer(p)} className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"><Edit size={18} /></button>
-                                            <button onClick={() => eliminarProducto(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"><Trash2 size={18} /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {/* --- MODAL CONFIRMACIÓN --- */}
             {confirmModal.show && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95 text-center">
@@ -315,7 +340,6 @@ const AdminProductos = () => {
                 </div>
             )}
 
-            {/* --- DRAWER FORMULARIO --- */}
             <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setDrawerOpen(false)} />
             <div className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
@@ -326,11 +350,9 @@ const AdminProductos = () => {
 
                 <form onSubmit={guardarProducto} className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar space-y-8 bg-gray-50/50">
 
-                    {/* GESTOR DE IMÁGENES */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <label className="text-sm font-bold text-gray-900 mb-4 block">Galería de Imágenes</label>
 
-                        {/* EXISTENTES */}
                         {imagenesExistentes.length > 0 && (
                             <div className="mb-4">
                                 <p className="text-xs text-gray-400 mb-2 font-bold uppercase">Guardadas</p>
@@ -342,14 +364,13 @@ const AdminProductos = () => {
                                                 <button type="button" onClick={() => marcarPortada(img.id)} className={`p-1.5 rounded-full ${img.is_cover ? 'bg-yellow-400 text-white' : 'bg-white text-gray-500 hover:text-yellow-500'}`} title="Portada"><Star size={14} fill={img.is_cover ? "currentColor" : "none"} /></button>
                                                 <button type="button" onClick={() => eliminarImagenExistente(img.id)} className="p-1.5 bg-white text-red-500 rounded-full hover:bg-red-50" title="Eliminar"><Trash2 size={14} /></button>
                                             </div>
-                                            {img.is_cover == 1 && <div className="absolute top-1 left-1 bg-tenri-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">PORTADA</div>}
+                                            {Boolean(img.is_cover) && <div className="absolute top-1 left-1 bg-tenri-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">PORTADA</div>}
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* NUEVAS */}
                         <div>
                             <p className="text-xs text-gray-400 mb-2 font-bold uppercase">Subir Nuevas</p>
                             <div className="flex gap-3 overflow-x-auto pb-2">
@@ -369,7 +390,6 @@ const AdminProductos = () => {
                         </div>
                     </div>
 
-                    {/* DATOS DEL PRODUCTO */}
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -399,10 +419,14 @@ const AdminProductos = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Stock Actual</label>
-                                <input required type="number" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.stock_current} onChange={e => setForm({ ...form, stock_current: e.target.value })} />
+                                <input required type="number" min="0" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.stock_current} onChange={e => setForm({ ...form, stock_current: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Stock Alerta</label>
+                                <input type="number" min="0" className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none" value={form.stock_alert} onChange={e => setForm({ ...form, stock_alert: e.target.value })} placeholder="5" />
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Categoría</label>
@@ -413,11 +437,11 @@ const AdminProductos = () => {
                             </div>
                         </div>
 
-                        {/* --- SECCIÓN ESPECIFICACIONES --- */}
                         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                            <label className="text-sm font-bold text-gray-900 mb-4 block flex items-center gap-2">
+                            <label className="text-sm font-bold text-gray-900 mb-2 block flex items-center gap-2">
                                 <List size={16} /> Especificaciones Técnicas
                             </label>
+                            <p className="text-xs text-gray-500 mb-4">Una línea por característica. Ejemplo: <code className="bg-gray-100 px-1.5 py-0.5 rounded">Procesador: Intel Core i7</code></p>
                             <div className="space-y-3">
                                 {form.specs.map((spec, index) => (
                                     <div key={index} className="flex gap-2 items-center">
@@ -428,7 +452,7 @@ const AdminProductos = () => {
                                                 value={spec}
                                                 onChange={(e) => handleSpecChange(index, e.target.value)}
                                                 className="w-full pl-7 pr-3 py-2 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-tenri-900 outline-none text-sm"
-                                                placeholder="Ej: Procesador Intel Core i7"
+                                                placeholder="Ej: Procesador: Intel Core i7"
                                             />
                                         </div>
                                         {form.specs.length > 1 && (
@@ -459,7 +483,7 @@ const AdminProductos = () => {
 
                 <div className="p-6 border-t border-gray-100 bg-white flex justify-end gap-3 flex-shrink-0">
                     <button onClick={() => setDrawerOpen(false)} className="px-6 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Cancelar</button>
-                    <button onClick={guardarProducto} disabled={guardando} className="px-8 py-3 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg flex items-center gap-2">
+                    <button onClick={guardarProducto} disabled={guardando} className="px-8 py-3 bg-tenri-900 text-white font-bold rounded-xl hover:bg-tenri-800 shadow-lg flex items-center gap-2 disabled:opacity-70">
                         {guardando ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
                         Guardar
                     </button>

@@ -4,6 +4,13 @@ const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
+const isService = (item) => {
+    const id = String(item?.id ?? '');
+    return id.startsWith('service-') || item?.is_service === true || item?.type === 'service';
+};
+
+const sameId = (a, b) => String(a) === String(b);
+
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState(() => {
         try {
@@ -22,30 +29,30 @@ export const CartProvider = ({ children }) => {
 
     const addToCart = (product, amount = 1) => {
         setCart((prevCart) => {
-            const existingItem = prevCart.find((item) => item.id === product.id);
-            
+            const existingItem = prevCart.find((item) => sameId(item.id, product.id));
+
             if (existingItem) {
                 return prevCart.map((item) =>
-                    item.id === product.id
+                    sameId(item.id, product.id)
                         ? { ...item, quantity: item.quantity + amount }
                         : item
                 );
             } else {
-                setIsCartOpen(true); 
+                setIsCartOpen(true);
                 return [...prevCart, { ...product, quantity: amount }];
             }
         });
     };
 
     const removeFromCart = (id) => {
-        setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+        setCart((prevCart) => prevCart.filter((item) => !sameId(item.id, id)));
     };
 
     const updateQuantity = (id, newQuantity) => {
         if (newQuantity < 1) return;
-        setCart((prevCart) => 
-            prevCart.map((item) => 
-                item.id === id ? { ...item, quantity: newQuantity } : item
+        setCart((prevCart) =>
+            prevCart.map((item) =>
+                sameId(item.id, id) ? { ...item, quantity: newQuantity } : item
             )
         );
     };
@@ -62,22 +69,34 @@ export const CartProvider = ({ children }) => {
         return cart.reduce((count, item) => count + item.quantity, 0);
     };
 
+    const hasOnlyServices = () => {
+        return cart.length > 0 && cart.every(isService);
+    };
+
+    const hasPhysicalProducts = () => {
+        return cart.some(item => !isService(item));
+    };
+
     const toggleCart = () => setIsCartOpen(!isCartOpen);
 
     return (
-        <CartContext.Provider value={{ 
-            cart, 
-            addToCart, 
-            removeFromCart, 
+        <CartContext.Provider value={{
+            cart,
+            addToCart,
+            removeFromCart,
             updateQuantity,
-            clearCart, 
-            getCartTotal, 
+            clearCart,
+            getCartTotal,
             getCartCount,
-            isCartOpen,      
-            setIsCartOpen,   
-            toggleCart 
+            hasOnlyServices,
+            hasPhysicalProducts,
+            isCartOpen,
+            setIsCartOpen,
+            toggleCart,
         }}>
             {children}
         </CartContext.Provider>
     );
 };
+
+export { isService };

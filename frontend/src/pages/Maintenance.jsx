@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 const Maintenance = () => {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     useEffect(() => {
         let isMounted = true;
 
