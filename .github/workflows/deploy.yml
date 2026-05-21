@@ -1,60 +1,160 @@
-name: Deploy Tenri Spa Monorepo
+name: Deploy Tenri Spa
 
 on:
   push:
-    branches:
-      - main
+    branches: ['**']
+  pull_request:
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  # ══════════════════════════════════════════════
+  # JOB 1 — TESTS (corre en TODAS las ramas)
+  # ══════════════════════════════════════════════
+  test:
+    name: Tests
     runs-on: ubuntu-latest
 
-    steps:
-      - name: 📥 Checkout del código
-        uses: actions/checkout@v3
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: tenri_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
-      # ==========================================
-      # 1. FRONTEND (REACT)
-      # ==========================================
-      - name: ⚙️ Setup Node.js (Frontend)
-        uses: actions/setup-node@v3
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # ── Backend PHP ──
+      - name: ⚙️ Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, zip, bcmath, tokenizer, xml, ctype, json
+          coverage: none
+
+      - name: 📦 Instalar dependencias backend
+        run: |
+          cd backend
+          composer install --no-interaction --prefer-dist
+
+      - name: 🔧 Preparar .env de test
+        run: |
+          cd backend
+          cp .env.testing .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=tenri_test/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
+          php artisan key:generate
+
+      - name: 🧪 Correr tests PHP
+        run: |
+          cd backend
+          php artisan test --parallel --stop-on-failure
+
+      # ── Frontend ──
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: 🏗️ Compilar Frontend (React)
-        env:
-          VITE_API_URL: 'https://api.tenri.cl/api'
+      - name: 📦 Instalar dependencias frontend
         run: |
           cd frontend
-          npm install
-          npm run build
+          npm install -g pnpm
+          pnpm install --frozen-lockfile
 
-      - name: 🚀 Subir Frontend a public_html via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: 🔍 Lint frontend
+        run: |
+          cd frontend
+          pnpm lint
+
+      - name: 🏗️ Build frontend (verifica que compila)
+        env:
+          VITE_API_URL: /api
+          VITE_ROOT_URL: ''
+        run: |
+          cd frontend
+          pnpm build
+
+  # ══════════════════════════════════════════════
+  # JOB 2 — DEPLOY (solo en push a main + tests OK)
+  # ══════════════════════════════════════════════
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # ── Frontend ──
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 📦 Instalar dependencias frontend
+        run: |
+          cd frontend
+          npm install -g pnpm
+          pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build frontend
+        env:
+          VITE_API_URL: /api
+          VITE_ROOT_URL: ''
+        run: |
+          cd frontend
+          pnpm build
+
+      - name: 🚀 Subir frontend a public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./frontend/dist/
           server-dir: /public_html/
+          dangerous-clean-slate: false
 
-      # ==========================================
-      # 2. BACKEND (LARAVEL)
-      # ==========================================
-      - name: ⚙️ Setup PHP (Backend)
+      # ── Backend ──
+      - name: ⚙️ Setup PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: mbstring, pdo_mysql, zip, bcmath, tokenizer, xml, ctype, json
 
-      - name: 📦 Instalar Dependencias y Comprimir Backend
+      - name: 📦 Instalar dependencias backend
         run: |
           cd backend
-          composer install --optimize-autoloader --no-dev
-          # Comprimimos para que la subida tarde segundos en vez de horas
-          zip -r ../backend.zip . -x "node_modules/*" -x "tests/*"
+          composer install --optimize-autoloader --no-dev --no-interaction
 
-      - name: 🚀 Subir Backend comprimido a tenri_backend via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: 🗜️ Comprimir backend
+        run: |
+          cd backend
+          zip -r ../backend.zip . \
+            -x "*.git*" \
+            -x "tests/*" \
+            -x "node_modules/*" \
+            -x ".env*" \
+            -x "storage/logs/*" \
+            -x "storage/framework/cache/*" \
+            -x "storage/framework/sessions/*" \
+            -x "storage/framework/views/*"
+
+      - name: 🚀 Subir backend comprimido
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -65,33 +165,48 @@ jobs:
             **/*
             !backend.zip
 
-      # ==========================================
-      # 3. EJECUTAR COMANDOS EN EL SERVIDOR (SSH)
-      # ==========================================
-      - name: 🛠️ Descomprimir y Configurar Laravel en cPanel
-        uses: appleboy/ssh-action@v1.0.0
+      # ── Servidor ──
+      - name: 🛠️ Descomprimir y configurar Laravel
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: 22 
+          port: 22
           script: |
-            # Entrar a la carpeta del backend
+            set -e
             cd ~/tenri_backend
-            
-            # Descomprimir el código fresco y limpiar el zip
+
             unzip -o backend.zip
             rm backend.zip
-            
-            # Recrear el enlace simbólico de la API hacia tu dominio específico
-            rm -rf ~/domains/tenri.cl/public_html/api
-            
-            # Creamos el enlace nuevo apuntando a la carpeta public del backend
-            ln -s ~/tenri_backend/public ~/domains/tenri.cl/public_html/api
-            
-            # Comandos de optimización
-            php artisan migrate --force
+
+            chmod -R 775 storage bootstrap/cache
+            mkdir -p storage/framework/sessions
+            mkdir -p storage/framework/views
+            mkdir -p storage/framework/cache
+            mkdir -p storage/logs
+
+            rm -rf ~/public_html/api
+            ln -s ~/tenri_backend/public ~/public_html/api
+
             php artisan optimize:clear
+            php artisan migrate --force
+
+            php artisan tinker --execute="
+              if (\App\Domain\Catalog\Models\Service::count() === 0) {
+                \Artisan::call('db:seed', ['--force' => true]);
+                echo 'Seeded OK';
+              } else {
+                \Artisan::call('db:seed', ['--class' => 'ServiceSeeder', '--force' => true]);
+                echo 'ServiceSeeder updated';
+              }
+            "
+
             php artisan config:cache
-            php artisan storage:link
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
+            php artisan storage:link --force 2>/dev/null || true
+
+            echo "Deploy completado OK"
