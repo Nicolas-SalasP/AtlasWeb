@@ -19,8 +19,6 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\Api\PublicServiceController;
-use App\Http\Controllers\Api\AdminErpPlansController;
-use App\Http\Controllers\Api\ErpInternalController;
 use App\Http\Controllers\Api\IndicadoresController;
 use App\Http\Controllers\Api\SystemStatusController;
 use App\Http\Controllers\Api\TicketController;
@@ -28,9 +26,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
-$loginLimit = app()->isProduction() ? 'throttle:5,1' : 'throttle:100,1';
-$forgotLimit = app()->isProduction() ? 'throttle:3,1' : 'throttle:100,1';
-$contactLimit = app()->isProduction() ? 'throttle:5,1' : 'throttle:100,1';
+$loginLimit   = 'throttle:5,1';
+$forgotLimit  = 'throttle:3,1';
+$contactLimit = 'throttle:5,1';
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->middleware($loginLimit);
@@ -58,11 +56,11 @@ Route::middleware(['erp.api.key'])->post('/internal/erp/validate-login', functio
 
     return response()->json([
         'success' => true,
-        'user' => [
-            'atlas_id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'rut' => $user->rut ?? null,
+        'user'    => [
+            'atlas_id'  => $user->id,
+            'name'      => $user->name,
+            'email'     => $user->email,
+            'rut'       => $user->rut ?? null,
             'is_active' => true,
         ],
     ]);
@@ -135,12 +133,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/products/{id}/force', [AdminProductController::class, 'forceDestroy'])->whereNumber('id');
             Route::delete('/product-images/{id}', [AdminProductController::class, 'destroyImage'])->whereNumber('id');
             Route::post('/product-images/{id}/cover', [AdminProductController::class, 'setCover'])->whereNumber('id');
-        });
-
-        Route::middleware(['admin'])->group(function () {
-            Route::get('/erp-plans', [AdminErpPlansController::class, 'index']);
-            Route::put('/erp-plans/{service}', [AdminErpPlansController::class, 'update']);
-            Route::get('/erp-plans/online-users', [AdminErpPlansController::class, 'onlineUsers']);
         });
 
         Route::middleware(['admin:manage_services'])->group(function () {

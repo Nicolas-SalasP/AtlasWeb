@@ -49,9 +49,14 @@ jobs:
         run: |
           cd backend
           cp .env.testing .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=tenri_test/' .env
-          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
+          # Sobreescribir variables de BD directamente en el .env
+          echo "" >> .env
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=tenri_test" >> .env
+          echo "DB_USERNAME=root" >> .env
+          echo "DB_PASSWORD=" >> .env
           php artisan key:generate
 
       - name: 🧪 Correr tests PHP
@@ -79,7 +84,7 @@ jobs:
         run: |
           cd frontend
           npm install -g pnpm
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 🔍 Lint
         run: |
@@ -117,7 +122,7 @@ jobs:
         run: |
           cd frontend
           npm install -g pnpm
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 🏗️ Build frontend
         env:
