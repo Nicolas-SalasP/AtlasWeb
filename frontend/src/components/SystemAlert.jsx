@@ -16,7 +16,7 @@ const SystemAlert = () => {
                 } else {
                     setVisible(false);
                 }
-            } catch (error) {
+            } catch (_error) {
                 console.error("No se pudo verificar estado del sistema");
             }
         };

@@ -44,7 +44,7 @@ const getInitial = (name) => {
 
 const AdminTickets = () => {
     const { user: adminUser } = useAuth();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     const [tickets, setTickets] = useState([]);
     const [ticketActivo, setTicketActivo] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -92,7 +92,7 @@ const AdminTickets = () => {
             const { data } = await api.get('/admin/users');
             const lista = Array.isArray(data) ? data : (data?.data || []);
             setAdminList(lista.filter(u => Number(u.role_id) === 1));
-        } catch (error) {
+        } catch (_error) {
             console.error("Error cargando admins:", error);
         }
     };
@@ -114,7 +114,7 @@ const AdminTickets = () => {
                     }
                 }
             }
-        } catch (error) {
+        } catch (_error) {
             console.error("Error:", error);
             if (!silent) showToast('error', 'Error de conexión');
         } finally {
@@ -128,7 +128,7 @@ const AdminTickets = () => {
         try {
             const { data } = await api.get(`/tickets/${ticket.id}`);
             setTicketActivo(data);
-        } catch (error) {
+        } catch (_error) {
             console.error("Error cargando ticket:", error);
             showToast('error', 'No se pudo cargar el ticket.');
         }
@@ -186,7 +186,7 @@ const AdminTickets = () => {
             showToast('success', 'Mensaje enviado');
 
             setTimeout(() => cargarTickets(true), 1500);
-        } catch (error) {
+        } catch (_error) {
             console.error(error);
             const msg = error.response?.data?.message || 'Error al enviar mensaje';
             showToast('error', msg);
@@ -202,7 +202,7 @@ const AdminTickets = () => {
             setTickets(prev => prev.map(t => t.id === data.id ? { ...t, ...data } : t));
             setEstadosPermitidos(null);
             showToast('success', `Ticket → ${data.status_label || nuevoEstado}`);
-        } catch (error) {
+        } catch (_error) {
             const status = error.response?.status;
             const body = error.response?.data;
             if (status === 422 && Array.isArray(body?.allowed)) {
@@ -226,7 +226,7 @@ const AdminTickets = () => {
             showToast('success', assigneeId
                 ? `Asignado a ${data.assignee?.name || 'agente'}`
                 : 'Asignación removida');
-        } catch (error) {
+        } catch (_error) {
             console.error(error);
             const msg = error.response?.data?.message || 'No se pudo asignar';
             showToast('error', msg);
@@ -488,7 +488,7 @@ const AdminTickets = () => {
                                                             let adjuntosSeguros = [];
                                                             try {
                                                                 adjuntosSeguros = typeof msg.attachments === 'string' ? JSON.parse(msg.attachments) : msg.attachments;
-                                                            } catch (e) { adjuntosSeguros = []; }
+                                                            } catch (_e) { adjuntosSeguros = []; }
 
                                                             if (!Array.isArray(adjuntosSeguros)) return null;
 

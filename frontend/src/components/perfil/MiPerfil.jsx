@@ -95,7 +95,7 @@ const MiPerfil = ({ onOpenEmailModal }) => {
             }
 
             toast.success('Perfil actualizado correctamente');
-        } catch (error) {
+        } catch (_error) {
             toast.error('Error al actualizar perfil');
         } finally {
             setLoading(false);

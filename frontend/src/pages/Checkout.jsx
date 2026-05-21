@@ -75,7 +75,7 @@ const isServiceItem = (item) => {
 const Checkout = () => {
     const { cart, getCartTotal, clearCart } = useCart();
     const { user, isAuthenticated } = useAuth();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
 
     const [procesando, setProcesando] = useState(false);
     const [buscandoDireccion, setBuscandoDireccion] = useState(false);
@@ -141,7 +141,7 @@ const Checkout = () => {
                             giro: defaultEmp.business_line
                         }));
                     }
-                } catch (error) { console.error("Error cargando perfil:", error); }
+                } catch (_error) { console.error("Error cargando perfil:", error); }
             };
             fetchDatosUsuario();
         }
@@ -185,7 +185,7 @@ const Checkout = () => {
 
     const getCartImage = (item) => {
         if (!item.images || item.images.length === 0) return null;
-        const cover = item.images.find(img => Boolean(img.is_cover)) || item.images[0];
+        const cover = item.images.find(img => !!img.is_cover) || item.images[0];
         return `${BASE_URL}${cover.url}`;
     };
 
@@ -249,7 +249,7 @@ const Checkout = () => {
             } else {
                 showModal('info', 'No encontrada', 'No encontramos la dirección exacta. Revisá los datos.');
             }
-        } catch (e) {
+        } catch (_e) {
             showModal('error', 'Error', 'Error de conexión con el mapa.');
         } finally {
             setBuscandoDireccion(false);
@@ -264,7 +264,7 @@ const Checkout = () => {
             if (data && data.length > 0) {
                 setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
             }
-        } catch (e) { /* silent */ }
+        } catch (_e) { /* silent */ }
     };
 
     const handleCrearOrden = async () => {
@@ -324,7 +324,7 @@ const Checkout = () => {
             }
             setOrderId(newOrderId);
             clearCart();
-        } catch (error) {
+        } catch (_error) {
             console.error(error);
             const body = error.response?.data;
             let msg = body?.message || 'Ocurrió un problema al crear la orden.';

@@ -29,7 +29,7 @@ const MisDirecciones = () => {
         try {
             const res = await api.get('/addresses');
             setAddresses(res.data);
-        } catch (error) {
+        } catch (_error) {
             console.error(error);
         } finally {
             setLoading(false);
@@ -49,7 +49,7 @@ const MisDirecciones = () => {
             setShowForm(false);
             setFormData({ alias: '', address: '', number: '', depto: '', region: '', commune: '' });
             fetchAddresses();
-        } catch (error) {
+        } catch (_error) {
             console.error(error);
             toast.error('Error al guardar la dirección. Verifica los datos.');
         } finally {
@@ -62,7 +62,7 @@ const MisDirecciones = () => {
             await api.put(`/addresses/${id}/default`);
             toast.success('Dirección principal actualizada');
             fetchAddresses();
-        } catch (error) { toast.error('Error al actualizar'); }
+        } catch (_error) { toast.error('Error al actualizar'); }
     };
 
     const requestDelete = (id) => {
@@ -79,7 +79,7 @@ const MisDirecciones = () => {
             fetchAddresses();
             setShowDeleteModal(false);
             setAddressToDelete(null);
-        } catch (error) { 
+        } catch (_error) { 
             toast.error('Error al eliminar'); 
         } finally {
             setDeleting(false);

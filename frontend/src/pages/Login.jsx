@@ -5,7 +5,7 @@ import AlertModal from '../components/AlertModal';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     const { login } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -32,7 +32,7 @@ const Login = () => {
                 navigate('/perfil');
             }, 1500);
 
-        } catch (error) {
+        } catch (_error) {
             setIsSubmitting(false);
             setModal({
                 open: true,

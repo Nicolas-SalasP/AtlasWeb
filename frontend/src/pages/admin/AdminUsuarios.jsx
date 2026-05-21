@@ -67,7 +67,7 @@ const AdminUsuarios = () => {
         try {
             const response = await api.get('/admin/users');
             setUsuarios(response.data);
-        } catch (error) {
+        } catch (_error) {
             console.error("Error:", error);
             showToast('error', 'Error al cargar usuarios');
         } finally {
@@ -82,7 +82,7 @@ const AdminUsuarios = () => {
         try {
             const response = await api.get(`/admin/users/${id}`);
             setUsuarioDetalle(response.data);
-        } catch (error) {
+        } catch (_error) {
             console.error("Error cargando detalle:", error);
             showToast('error', 'No se pudo cargar el detalle');
         } finally {
@@ -99,7 +99,7 @@ const AdminUsuarios = () => {
                 parsedPerms = typeof usuario.permissions === 'string'
                     ? JSON.parse(usuario.permissions)
                     : usuario.permissions;
-            } catch (e) {
+            } catch (_e) {
                 parsedPerms = {};
             }
         }
@@ -124,7 +124,7 @@ const AdminUsuarios = () => {
                 name: usuarioEditar.name,
                 email: usuarioEditar.email,
                 role_id: parseInt(usuarioEditar.role_id),
-                is_active: Boolean(usuarioEditar.is_active),
+                is_active: !!usuarioEditar.is_active,
                 phone: usuarioEditar.phone || null,
                 permissions: permisosEdit,
             };
@@ -134,7 +134,7 @@ const AdminUsuarios = () => {
             setUsuarios(usuarios.map(u => u.id === usuarioEditar.id ? response.data : u));
             setModalEditarOpen(false);
             showToast('success', 'Usuario actualizado');
-        } catch (error) {
+        } catch (_error) {
             console.error("Error actualizando:", error);
             const status = error.response?.status;
             const body = error.response?.data;
@@ -507,7 +507,7 @@ const AdminUsuarios = () => {
                                                     <input
                                                         type="checkbox"
                                                         className="peer w-5 h-5 cursor-pointer appearance-none rounded-md border border-gray-300 checked:bg-tenri-900 checked:border-tenri-900 transition-all"
-                                                        checked={Boolean(permisosEdit[permiso.id])}
+                                                        checked={!!permisosEdit[permiso.id]}
                                                         onChange={() => handleTogglePermiso(permiso.id)}
                                                     />
                                                     <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
 import {
     LayoutDashboard, Package, ShoppingCart, LogOut,
-    Settings, Home, Users, LifeBuoy, Menu, X, Zap, Layers
+    Settings, Home, Users, LifeBuoy, Menu, X, Zap
 } from 'lucide-react';
 
 const parsePermissions = (raw) => {
@@ -14,7 +14,7 @@ const parsePermissions = (raw) => {
         try {
             const parsed = JSON.parse(raw);
             return parsed && typeof parsed === 'object' ? parsed : {};
-        } catch (e) {
+        } catch (_e) {
             return {};
         }
     }
@@ -23,7 +23,7 @@ const parsePermissions = (raw) => {
 
 const AdminLayout = () => {
     const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [badges, setBadges] = useState({ orders: 0, tickets: 0 });
@@ -76,7 +76,7 @@ const AdminLayout = () => {
                         tickets: canViewTickets ? (response.data.new_tickets ?? 0) : 0
                     });
                 }
-            } catch (error) {
+            } catch (_error) {
                 console.error("Error cargando notificaciones de la barra lateral:", error);
             }
         };
@@ -132,14 +132,9 @@ const AdminLayout = () => {
                     )}
 
                     {checkPermission('manage_services') && (
-                        <>
-                            <Link to="/admin/services" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/services')}`}>
-                                <Zap size={20} /> Servicios
-                            </Link>
-                            <Link to="/admin/planes" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/planes')}`}>
-                                <Layers size={20} /> Planes ERP
-                            </Link>
-                        </>
+                        <Link to="/admin/services" onClick={handleNavigation} className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin/services')}`}>
+                            <Zap size={20} /> Servicios
+                        </Link>
                     )}
 
                     {checkPermission('view_orders') && (

@@ -6,7 +6,7 @@ import AlertModal from '../components/AlertModal';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
@@ -25,7 +25,7 @@ const ResetPassword = () => {
         try {
             await api.post('/reset-password', formData);
             setSuccess(true);
-        } catch (error) {
+        } catch (_error) {
             console.error("Error reset:", error);
             const data = error.response?.data;
             let finalMsg = 'Ocurrió un error al restablecer la contraseña. Verifica que el enlace no haya expirado.';

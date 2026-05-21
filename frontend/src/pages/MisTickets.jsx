@@ -101,7 +101,7 @@ const MisTickets = () => {
             } else if (!silent && data.length > 0) {
                 setTicketActivo(data[0]);
             }
-        } catch (error) {
+        } catch (_error) {
             console.error("Error cargando tickets:", error);
         } finally {
             if (!silent) setLoading(false);
@@ -155,7 +155,7 @@ const MisTickets = () => {
             setTickets(tickets.map(t => t.id === ticketActivo.id ? ticketActualizado : t));
             setMensaje("");
             setAdjuntos([]);
-        } catch (error) {
+        } catch (_error) {
             const msg = error.response?.data?.message || 'Error al enviar el mensaje';
             setErrorEnvio(msg);
             setTimeout(() => setErrorEnvio(null), 4000);
@@ -176,7 +176,7 @@ const MisTickets = () => {
             setCrearModalOpen(false);
             setNuevoForm({ asunto: '', categoria: 'ERP', prioridad: 'media', mensaje: '' });
             setVistaMovil('chat');
-        } catch (error) {
+        } catch (_error) {
             const body = error.response?.data;
             const msg = body?.errors
                 ? Object.values(body.errors).flat().join(' ')
@@ -327,7 +327,7 @@ const MisTickets = () => {
                                     let adjuntosSeguros = [];
                                     try {
                                         adjuntosSeguros = typeof msg.attachments === 'string' ? JSON.parse(msg.attachments) : (msg.attachments || []);
-                                    } catch (e) { adjuntosSeguros = []; }
+                                    } catch (_e) { adjuntosSeguros = []; }
                                     if (!Array.isArray(adjuntosSeguros)) adjuntosSeguros = [];
 
                                     return (

@@ -39,8 +39,8 @@ const AdminServices = () => {
     const cargarDatos = async () => {
         try {
             const { data } = await api.get('/admin/services');
-            setServices(data.filter(s => !s.tipo || s.tipo === 'spa'));
-        } catch (error) {
+            setServices(data);
+        } catch (_error) {
             console.error("Error:", error);
             showToast('error', 'Error al cargar servicios');
         } finally {
@@ -75,7 +75,7 @@ const AdminServices = () => {
                 duration_days: service.duration_days,
                 description: service.description || '',
                 features: service.features && service.features.length > 0 ? service.features : [''],
-                is_active: Boolean(service.is_active ?? true),
+                is_active: !!(service.is_active ?? true),
                 image: null,
                 previewUrl: service.image_url ? `${BASE_URL}${service.image_url}` : null
             });
@@ -149,7 +149,7 @@ const AdminServices = () => {
             await cargarDatos();
             setDrawerOpen(false);
 
-        } catch (error) {
+        } catch (_error) {
             console.error(error);
             const msg = error.response?.data?.message || 'Error al guardar';
             showToast('error', msg);
@@ -164,7 +164,7 @@ const AdminServices = () => {
                 await api.delete(`/admin/services/${id}`);
                 setServices(services.filter(s => s.id !== id));
                 showToast('success', 'Plan eliminado');
-            } catch (error) {
+            } catch (_error) {
                 const msg = error.response?.data?.message || 'Error al eliminar';
                 showToast('error', msg);
             }
@@ -255,7 +255,7 @@ const AdminServices = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        {Boolean(s.is_active ?? true) ? (
+                                        {!!(s.is_active ?? true) ? (
                                             <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 border border-green-100 px-2 py-1 rounded-lg w-fit"><CheckCircle size={12} /> Activo</span>
                                         ) : (
                                             <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-1 rounded-lg w-fit"><EyeOff size={12} /> Pausado</span>

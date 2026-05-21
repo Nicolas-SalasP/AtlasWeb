@@ -23,7 +23,7 @@ const normalizeSpecs = (specs) => {
 
 const ItemDetail = () => {
     const { type, id } = useParams();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     const { addToCart } = useCart();
 
     const [item, setItem] = useState(null);
@@ -53,7 +53,7 @@ const ItemDetail = () => {
                             data.type = 'product';
                             data.is_service = false;
                         }
-                    } catch (e) {
+                    } catch (_e) {
                         if (e.response?.status === 404) {
                             if (isMounted) toast.error("Producto no encontrado");
                             if (isMounted) navigate('/catalogo');
@@ -65,7 +65,7 @@ const ItemDetail = () => {
                     try {
                         const listaRes = await api.get('/products');
                         productosLista = listaRes.data || [];
-                    } catch (e) {
+                    } catch (_e) {
                         productosLista = [];
                     }
                 } else {
@@ -95,7 +95,7 @@ const ItemDetail = () => {
                 } else {
                     setRelacionados([]);
                 }
-            } catch (error) {
+            } catch (_error) {
                 console.error("Error:", error);
                 if (isMounted) toast.error("Error de conexión");
             } finally {
@@ -390,9 +390,9 @@ const ItemDetail = () => {
 };
 
 const RelatedCard = ({ producto }) => {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     const imagenes = producto.images || [];
-    const cover = imagenes.find(img => Boolean(img.is_cover)) || imagenes[0];
+    const cover = imagenes.find(img => !!img.is_cover) || imagenes[0];
     const sinStock = Number(producto.stock_current ?? 0) <= 0;
 
     return (

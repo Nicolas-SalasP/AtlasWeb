@@ -55,7 +55,7 @@ const AdminProductos = () => {
             ]);
             setProductos(prodRes.data);
             setCategorias(catRes.data);
-        } catch (error) {
+        } catch (_error) {
             console.error("Error:", error);
             showToast('error', 'Error al cargar datos');
         } finally {
@@ -112,7 +112,7 @@ const AdminProductos = () => {
                 stock_alert: producto.stock_alert ?? 5,
                 category_id: producto.category_id,
                 description: producto.description || '',
-                is_visible: Boolean(producto.is_visible),
+                is_visible: !!producto.is_visible,
                 specs: normalizeSpecs(producto.specs)
             });
             setImagenesExistentes(producto.images || []);
@@ -135,7 +135,7 @@ const AdminProductos = () => {
                 setImagenesExistentes(prev => prev.filter(img => img.id !== idImagen));
                 cargarDatos();
                 showToast('success', 'Imagen eliminada');
-            } catch (error) {
+            } catch (_error) {
                 showToast('error', 'Error al eliminar imagen');
             }
         });
@@ -150,7 +150,7 @@ const AdminProductos = () => {
             })));
             cargarDatos();
             showToast('success', 'Portada actualizada');
-        } catch (error) {
+        } catch (_error) {
             showToast('error', 'Error al cambiar portada');
         }
     };
@@ -188,7 +188,7 @@ const AdminProductos = () => {
             setDrawerOpen(false);
             showToast('success', editando ? 'Producto actualizado' : 'Producto creado');
 
-        } catch (error) {
+        } catch (_error) {
             console.error(error);
             const msg = error.response?.data?.message
                 || (error.response?.status === 422 ? 'Datos inválidos. Revisa el SKU y los campos.' : 'Error al guardar.');
@@ -204,7 +204,7 @@ const AdminProductos = () => {
                 await api.delete(`/admin/products/${id}`);
                 setProductos(productos.filter(p => p.id !== id));
                 showToast('success', 'Producto eliminado');
-            } catch (error) {
+            } catch (_error) {
                 const msg = error.response?.data?.message || 'Error al eliminar';
                 showToast('error', msg);
             }
@@ -266,7 +266,7 @@ const AdminProductos = () => {
                                 const stockAlerta = Number(p.stock_alert ?? 0);
                                 const stockBajo = stockAlerta > 0 && stockActual <= stockAlerta;
                                 const sinStock = stockActual <= 0;
-                                const portada = (p.images || []).find(img => Boolean(img.is_cover));
+                                const portada = (p.images || []).find(img => !!img.is_cover);
                                 const imagenMostrar = portada || (p.images && p.images[0]);
 
                                 return (
@@ -364,7 +364,7 @@ const AdminProductos = () => {
                                                 <button type="button" onClick={() => marcarPortada(img.id)} className={`p-1.5 rounded-full ${img.is_cover ? 'bg-yellow-400 text-white' : 'bg-white text-gray-500 hover:text-yellow-500'}`} title="Portada"><Star size={14} fill={img.is_cover ? "currentColor" : "none"} /></button>
                                                 <button type="button" onClick={() => eliminarImagenExistente(img.id)} className="p-1.5 bg-white text-red-500 rounded-full hover:bg-red-50" title="Eliminar"><Trash2 size={14} /></button>
                                             </div>
-                                            {Boolean(img.is_cover) && <div className="absolute top-1 left-1 bg-tenri-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">PORTADA</div>}
+                                            {!!img.is_cover && <div className="absolute top-1 left-1 bg-tenri-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">PORTADA</div>}
                                         </div>
                                     ))}
                                 </div>

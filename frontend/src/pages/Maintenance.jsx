@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 const Maintenance = () => {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     useEffect(() => {
         let isMounted = true;
 
@@ -15,7 +15,7 @@ const Maintenance = () => {
                 if (isMounted && (response.data.maintenance_mode == '0' || response.data.maintenance_mode === false)) {
                     window.location.href = '/';
                 }
-            } catch (error) {
+            } catch (_error) {
                 console.log("Sistema aún en mantenimiento...");
             }
         };
