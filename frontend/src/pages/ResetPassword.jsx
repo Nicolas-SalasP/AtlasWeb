@@ -6,7 +6,7 @@ import AlertModal from '../components/AlertModal';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });

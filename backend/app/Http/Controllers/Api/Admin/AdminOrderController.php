@@ -23,39 +23,48 @@ class AdminOrderController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->query('per_page', 25);
-        $perPage = max(1, min($perPage, 100));
-
+        $perPage = (int) $request->query('per_page', 0);
         $filters = $request->only(['status', 'from', 'to', 'q']);
 
-        $paginator = $this->orderService->paginateAll($filters, $perPage);
-        $paginator->setCollection(
-            $paginator->getCollection()->map(fn ($order) => (new OrderResource($order))->toArray($request))
-        );
+        if ($perPage > 0) {
+            $perPage = max(1, min($perPage, 100));
+            $paginator = $this->orderService->paginateAll($filters, $perPage);
+            $paginator->setCollection(
+                $paginator->getCollection()->map(fn ($order) => (new OrderResource($order))->toArray($request))
+            );
 
-        return response()->json($paginator);
+            return response()->json($paginator);
+        }
+
+        $orders = $this->orderService->listAll($filters);
+
+        return response()->json(
+            OrderResource::collection($orders)->toArray($request)
+        );
     }
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-
         try {
-            $order = $this->orderService->findFor($id, $user);
+            $order = $this->orderService->findByIdOrFail($id);
         } catch (OrderNotFoundException) {
             return response()->json(['message' => 'Orden no encontrada'], 404);
         }
 
-        return response()->json((new OrderResource($order))->toArray($request));
+        $order->load(['user', 'items.product', 'statusLogs.user']);
+
+        return response()->json(
+            (new OrderResource($order))->toArray($request)
+        );
     }
 
     public function update(UpdateOrderRequest $request, int $id): JsonResponse
     {
-        $user = $request->user();
+        $actor = $request->user();
         $data = UpdateOrderData::fromValidated(
             $request->validated(),
-            $user?->id,
-            $user?->name,
+            actorUserId: $actor?->id,
+            actorName: $actor?->name
         );
 
         try {

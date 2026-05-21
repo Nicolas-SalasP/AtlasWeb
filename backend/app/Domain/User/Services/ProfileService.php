@@ -9,6 +9,7 @@ use App\Domain\User\Exceptions\IncorrectPasswordException;
 use App\Domain\User\Exceptions\InvalidOtpException;
 use App\Domain\User\Models\User;
 use App\Mail\EmailChangeVerification;
+use App\Domain\Erp\Services\ErpPasswordSyncService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -17,6 +18,11 @@ class ProfileService
 {
     private const EMAIL_CHANGE_CACHE_PREFIX = 'email_change_';
     private const EMAIL_CHANGE_TTL_SECONDS = 600;
+
+    public function __construct(
+        private readonly ?ErpPasswordSyncService $erpSync = null,
+    ) {
+    }
 
     public function updateProfile(User $user, UpdateProfileData $data): User
     {
@@ -37,7 +43,10 @@ class ProfileService
             throw new IncorrectPasswordException();
         }
 
-        $user->update(['password' => Hash::make($data->newPassword)]);
+        $newHash = Hash::make($data->newPassword);
+        $user->update(['password' => $newHash]);
+
+        $this->erpSync?->sync($user->id, $newHash);
     }
 
     public function requestEmailChange(User $user, string $newEmail): void

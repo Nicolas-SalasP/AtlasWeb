@@ -19,15 +19,20 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\Api\PublicServiceController;
+use App\Http\Controllers\Api\IndicadoresController;
 use App\Http\Controllers\Api\SystemStatusController;
 use App\Http\Controllers\Api\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
+$loginLimit   = 'throttle:5,1';
+$forgotLimit  = 'throttle:3,1';
+$contactLimit = 'throttle:5,1';
+
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:3,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware($loginLimit);
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware($forgotLimit);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::get('/products', [PublicProductController::class, 'index']);
@@ -36,11 +41,12 @@ Route::get('/services/catalog', [PublicServiceController::class, 'indexPublic'])
 Route::get('/categories', [PublicCategoryController::class, 'index']);
 
 Route::get('/system-status', [SystemStatusController::class, 'publicStatus']);
+Route::get('/indicadores/uf', [IndicadoresController::class, 'uf']);
 
 Route::post('/orders', [OrderController::class, 'store']);
 Route::any('/webpay/return', [PaymentController::class, 'commitWebpay']);
 
-Route::post('/contacto', [ContactController::class, 'submit'])->middleware('throttle:5,1');
+Route::post('/contacto', [ContactController::class, 'submit'])->middleware($contactLimit);
 
 Route::middleware(['erp.api.key'])->post('/internal/erp/validate-login', function (Request $request) {
     $user = User::where('email', $request->email)->first();

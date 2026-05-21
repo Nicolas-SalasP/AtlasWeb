@@ -18,6 +18,9 @@ use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Requests\Profile\VerifyEmailChangeRequest;
 use App\Http\Resources\User\AccessLogResource;
 use App\Http\Resources\User\UserResource;
+use App\Domain\Catalog\Models\Service;
+use App\Domain\Order\Enums\OrderStatus;
+use App\Domain\Order\Models\OrderItem;
 use App\Domain\Ticket\Models\Ticket;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -137,19 +140,37 @@ class ProfileController extends Controller
             return response()->json(['message' => 'No autorizado'], 401);
         }
 
-        $isActive = (int) $user->role_id === 1
-            || ($user->subscription_ends_at && $user->subscription_ends_at > now());
+        $item = OrderItem::whereHas('order', function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+                ->where('status', OrderStatus::Paid->value);
+        })
+            ->whereNotNull('service_id')
+            ->whereHas('service', function ($q) {
+                $q->where('slug', 'like', 'erp-%');
+            })
+            ->with(['service', 'order'])
+            ->latest('id')
+            ->first();
+
+        if (!$item || !$item->service instanceof Service) {
+            return response()->json(['status' => 'inactive']);
+        }
+
+        $service = $item->service;
+        $order   = $item->order;
+
+        $nextBilling = $order->created_at
+            ? $order->created_at->addDays($service->duration_days ?? 30)->format('Y-m-d')
+            : null;
 
         return response()->json([
-            'status'            => $isActive ? 'active' : 'inactive',
-            'plan_name'         => 'Plan ERP Profesional',
-            'next_billing_date' => $isActive ? now()->addDays(15)->format('Y-m-d') : null,
-            'amount'            => 25000,
-            'features'          => [
-                'Acceso total al ERP',
-                'Facturación Ilimitada',
-                'Soporte Prioritario',
-            ],
+            'status'            => 'active',
+            'plan_name'         => $service->name,
+            'plan_slug'         => $service->slug,
+            'price_label'       => $service->price_label,
+            'next_billing_date' => $nextBilling,
+            'amount'            => $service->price,
+            'features'          => $service->features ?? [],
         ]);
     }
 
@@ -162,18 +183,22 @@ class ProfileController extends Controller
         }
 
         $tickets = Ticket::where('user_id', $user->id)
+            ->withCount('messages')
             ->orderByDesc('created_at')
             ->take(10)
             ->get();
 
+        $statusAbiertos = ['nuevo', 'abierto', 'esperando_cliente'];
+        $statusCerrados = ['resuelto', 'cerrado'];
+
         $stats = [
             'total'  => Ticket::where('user_id', $user->id)->count(),
-            'open'   => Ticket::where('user_id', $user->id)->whereIn('status', ['open', 'in_progress'])->count(),
-            'closed' => Ticket::where('user_id', $user->id)->where('status', 'closed')->count(),
+            'open'   => Ticket::where('user_id', $user->id)->whereIn('status', $statusAbiertos)->count(),
+            'closed' => Ticket::where('user_id', $user->id)->whereIn('status', $statusCerrados)->count(),
         ];
 
         return response()->json([
-            'tickets' => $tickets,
+            'tickets' => \App\Http\Resources\Ticket\TicketResource::collection($tickets)->toArray($request),
             'stats'   => $stats,
         ]);
     }

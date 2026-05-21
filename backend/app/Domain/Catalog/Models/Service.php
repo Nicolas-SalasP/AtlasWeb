@@ -13,18 +13,36 @@ class Service extends Model
 
     protected $fillable = [
         'name',
+        'slug',
+        'tipo',
         'description',
         'price',
+        'price_uf',
+        'price_label',
         'duration_days',
         'features',
+        'module_keys',
         'is_active',
+        'is_popular',
         'image_url',
     ];
 
     protected $casts = [
         'features'      => 'array',
+        'module_keys'   => 'array',
         'is_active'     => 'boolean',
+        'is_popular'    => 'boolean',
         'price'         => 'integer',
         'duration_days' => 'integer',
     ];
+
+    public function scopeErp($query)
+    {
+        return $query->where('tipo', 'erp');
+    }
+
+    public function scopeSpa($query)
+    {
+        return $query->where('tipo', 'spa');
+    }
 }

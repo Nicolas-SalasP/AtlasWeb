@@ -30,6 +30,7 @@ class TicketService
     public function paginateForUser(int $userId, int $perPage = 20): LengthAwarePaginator
     {
         return Ticket::with(['assignee'])
+            ->withCount('messages')
             ->where('user_id', $userId)
             ->orderByDesc('created_at')
             ->paginate($perPage);
@@ -38,6 +39,7 @@ class TicketService
     public function paginateAll(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
         $query = Ticket::with(['user', 'assignee'])
+            ->withCount('messages')
             ->orderByRaw("FIELD(status, 'nuevo', 'abierto', 'esperando_cliente', 'resuelto', 'cerrado')")
             ->orderByDesc('created_at');
 
@@ -49,6 +51,7 @@ class TicketService
     public function listForUser(int $userId): Collection
     {
         return Ticket::with(['assignee'])
+            ->withCount('messages')
             ->where('user_id', $userId)
             ->orderByDesc('created_at')
             ->get();
@@ -57,6 +60,7 @@ class TicketService
     public function listAll(array $filters = []): Collection
     {
         $query = Ticket::with(['user', 'assignee'])
+            ->withCount('messages')
             ->orderByRaw("FIELD(status, 'nuevo', 'abierto', 'esperando_cliente', 'resuelto', 'cerrado')")
             ->orderByDesc('created_at');
 

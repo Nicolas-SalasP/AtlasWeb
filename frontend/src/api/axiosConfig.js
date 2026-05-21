@@ -18,14 +18,12 @@ api.interceptors.response.use(
         if (error.response) {
             const { status } = error.response;
 
-            // 1. Manejo del Modo Mantenimiento
             if (status === 503) {
                 if (window.location.pathname !== '/mantenimiento' && !window.location.pathname.startsWith('/admin')) {
                     window.location.href = '/mantenimiento';
                 }
             }
 
-            // 2. Manejo de Sesión Expirada o Inválida
             if (status === 401) {
                 localStorage.removeItem('user_data');
                 localStorage.removeItem('pending_claims');

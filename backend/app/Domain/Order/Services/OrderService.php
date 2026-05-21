@@ -49,6 +49,24 @@ class OrderService
         return $query->paginate($perPage);
     }
 
+    public function listForUser(int $userId): Collection
+    {
+        return Order::with('items.product')
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function listAll(array $filters = []): Collection
+    {
+        $query = Order::with(['user', 'items.product'])
+            ->orderByDesc('created_at');
+
+        $this->applyFilters($query, $filters);
+
+        return $query->get();
+    }
+
     public function findFor(int $orderId, User $viewer): Order
     {
         $order = Order::with(['user', 'items.product', 'statusLogs.user'])->find($orderId);
@@ -179,6 +197,7 @@ class OrderService
         return DB::transaction(function () use ($data) {
             $itemsToInsert = [];
             $subtotal = 0;
+            $hasPhysicalProduct = false;
 
             foreach ($data->items as $item) {
                 $rawId = (string) ($item['id'] ?? '');
@@ -208,6 +227,8 @@ class OrderService
                     continue;
                 }
 
+                $hasPhysicalProduct = true;
+
                 $product = $this->productService->reserveStock(
                     productId: (int) $rawId,
                     quantity: $quantity,
@@ -230,10 +251,11 @@ class OrderService
             }
 
             $region = $data->customerData['region'] ?? 'Metropolitana';
-            $shippingCost = ChileShippingRates::for($region);
+            $shippingCost = $hasPhysicalProduct ? ChileShippingRates::for($region) : 0;
 
             $cleanAddress = trim(strip_tags((string) ($data->shippingAddress ?? '')));
             $cleanNotes = trim(strip_tags((string) ($data->notes ?? '')));
+            $cleanCustomerData = $this->sanitizeCustomerData($data->customerData);
 
             $order = Order::create([
                 'user_id'           => $data->userId,
@@ -243,9 +265,9 @@ class OrderService
                 'shipping_cost'     => $shippingCost,
                 'total'             => $subtotal + $shippingCost,
                 'shipping_address'  => $cleanAddress !== '' ? $cleanAddress : null,
-                'customer_data'     => $data->customerData,
+                'customer_data'     => $cleanCustomerData,
                 'notes'             => $cleanNotes !== '' ? $cleanNotes : null,
-                'rut'               => $data->customerData['rut'] ?? null,
+                'rut'               => $cleanCustomerData['rut'] ?? null,
                 'terms_accepted_at' => now(),
                 'terms_accepted_ip' => $data->clientIp,
             ]);
@@ -434,6 +456,25 @@ class OrderService
         } while (Order::where('order_number', $candidate)->exists());
 
         return $candidate;
+    }
+
+    private function sanitizeCustomerData(array $data): array
+    {
+        $clean = [];
+
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $stripped = strip_tags($value);
+                $stripped = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $stripped) ?? '';
+                $clean[$key] = trim($stripped);
+            } elseif (is_array($value)) {
+                $clean[$key] = $this->sanitizeCustomerData($value);
+            } else {
+                $clean[$key] = $value;
+            }
+        }
+
+        return $clean;
     }
 
     private function applyFilters(Builder $query, array $filters): void

@@ -18,19 +18,20 @@ enum SettingKey: string
     case ContactEmail = 'contact_email';
     case ContactPhone = 'contact_phone';
     case FreeShippingThreshold = 'free_shipping_threshold';
+    case UfValue = 'uf_value';
 
     public function type(): SettingType
     {
         return match ($this) {
             self::MaintenanceMode,
-            self::WebpayEnabled         => SettingType::Boolean,
+            self::WebpayEnabled => SettingType::Boolean,
             self::FreeShippingThreshold => SettingType::Integer,
-            default                     => SettingType::String,
+            default => SettingType::String,
         };
     }
 
     public static function values(): array
     {
-        return array_map(fn (self $case) => $case->value, self::cases());
+        return array_map(fn(self $case) => $case->value, self::cases());
     }
 }

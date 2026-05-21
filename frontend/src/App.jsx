@@ -15,7 +15,6 @@ import ScrollToTop from './components/ScrollToTop';
 
 // Lazy Imports
 const Home = lazy(() => import('./pages/Home'));
-const Proyectos = lazy(() => import('./pages/Proyectos'));
 const Catalogo = lazy(() => import('./pages/Catalogo'));
 const Servicios = lazy(() => import('./pages/Servicios'));
 const ItemDetail = lazy(() => import('./pages/ItemDetail'));
@@ -36,6 +35,7 @@ const AdminPedidos = lazy(() => import('./pages/admin/AdminPedidos'));
 const AdminConfig = lazy(() => import('./pages/admin/AdminConfig'));
 const AdminUsuarios = lazy(() => import('./pages/admin/AdminUsuarios'));
 const AdminTickets = lazy(() => import('./pages/admin/AdminTickets'));
+const AdminPlanes = lazy(() => import('./pages/admin/AdminPlanes'));
 const AdminServices = lazy(() => import('./pages/admin/AdminServices'));
 
 // Loader Component
@@ -93,7 +93,7 @@ function App() {
 
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/proyectos" element={<Proyectos />} />
+              <Route path="/proyectos" element={<Navigate to="/servicios#casos" replace />} />
               <Route path="/catalogo" element={<Catalogo />} />
               <Route path="/contacto" element={<Contacto />} />
               <Route path="/servicios" element={<Servicios />} />
@@ -122,6 +122,7 @@ function App() {
                 <Route path="services" element={<AdminServices />} />
                 <Route path="pedidos" element={<AdminPedidos />} />
                 <Route path="usuarios" element={<AdminUsuarios />} />
+                <Route path="planes" element={<AdminPlanes />} />
                 <Route path="tickets" element={<AdminTickets />} />
                 <Route path="configuracion" element={<AdminConfig />} />
               </Route>
