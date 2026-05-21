@@ -7,7 +7,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
+    const navigate = useNavigate();
     const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
     const rootURL = import.meta.env.VITE_ROOT_URL !== undefined
         ? (import.meta.env.VITE_ROOT_URL || '')
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const savedUser = localStorage.getItem('user_data') || sessionStorage.getItem('user_data');
             return savedUser ? JSON.parse(savedUser) : null;
-        } catch (_e) {
+        } catch (e) {
             return null;
         }
     });
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
 
                 setUser(userData);
                 localStorage.setItem('user_data', JSON.stringify(userData));
-            } catch (_error) {
+            } catch (error) {
                 setUser(null);
                 localStorage.removeItem('user_data');
             } finally {
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
             setUser(userData);
             
             return payload; 
-        } catch (_error) {
+        } catch (error) {
             throw error;
         }
     };
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
 
             setUser(userData);
             return userData;
-        } catch (_error) {
+        } catch (error) {
             throw error;
         }
     };
@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await api.post('/logout');
-        } catch (_error) {
+        } catch (error) {
             console.error("Error al cerrar sesión:", error);
         } finally {
             localStorage.clear();

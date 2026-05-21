@@ -19,7 +19,7 @@ const Home = () => {
                 const { data } = await api.get('/products');
                 const hardwareOnly = (data || []).filter(p => !p.is_service).slice(0, 4);
                 setProductosDestacados(hardwareOnly);
-            } catch (_error) {
+            } catch (error) {
                 console.error("Error cargando productos home:", error);
             } finally {
                 setLoadingProducts(false);
@@ -39,7 +39,7 @@ const Home = () => {
             try {
                 const { data } = await api.get('/profile/subscription');
                 if (!cancelled) setSubscriptionStatus(data);
-            } catch (_error) {
+            } catch (error) {
                 if (!cancelled) setSubscriptionStatus({ status: 'inactive' });
             }
         };
@@ -53,7 +53,7 @@ const Home = () => {
 
     const getProductImage = (product) => {
         if (product.images && product.images.length > 0) {
-            const cover = product.images.find(img => !!img.is_cover) || product.images[0];
+            const cover = product.images.find(img => Boolean(img.is_cover)) || product.images[0];
             return `${BASE_URL}${cover.url}`;
         }
         return null;

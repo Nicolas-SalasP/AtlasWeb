@@ -15,7 +15,7 @@ const Maintenance = () => {
                 if (isMounted && (response.data.maintenance_mode == '0' || response.data.maintenance_mode === false)) {
                     window.location.href = '/';
                 }
-            } catch (_error) {
+            } catch (error) {
                 console.log("Sistema aún en mantenimiento...");
             }
         };

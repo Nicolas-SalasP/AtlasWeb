@@ -28,7 +28,7 @@ const MisEmpresas = () => {
         try {
             const response = await api.get('/billing-profiles');
             setEmpresas(response.data);
-        } catch (_error) {
+        } catch (error) {
             console.error("Error cargando empresas:", error);
         } finally {
             setLoading(false);
@@ -60,7 +60,7 @@ const MisEmpresas = () => {
             }
             setModalOpen(false);
             fetchEmpresas();
-        } catch (_error) {
+        } catch (error) {
             const msg = error.response?.data?.message || 'Verifica los datos e intenta nuevamente.';
             setAlertModal({ show: true, title: 'Error al guardar', message: msg, variant: 'error' });
         }
@@ -72,7 +72,7 @@ const MisEmpresas = () => {
         try {
             await api.delete(`/billing-profiles/${id}`);
             fetchEmpresas();
-        } catch (_error) {
+        } catch (error) {
             setAlertModal({ show: true, title: 'Error al eliminar', message: 'No se pudo eliminar la empresa.', variant: 'error' });
         }
     };
@@ -81,7 +81,7 @@ const MisEmpresas = () => {
         try {
             await api.put(`/billing-profiles/${empresa.id}`, { ...empresa, is_default: true });
             fetchEmpresas();
-        } catch (_error) {
+        } catch (error) {
             console.error("Error cambiando perfil por defecto", error);
         }
     };

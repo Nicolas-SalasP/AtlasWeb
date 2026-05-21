@@ -25,7 +25,7 @@ const ResetPassword = () => {
         try {
             await api.post('/reset-password', formData);
             setSuccess(true);
-        } catch (_error) {
+        } catch (error) {
             console.error("Error reset:", error);
             const data = error.response?.data;
             let finalMsg = 'Ocurrió un error al restablecer la contraseña. Verifica que el enlace no haya expirado.';

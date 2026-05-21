@@ -18,7 +18,7 @@ const EmailChangeModal = ({ isOpen, onClose, onSuccess }) => {
             toast.success(data.message);
             console.log('DEBUG CODE:', data.debug_code);
             setStep(2);
-        } catch (_error) { toast.error(error.response?.data?.message || 'Error'); }
+        } catch (error) { toast.error(error.response?.data?.message || 'Error'); }
         finally { setLoading(false); }
     };
 
@@ -29,7 +29,7 @@ const EmailChangeModal = ({ isOpen, onClose, onSuccess }) => {
             onSuccess(email);
             onClose();
             setStep(1); setEmail(''); setCode('');
-        } catch (_error) { toast.error('Código incorrecto'); }
+        } catch (error) { toast.error('Código incorrecto'); }
         finally { setLoading(false); }
     };
 

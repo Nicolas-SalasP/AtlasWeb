@@ -14,7 +14,7 @@ const parsePermissions = (raw) => {
         try {
             const parsed = JSON.parse(raw);
             return parsed && typeof parsed === 'object' ? parsed : {};
-        } catch (_e) {
+        } catch (e) {
             return {};
         }
     }
@@ -23,7 +23,7 @@ const parsePermissions = (raw) => {
 
 const AdminLayout = () => {
     const { user, logout } = useAuth();
-    const navigate = useNavigate(); // eslint-disable-line no-unused-vars
+    const navigate = useNavigate();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [badges, setBadges] = useState({ orders: 0, tickets: 0 });
@@ -76,7 +76,7 @@ const AdminLayout = () => {
                         tickets: canViewTickets ? (response.data.new_tickets ?? 0) : 0
                     });
                 }
-            } catch (_error) {
+            } catch (error) {
                 console.error("Error cargando notificaciones de la barra lateral:", error);
             }
         };
