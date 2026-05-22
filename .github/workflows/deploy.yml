@@ -136,6 +136,8 @@ jobs:
           local-dir: ./frontend/dist/
           server-dir: /public_html/
           dangerous-clean-slate: false
+          exclude: |
+            api/**
 
       # ── Backend ──
       - name: ⚙️ Setup PHP 8.2
@@ -184,8 +186,18 @@ jobs:
           port: 22
           script: |
             set -e
-            cd ~/tenri_backend
 
+            # El FTP (tipo Dominio) sube a ~/domains/tenri.cl/tenri_backend/
+            # Movemos el zip a ~/tenri_backend/ que es donde corre Laravel
+            FTP_BACKEND=~/domains/tenri.cl/tenri_backend
+            LARAVEL_ROOT=~/tenri_backend
+
+            if [ -f "$FTP_BACKEND/backend.zip" ]; then
+              echo "ZIP encontrado en FTP path, moviendo a Laravel root..."
+              mv "$FTP_BACKEND/backend.zip" "$LARAVEL_ROOT/backend.zip"
+            fi
+
+            cd $LARAVEL_ROOT
             unzip -o backend.zip
             rm backend.zip
 
@@ -195,8 +207,8 @@ jobs:
             mkdir -p storage/framework/cache
             mkdir -p storage/logs
 
-            rm -rf ~/public_html/api
-            ln -s ~/tenri_backend/public ~/public_html/api
+            rm -rf ~/domains/tenri.cl/public_html/api
+            ln -s ~/tenri_backend/public ~/domains/tenri.cl/public_html/api
 
             php artisan optimize:clear
             php artisan migrate --force
