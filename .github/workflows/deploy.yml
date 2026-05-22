@@ -49,14 +49,9 @@ jobs:
         run: |
           cd backend
           cp .env.testing .env
-          # Sobreescribir variables de BD directamente en el .env
-          echo "" >> .env
-          echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_DATABASE=tenri_test" >> .env
-          echo "DB_USERNAME=root" >> .env
-          echo "DB_PASSWORD=" >> .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=tenri_test/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
           php artisan key:generate
 
       - name: 🧪 Correr tests PHP
@@ -93,7 +88,7 @@ jobs:
 
       - name: 🏗️ Build
         env:
-          VITE_API_URL: /api
+          VITE_API_URL: https://api.tenri.cl/api
           VITE_ROOT_URL: ''
         run: |
           cd frontend
@@ -126,7 +121,7 @@ jobs:
 
       - name: 🏗️ Build frontend
         env:
-          VITE_API_URL: /api
+          VITE_API_URL: https://api.tenri.cl/api
           VITE_ROOT_URL: ''
         run: |
           cd frontend
@@ -141,6 +136,8 @@ jobs:
           local-dir: ./frontend/dist/
           server-dir: /public_html/
           dangerous-clean-slate: false
+          exclude: |
+            api/**
 
       # ── Backend ──
       - name: ⚙️ Setup PHP 8.2
@@ -186,12 +183,21 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: 22
           script: |
             set -e
-            cd ~/tenri_backend
 
+            # El FTP (tipo Dominio) sube a ~/domains/tenri.cl/tenri_backend/
+            # Movemos el zip a ~/tenri_backend/ que es donde corre Laravel
+            FTP_BACKEND=~/domains/tenri.cl/tenri_backend
+            LARAVEL_ROOT=~/tenri_backend
+
+            if [ -f "$FTP_BACKEND/backend.zip" ]; then
+              echo "ZIP encontrado en FTP path, moviendo a Laravel root..."
+              mv "$FTP_BACKEND/backend.zip" "$LARAVEL_ROOT/backend.zip"
+            fi
+
+            cd $LARAVEL_ROOT
             unzip -o backend.zip
             rm backend.zip
 
@@ -201,8 +207,8 @@ jobs:
             mkdir -p storage/framework/cache
             mkdir -p storage/logs
 
-            rm -rf ~/public_html/api
-            ln -s ~/tenri_backend/public ~/public_html/api
+            rm -rf ~/domains/tenri.cl/public_html/api
+            ln -s ~/tenri_backend/public ~/domains/tenri.cl/public_html/api
 
             php artisan optimize:clear
             php artisan migrate --force
