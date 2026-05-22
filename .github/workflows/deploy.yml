@@ -49,9 +49,13 @@ jobs:
         run: |
           cd backend
           cp .env.testing .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=tenri_test/' .env
-          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
+          echo "" >> .env
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=tenri_test" >> .env
+          echo "DB_USERNAME=root" >> .env
+          echo "DB_PASSWORD=" >> .env
           php artisan key:generate
 
       - name: 🧪 Correr tests PHP
@@ -89,7 +93,7 @@ jobs:
       - name: 🏗️ Build
         env:
           VITE_API_URL: https://api.tenri.cl/api
-          VITE_ROOT_URL: ''
+          VITE_ROOT_URL: https://tenri.cl
         run: |
           cd frontend
           pnpm build
@@ -122,7 +126,7 @@ jobs:
       - name: 🏗️ Build frontend
         env:
           VITE_API_URL: https://api.tenri.cl/api
-          VITE_ROOT_URL: ''
+          VITE_ROOT_URL: https://tenri.cl
         run: |
           cd frontend
           pnpm build
@@ -136,8 +140,6 @@ jobs:
           local-dir: ./frontend/dist/
           server-dir: /public_html/
           dangerous-clean-slate: false
-          exclude: |
-            api/**
 
       # ── Backend ──
       - name: ⚙️ Setup PHP 8.2
@@ -188,12 +190,12 @@ jobs:
             set -e
 
             # El FTP (tipo Dominio) sube a ~/domains/tenri.cl/tenri_backend/
-            # Movemos el zip a ~/tenri_backend/ que es donde corre Laravel
             FTP_BACKEND=~/domains/tenri.cl/tenri_backend
             LARAVEL_ROOT=~/tenri_backend
+            API_PUBLIC=~/domains/api.tenri.cl/public_html
 
+            # Mover zip al directorio real de Laravel
             if [ -f "$FTP_BACKEND/backend.zip" ]; then
-              echo "ZIP encontrado en FTP path, moviendo a Laravel root..."
               mv "$FTP_BACKEND/backend.zip" "$LARAVEL_ROOT/backend.zip"
             fi
 
@@ -207,8 +209,13 @@ jobs:
             mkdir -p storage/framework/cache
             mkdir -p storage/logs
 
-            rm -rf ~/domains/tenri.cl/public_html/api
-            ln -s ~/tenri_backend/public ~/domains/tenri.cl/public_html/api
+            # Actualizar public_html del subdominio api.tenri.cl
+            # (no usar symlink — Apache/LiteSpeed no los sigue en shared hosting)
+            mkdir -p $API_PUBLIC
+            cp public/index.php $API_PUBLIC/index.php
+            cp public/.htaccess $API_PUBLIC/.htaccess
+            cp public/favicon.ico $API_PUBLIC/favicon.ico 2>/dev/null || true
+            cp public/robots.txt $API_PUBLIC/robots.txt 2>/dev/null || true
 
             php artisan optimize:clear
             php artisan migrate --force
